@@ -13,7 +13,9 @@ import FooterAdmin from "components/Footers/FooterAdmin.js";
 import Dashboard from "views/admin/Dashboard.js";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
+import { MainProvider } from "context/MainContext";
 import Tables from "views/admin/Tables.js";
+import NotificationContainer from "components/Notification/NotificationContainer";
 
 export default function User() {
   return (
@@ -24,13 +26,16 @@ export default function User() {
         {/* Header */}
         <HeaderStats />
         <div className="px-4 md:px-10 mx-auto w-full -m-24">
-          <Switch>
-            <Route path="/user/dashboard" exact component={Dashboard} />
-            <Route path="/user/maps" exact component={Maps} />
-            <Route path="/user/settings" exact component={Settings} />
-            <Route path="/user/tables" exact component={Tables} />
-            <Redirect from="/user" to="/admin/dashboard" />
-          </Switch>
+          <MainProvider>
+            <NotificationContainer />
+            <Switch>
+              <Route path="/user/dashboard" exact component={Dashboard} />
+              <Route path="/user/maps" exact component={Maps} />
+              <Route path="/user/settings" exact component={Settings} />
+              <Route path="/user/tables" exact component={Tables} />
+              <Redirect from="/user" to="/admin/dashboard" />
+            </Switch>
+          </MainProvider>
           <FooterAdmin />
         </div>
       </div>

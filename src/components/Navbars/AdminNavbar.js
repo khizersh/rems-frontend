@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
+import "assets/styles/loading.css";
+import { MainContext } from "context/MainContext";
 
 export default function Navbar() {
+ const { loading, setLoading } = useContext(MainContext);
   return (
     <>
+     {loading ? (
+        <div className="backdrop" id="loaderDiv">
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <></>
+      )}
       {/* Navbar */}
       <nav className="absolute top-0 left-0 w-full z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4">
         <div className="w-full mx-autp items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-4">

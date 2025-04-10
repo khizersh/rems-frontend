@@ -1,0 +1,33 @@
+/* Fullscreen loader backdrop */
+.backdrop {
+  position: fixed; /* Fixed position to cover the entire screen */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center the loader */
+  z-index: 9999; /* Ensure it's on top of all other content */
+}
+
+/* Loader spinner styles */
+.loader {
+  border: 5px solid #fff;
+  border-top: 5px solid #0284C7; /* Customize the spinning color */
+  border-radius: 50%;
+  width: 65px;
+  height: 65px;
+  animation: spin 2s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

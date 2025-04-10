@@ -1,48 +1,38 @@
-import React, { useState } from "react";
+import { MainContext } from "context/MainContext";
+import React, { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import httpService from "utility/httpService";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { loading, setLoading, notifySuccess, notifyError, notifyWarning } =
+    useContext(MainContext);
   const history = useHistory();
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError("");
 
     try {
-      const response = await fetch("http://localhost:8081/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.email,
-          password: formData.password
-        })
+      const data = await httpService.post("/user/login", {
+        username: formData.email,
+        password: formData.password,
       });
 
-      if (!response.ok) {
-        throw new Error("Invalid credentials");
+      if (data.token) {
+        localStorage.setItem("token", data.token);
       }
-
-      const data = await response.json();
-      console.log("data :: ", data);
-      
-
-      // Save token or user info (depends on your API)
-      // localStorage.setItem("token", data.token); // adjust if needed
-
-      // Redirect to dashboard or role-based path
-      history.push("/dashboard"); // change this as per your routing
+      notifySuccess(data.responseMessage, 3000);
+      history.push("/admin/dashboard");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message, err.data, 4000);
     } finally {
       setLoading(false);
     }

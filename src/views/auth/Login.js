@@ -26,11 +26,15 @@ export default function Login() {
         password: formData.password,
       });
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      if (data?.data?.token) {
+        localStorage.setItem("token", data.data.token);
+        localStorage.setItem("sidebar", JSON.stringify(data.data.sidebar));
       }
+
+      console.log("data :: ",data);
+      
       notifySuccess(data.responseMessage, 3000);
-      history.push("/admin/dashboard");
+      history.push("/dashboard");
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {

@@ -33,7 +33,7 @@ export default function User() {
               <Route path="/user/maps" exact component={Maps} />
               <Route path="/user/settings" exact component={Settings} />
               <Route path="/user/tables" exact component={Tables} />
-              <Redirect from="/user" to="/admin/dashboard" />
+              <Redirect from="/user" to="/dashboard/" />
             </Switch>
           </MainProvider>
           <FooterAdmin />

@@ -38,7 +38,7 @@ to quickly set up the basic structure for your web project.
 Here are all the page from the project:
 - [Presentation](https://demos.creative-tim.com/notus-react/?ref=nr-github-readme)
 - Admin Samples
-  - [Dashboard](https://demos.creative-tim.com/notus-react/admin/dashboard?ref=nr-github-readme)
+  - [Dashboard](https://demos.creative-tim.com/notus-react/dashboard/?ref=nr-github-readme)
   - [Settings](https://demos.creative-tim.com/notus-react/admin/settings?ref=nr-github-readme)
   - [Tables](https://demos.creative-tim.com/notus-react/admin/tables?ref=nr-github-readme)
   - [Maps](https://demos.creative-tim.com/notus-react/admin/maps?ref=nr-github-readme)

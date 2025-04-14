@@ -21,7 +21,7 @@ ReactDOM.render(
   <BrowserRouter>
     <Switch>
       {/* add routes with layouts */}
-      <Route path="/admin" component={Admin} />
+      <Route path="/dashboard" component={Admin} />
       <Route path="/auth" component={Auth} />
       <Route path="/user" component={User} />
 

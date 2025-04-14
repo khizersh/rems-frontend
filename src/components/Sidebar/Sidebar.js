@@ -1,12 +1,20 @@
 /*eslint-disable*/
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import NotificationDropdown from "components/Dropdowns/NotificationDropdown.js";
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
 
 export default function Sidebar() {
-  const [collapseShow, setCollapseShow] = React.useState("hidden");
+  const [collapseShow, setCollapseShow] = useState("hidden");
+  const location = useLocation();
+  const [sidebarList, setSidebarList] = useState([]);
+
+  useEffect(() => {
+    const sidebarData = JSON.parse(localStorage.getItem("sidebar")) || [];
+    setSidebarList(sidebarData);
+  }, []);
+
   return (
     <>
       <nav className="md:left-0 md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow-xl bg-white flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
@@ -84,93 +92,61 @@ export default function Sidebar() {
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/dashboard") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/dashboard"
-                >
-                  <i
-                    className={
-                      "fas fa-tv mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/dashboard") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Dashboard
-                </Link>
-              </li>
+              {sidebarList.map((sidebar) => {
+                console.log("location :: ", location.pathname , sidebar.url)
+                const isActive = location.pathname === sidebar.url;
 
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/settings") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/settings"
-                >
-                  <i
-                    className={
-                      "fas fa-tools mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/settings") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Settings
-                </Link>
-              </li>
+                return (
+                  <li className="items-center" key={sidebar.id}>
+                    <Link
+                      className={`text-xs uppercase py-3 font-bold block ${
+                        isActive
+                          ? "text-lightBlue-500 hover:text-lightBlue-600"
+                          : "text-blueGray-700 hover:text-blueGray-500"
+                      }`}
+                      to={sidebar.url}
+                    >
+                      <i
+                        className={`mr-2 text-sm ${
+                          isActive ? "opacity-75" : "text-blueGray-300"
+                        } ${sidebar.icon}`}
+                      ></i>
+                      {sidebar.title}
+                    </Link>
 
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/tables") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/tables"
-                >
-                  <i
-                    className={
-                      "fas fa-table mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/tables") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Tables
-                </Link>
-              </li>
+                    {/* Child routes if any */}
+                    {sidebar.childList && sidebar.childList.length > 0 && (
+                      <ul className="ml-4">
+                        {sidebar.childList.map((child) => {
+                          const isChildActive = location.pathname === child.url;
 
-              <li className="items-center">
-                <Link
-                  className={
-                    "text-xs uppercase py-3 font-bold block " +
-                    (window.location.href.indexOf("/admin/maps") !== -1
-                      ? "text-lightBlue-500 hover:text-lightBlue-600"
-                      : "text-blueGray-700 hover:text-blueGray-500")
-                  }
-                  to="/admin/maps"
-                >
-                  <i
-                    className={
-                      "fas fa-map-marked mr-2 text-sm " +
-                      (window.location.href.indexOf("/admin/maps") !== -1
-                        ? "opacity-75"
-                        : "text-blueGray-300")
-                    }
-                  ></i>{" "}
-                  Maps
-                </Link>
-              </li>
+                          return (
+                            <li key={child.id} className="items-center">
+                              <Link
+                                className={`text-xs py-2 block ${
+                                  isChildActive
+                                    ? "text-lightBlue-400 hover:text-lightBlue-500"
+                                    : "text-blueGray-500 hover:text-blueGray-700"
+                                }`}
+                                to={child.url}
+                              >
+                                <i
+                                  className={`mr-2 text-sm ${
+                                    isChildActive
+                                      ? "opacity-75"
+                                      : "text-blueGray-300"
+                                  } ${child.icon}`}
+                                ></i>
+                                {child.title}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Divider */}
@@ -202,8 +178,6 @@ export default function Sidebar() {
                 </Link>
               </li>
             </ul>
-
-         
           </div>
         </div>
       </nav>

@@ -15,12 +15,18 @@ module.exports = {
       "./public/*.js",
     ],
     options: {
-      safelist: [],
+      safelist: [
+        "bg-gray-50",
+        "bg-indigo-50",
+        "hover:bg-indigo-50", // Add hover class as well
+      ],
     },
   },
   theme: {
     colors: {
       ...colors,
+      "gray-50": "#f9fafb", // light gray
+      "indigo-50": "#e0e7ff",
     },
     extend: {
       minHeight: {

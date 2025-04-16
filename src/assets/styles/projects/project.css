@@ -1,0 +1,33 @@
+.hover-bg:hover {
+  background-color: #eef2ff;
+}
+
+.gap-4 {
+  gap: 1rem; /* 1rem is the equivalent of 4 in Tailwind's spacing scale */
+}
+
+.project-table-rows td {
+  font-size: 13px;
+}
+
+.bg-gray-50 {
+  background-color: #eee;
+}
+.red {
+  color: red;
+}
+.green {
+  color: green;
+}
+.blue {
+  color: blue;
+}
+
+.btn-hover-shadow {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.btn-hover-shadow:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind's shadow-lg */
+}

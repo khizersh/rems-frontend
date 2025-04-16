@@ -1851,6 +1851,10 @@ select {
   margin-top: -1rem;
 }
 
+.hover-bg-indigo-50:hover {
+  background-color: #eef2ff; 
+}
+
 .max-h-860-px {
   max-height: 860px;
 }

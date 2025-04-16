@@ -2,6 +2,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
+  console.log("token :: ", token);
+  
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -24,8 +26,8 @@ const handleResponse = async (response) => {
   if (response.status === 403) {
     result = {
       responseCode: "403",
-      responseMessage: "Forbidden: You don’t have permission to access this resource.",
-      data: null,
+      responseMessage: "Permission Denied!",
+      data: "You don’t have permission to access this resource.",
     };
   }
 

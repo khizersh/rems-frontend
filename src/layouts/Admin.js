@@ -18,6 +18,7 @@ import ProjectList from "views/projects/ProjectList";
 import Tables from "views/admin/Tables.js";
 import { MainProvider } from "context/MainContext";
 import NotificationContainer from "components/Notification/NotificationContainer";
+import ProjectDetail from "views/projects/components/ProjectDetail";
 
 export default function Admin() {
   return (
@@ -33,6 +34,7 @@ export default function Admin() {
             <Switch>
               <Route path="/dashboard" exact component={Dashboard} />
               <Route path="/dashboard/projects" exact component={ProjectList} />
+              <Route path="/dashboard/projects/:projectId" exact component={ProjectDetail} />
               <Route path="/dashboard/add-project" exact component={ProjectAdd} />
               <Route path="/dashboard/map" exact component={Maps} />
               <Route path="/dashboard/settings" exact component={Settings} />

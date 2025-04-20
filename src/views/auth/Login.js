@@ -29,6 +29,7 @@ export default function Login() {
       if (data?.data?.token) {
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("sidebar", JSON.stringify(data.data.sidebar));
+        localStorage.setItem("organization", JSON.stringify(data.data.organization));
       }
 
       console.log("data :: ",data);

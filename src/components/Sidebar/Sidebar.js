@@ -93,7 +93,6 @@ export default function Sidebar() {
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
               {sidebarList.map((sidebar) => {
-                console.log("location :: ", location.pathname , sidebar.url)
                 const isActive = location.pathname === sidebar.url;
 
                 return (

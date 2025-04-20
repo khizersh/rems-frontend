@@ -13,11 +13,17 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import "../../../assets/styles/projects/project.css";
+import {
+  useHistory,
+  useParams,
+} from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function ProjectListComponent() {
   const [projects, setProjects] = useState([]);
   const { loading, setLoading, notifySuccess, notifyError, notifyWarning } =
     useContext(MainContext);
+
+  const history = useHistory();
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -55,13 +61,20 @@ export default function ProjectListComponent() {
   };
 
   const handleView = (projectId) => {
-    console.log("View Project:", projectId);
-    // You can use a router.push or modal
+    console.log("Edit Project:", projectId);
+    // Redirect to edit page or open modal
+    if (!projectId) {
+      return notifyError("Invalid Project!", 4000);
+    }
+    history.push(`/dashboard/floor/${projectId}`);
   };
 
   const handleEdit = (projectId) => {
     console.log("Edit Project:", projectId);
     // Redirect to edit page or open modal
+    if (!projectId) {
+      notifyError("Invalid Project!", 4000);
+    }
   };
 
   const handleDelete = (projectId) => {
@@ -159,6 +172,7 @@ export default function ProjectListComponent() {
                         <button
                           className="green hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
                           title="View"
+                          onClick={() => handleView(project.projectId)}
                         >
                           <FaEye />
                         </button>

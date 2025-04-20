@@ -1,9 +1,9 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
-  console.log("token :: ", token);
-  
+
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -44,6 +44,7 @@ const handleResponse = async (response) => {
 
 const httpService = {
   get: async (url, headers = {}) => {
+
     const response = await fetch(`${BASE_URL}${url}`, {
       method: "GET",
       headers: {

@@ -11,11 +11,11 @@ export default function CustomerList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
   const history = useHistory();
 
-  const [floors, setFloors] = useState([]);
+  const [customerList, setCustomerList] = useState([]);
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
-  const [fileteredId, setFileteredId] = useState(1);
+  const [fileteredId, setFileteredId] = useState("");
   const [filteredBy, setFilteredBy] = useState("organization");
   const [floorOptions, setFloorOptions] = useState([]);
 
@@ -61,6 +61,8 @@ export default function CustomerList() {
   const fetchCustomerDetails = async () => {
     setLoading(true);
     try {
+      
+     
       const requestBody = {
         id: fileteredId,
         filteredBy: filteredBy,
@@ -74,6 +76,14 @@ export default function CustomerList() {
         },
       };
 
+      if(!fileteredId){
+        let organizationLocal = JSON.parse(localStorage.getItem("organization"));
+        if(organizationLocal){
+          requestBody.id = organizationLocal.organizationId
+        } 
+        requestBody.filteredBy = "organization"
+      }
+
       console.log("requestBody :: ", requestBody);
 
       const response = await httpService.post(
@@ -81,7 +91,7 @@ export default function CustomerList() {
         requestBody
       );
 
-      setFloors(response?.data?.content || []);
+      setCustomerList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -193,7 +203,7 @@ export default function CustomerList() {
           fetchDataFunction={fetchCustomerDetails}
           setPage={setPage}
           page={page}
-          data={floors}
+          data={customerList}
           columns={tableColumns}
           pageSize={pageSize}
           totalPages={totalPages}

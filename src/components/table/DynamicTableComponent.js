@@ -10,6 +10,10 @@ import {
 } from "react-icons/fa";
 import "../../assets/styles/projects/project.css";
 
+// Utility to resolve nested fields like "customer.name"
+const getNestedValue = (obj, path) =>
+  path.split(".").reduce((acc, part) => (acc ? acc[part] : ""), obj);
+
 export default function DynamicTableComponent({
   fetchDataFunction,
   setPage,
@@ -76,12 +80,16 @@ export default function DynamicTableComponent({
               data.map((item, index) => (
                 <tr
                   key={index}
-                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} project-table-rows`}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } project-table-rows`}
                 >
-                  <td className="px-6 py-4">{page * pageSize + index + 1}</td>
+                  <td className="px-6 py-4">
+                    {page * pageSize + index + 1}
+                  </td>
                   {columns.map((col, i) => (
                     <td key={i} className="px-6 py-4">
-                      {item[col.field]}
+                      {getNestedValue(item, col.field)}
                     </td>
                   ))}
                   {Object.keys(actions).length > 0 && (

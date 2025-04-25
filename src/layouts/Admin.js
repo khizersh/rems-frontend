@@ -22,6 +22,7 @@ import FloorList from "views/projects/components/FloorList";
 import UnitList from "views/projects/components/UnitList";
 import CustomerList from "views/customer/CustomerList";
 import CustomerAccount from "views/customer/CustomerAccount";
+import CustomerPayment from "views/customer/CustomerPayment";
 
 export default function Admin() {
   return (
@@ -44,6 +45,7 @@ export default function Admin() {
               <Route path="/dashboard/add-project" exact component={ProjectAdd} />
               <Route path="/dashboard/customers" exact component={CustomerList} />
               <Route path="/dashboard/customer-account" exact component={CustomerAccount} />
+              <Route path="/dashboard/customer-payment/:customerAccountId" exact component={CustomerPayment} />
               <Route path="/dashboard/map" exact component={Maps} />
               <Route path="/dashboard/settings" exact component={Settings} />
               <Route path="/dashboard/tables" exact component={Tables} />

@@ -2,10 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
-import {
-  useHistory,
-  useParams,
-} from "react-router-dom/cjs/react-router-dom.min.js";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function CustomerAccount() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
@@ -13,15 +10,15 @@ export default function CustomerAccount() {
 
   const [floors, setFloors] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [filterProject, setFilterProject] = useState("");
-  const [filterFloor, setFilterFloor] = useState("");
-  const [fileteredId, setFileteredId] = useState(1);
-  const [filteredBy, setFilteredBy] = useState("organization");
-  const [floorOptions, setFloorOptions] = useState([]);
-
+  const [filterProject, setFilterProject] = useState(""); // For filtering by project
+  const [filterFloor, setFilterFloor] = useState(""); // For filtering by floor
+  const [filteredId, setFilteredId] = useState(""); // The ID of the selected project or floor
+  const [filteredBy, setFilteredBy] = useState("organization"); // Keep track of whether we're filtering by project or floor
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [floorOptions, setFloorOptions] = useState([]);
+  const [customerAccountList, setCustomerAccountList] = useState([]);
   const pageSize = 10;
 
   useEffect(() => {
@@ -30,16 +27,18 @@ export default function CustomerAccount() {
 
   useEffect(() => {
     fetchCustomerDetails();
-  }, [page, filterProject, filterFloor]);
+  }, [page, filteredId, filteredBy]);
 
   const fetchProjects = async () => {
     try {
-      const sidebarData =
+      const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
-      if (sidebarData) {
+      if (organization) {
         const response = await httpService.get(
-          `/project/getAllProjectByOrg/${sidebarData.organizationId}`
+          `/project/getAllProjectByOrg/${organization.organizationId}`
         );
+        console.log("response :: ", response);
+
         setProjects(response.data || []);
       }
     } catch (err) {
@@ -58,30 +57,38 @@ export default function CustomerAccount() {
     }
   };
 
+  // Fetch customer details based on the filter
   const fetchCustomerDetails = async () => {
     setLoading(true);
     try {
       const requestBody = {
-        id: fileteredId,
+        id: filteredId,
         filteredBy: filteredBy,
         page,
         size: pageSize,
-        sortBy: "customerId",
+        sortBy: "id",
         sortDir: "asc",
-        filters: {
-          projectId: filterProject || null,
-          floorId: filterFloor || null,
-        },
       };
+
+      if (!filteredId) {
+        let organizationLocal = JSON.parse(
+          localStorage.getItem("organization")
+        );
+        if (organizationLocal) {
+          requestBody.id = organizationLocal.organizationId;
+        }
+        requestBody.filteredBy = "organization";
+      }
 
       console.log("requestBody :: ", requestBody);
 
       const response = await httpService.post(
-        `/customer/getByIds`,
+        "/customerAccount/getByIds",
         requestBody
       );
 
-      setFloors(response?.data?.content || []);
+      console.log("response :: ", response);
+      setCustomerAccountList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -91,9 +98,10 @@ export default function CustomerAccount() {
     }
   };
 
+  // Handle changing the selected project
   const changeSelectedProjected = (projectId) => {
     if (projectId) {
-      setFileteredId(projectId);
+      setFilteredId(projectId);
       setFilteredBy("project");
       setFilterProject(projectId);
       fetchFloors(projectId);
@@ -102,36 +110,50 @@ export default function CustomerAccount() {
 
   const changeSelectedFloor = (floorId) => {
     if (floorId) {
-      setFileteredId(floorId);
+      setFilteredId(floorId);
       setFilteredBy("floor");
       setFilterFloor(floorId);
     }
   };
 
   const tableColumns = [
-    { header: "Name", field: "name" },
-    { header: "Country", field: "country" },
-    { header: "City", field: "city" },
-    { header: "Address", field: "address" },
-    { header: "National ID", field: "nationalId" },
-    { header: "Next of Kin Name", field: "nextOFKinName" },
-    { header: "Next of Kin National ID", field: "nextOFKinNationalId" },
-    { header: "Relationship with Kin", field: "relationShipWithKin" },
-    { header: "Organization ID", field: "organizationId" },
-    { header: "Project", field: "projectName" },
-    { header: "Floor", field: "floorNo" },
-    { header: "Unit", field: "unitSerialNo" },
+    { header: "Customer Name", field: "customer.name" },
+    { header: "Country", field: "customer.country" },
+    { header: "City", field: "customer.city" },
+    { header: "Address", field: "customer.address" },
+    { header: "National ID", field: "customer.nationalId" },
+    { header: "Next of Kin Name", field: "customer.nextOFKinName" },
+    {
+      header: "Next of Kin National ID",
+      field: "customer.nextOFKinNationalId",
+    },
+    { header: "Relationship with Kin", field: "customer.relationShipWithKin" },
+    { header: "Organization ID", field: "customer.organizationId" },
+    { header: "Project Name", field: "project.name" },
+    { header: "Project Address", field: "project.address" },
+    { header: "Project Type", field: "project.projectType" },
+    { header: "Unit Serial No", field: "unit.serialNo" },
+    { header: "Floor No", field: "unit.floorNo" },
+    { header: "Unit Amount", field: "unit.amount" },
+    { header: "Payment Schedule Duration", field: "durationInMonths" },
+    { header: "Total Amount", field: "totalAmount" },
+    { header: "Quarterly Payment", field: "quarterlyPayment" },
+    { header: "Half Yearly Payment", field: "halfYearly" },
+    { header: "Down Payment", field: "downPayment" },
+    { header: "On Possession Amount", field: "onPosessionAmount" },
     { header: "Created By", field: "createdBy" },
     { header: "Updated By", field: "updatedBy" },
     { header: "Created Date", field: "createdDate" },
     { header: "Updated Date", field: "updatedDate" },
   ];
 
-  const handleView = (floor) => {
-    if (!floor) {
-      return notifyError("Invalid Project!", 4000);
+  const handleView = (account) => {
+    if (!account) {
+      return notifyError("Invalid Account!", 4000);
     }
-    history.push(`/dashboard/unit/${floor.id}`);
+    console.log("account :: ",account);
+    let cName = account?.customer?.name;
+    history.push(`/dashboard/customer-payment/${account.id}?cName=${cName}`);
   };
 
   const handleEdit = (floor) => {
@@ -188,19 +210,20 @@ export default function CustomerAccount() {
         </div>
       </div>
 
+      {/* Dynamic Table */}
       <div className="container mx-auto p-4">
         <DynamicTableComponent
           fetchDataFunction={fetchCustomerDetails}
           setPage={setPage}
           page={page}
-          data={floors}
-          columns={tableColumns}
+          data={customerAccountList}
+          columns={tableColumns} // You need to define the columns for the table
           pageSize={pageSize}
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}
-          title="Customer List"
           actions={actions}
+          title="Customer List"
         />
       </div>
     </>

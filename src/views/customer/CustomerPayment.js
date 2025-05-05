@@ -122,6 +122,7 @@ export default function CustomerPayment() {
   const changeSelectedProjected = (projectId) => {
     if (projectId) {
       setFilteredId(projectId);
+      setFilterProject(projectId)
       fetchCustomerAccountList(projectId, "project");
     }
   };

@@ -3,21 +3,22 @@ import React, { useContext } from "react";
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
 import "assets/styles/loading.css";
 import { MainContext } from "context/MainContext";
-import "../../assets/styles/navbar/navbar.css"
+import "../../assets/styles/navbar/navbar.css";
 
 export default function Navbar() {
- const { loading, setLoading } = useContext(MainContext);
+  const { loading , backdrop } = useContext(MainContext);
   return (
     <>
-     {loading ? (
+      {loading ? (
         <div className="backdrop" id="loaderDiv">
           <div className="loader"></div>
         </div>
       ) : (
         <></>
       )}
+      {backdrop ? <div className="backdrop-class"></div> : <></>}
       {/* Navbar */}
-      <nav className="shadow-lg top-0 left-0 w-full h-50-px z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 mb-5">
+      <nav className="bg-white shadow-lg top-0 left-0 w-full h-50-px z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 mb-5">
         <div className="w-full mx-autp items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-4">
           {/* Brand */}
           <a

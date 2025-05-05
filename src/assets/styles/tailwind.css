@@ -321,7 +321,38 @@ ul {
 
 /**
  * Tailwind custom reset styles
+ 
  */
+
+ .modal-width {
+  width: 77%; /* default for mobile */
+}
+
+
+@media (max-width: 799px) {
+  .modal-width {
+    width: 70%;
+  }
+}
+
+
+ .width-250p{
+  width: 250px;
+ }
+
+
+.border-bottom-grey{
+  border-bottom: #c2cdda 0.5px solid;
+}
+.border-left-grey{
+  border-left: #c2cdda 0.5px solid;
+}
+.border-right-grey{
+  border-right: #c2cdda 0.5px solid;
+}
+.border-top-grey{
+  border-right: #c2cdda 0.5px solid;
+}
 
 /**
  * 1. Use the user's configured `sans` font-family (with Tailwind's default
@@ -1734,6 +1765,12 @@ select {
 .ml-3 {
   margin-left: 0.75rem;
 }
+.ml-5 {
+  margin-left: 1.5rem;
+}
+.ml-6{
+  margin-left: 2rem;
+}
 
 .mt-4 {
   margin-top: 1rem;
@@ -2008,6 +2045,10 @@ select {
   padding-left: 1rem;
   padding-right: 1rem;
 }
+.px-5 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
 
 .py-5 {
   padding-top: 1.25rem;
@@ -2078,6 +2119,19 @@ select {
   padding-left: 0.75rem;
 }
 
+.pl-4 {
+  padding-left: 1rem;
+}
+.pl-5 {
+  padding-left: 1.25rem;
+}
+.pl-6 {
+  padding-left: 1.50rem;
+}
+.pl-7 {
+  padding-left: 2rem;
+}
+
 .pr-4 {
   padding-right: 1rem;
 }
@@ -2088,6 +2142,17 @@ select {
 
 .pl-4 {
   padding-left: 1rem;
+}
+
+.pt-4 {
+  padding-top: 0.9rem;
+}
+.pt-3 {
+  padding-top: 0.8rem;
+}
+
+.pt-5 {
+  padding-top: 1rem;
 }
 
 .pt-6 {
@@ -2405,6 +2470,11 @@ select {
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgba(239, 68, 68, var(--tw-text-opacity));
+}
+
+.text-blue{
+  --tw-text-opacity: 1;
+  color: rgba(14, 165, 233, var(--tw-bg-opacity));
 }
 
 .text-blueGray-100 {
@@ -3006,6 +3076,9 @@ select {
     width: auto;
   }
 
+  .lg\:w-2\/12 {
+    width: 20%;
+  }
   .lg\:w-3\/12 {
     width: 25%;
   }

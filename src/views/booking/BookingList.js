@@ -6,15 +6,12 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 
-export default function CustomerList() {
-  const { loading, backdrop, setBackdrop , setLoading, notifyError } = useContext(MainContext);
+export default function BookingList() {
+  const { loading, setLoading, notifyError } = useContext(MainContext);
   const history = useHistory();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [customerList, setCustomerList] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState({});
+  const [bookingList, setBookingList] = useState([]);
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
@@ -32,7 +29,9 @@ export default function CustomerList() {
   }, []);
 
   useEffect(() => {
-    fetchCustomerDetails();
+    console.log("reload ....");
+    
+    fetchBookingList();
   }, [page, filterProject, filterFloor]);
 
   const fetchProjects = async () => {
@@ -61,7 +60,7 @@ export default function CustomerList() {
     }
   };
 
-  const fetchCustomerDetails = async () => {
+  const fetchBookingList = async () => {
     setLoading(true);
     try {
       const requestBody = {
@@ -69,12 +68,8 @@ export default function CustomerList() {
         filteredBy: filteredBy,
         page,
         size: pageSize,
-        sortBy: "customerId",
-        sortDir: "asc",
-        filters: {
-          projectId: filterProject || null,
-          floorId: filterFloor || null,
-        },
+        sortBy: "id",
+        sortDir: "desc",
       };
 
       if (!fileteredId) {
@@ -89,12 +84,9 @@ export default function CustomerList() {
 
       console.log("requestBody :: ", requestBody);
 
-      const response = await httpService.post(
-        `/customer/getByIds`,
-        requestBody
-      );
+      const response = await httpService.post(`/booking/getByIds`, requestBody);
 
-      setCustomerList(response?.data?.content || []);
+      setBookingList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -105,11 +97,16 @@ export default function CustomerList() {
   };
 
   const changeSelectedProjected = (projectId) => {
+    console.log("projectId :: ", projectId);
+
     if (projectId) {
       setFileteredId(projectId);
       setFilteredBy("project");
       setFilterProject(projectId);
       fetchFloors(projectId);
+    } else {
+      setFileteredId("");
+      setFilterProject("");
     }
   };
 
@@ -118,57 +115,30 @@ export default function CustomerList() {
       setFileteredId(floorId);
       setFilteredBy("floor");
       setFilterFloor(floorId);
+    } else {
+      setFileteredId(filterProject);
+      setFilteredBy("project");
+      setFilterFloor("")
+      setFilterProject(Number(filterProject)  + Number(0));
     }
   };
-
   const tableColumns = [
-    { header: "Name", field: "name" },
-    { header: "Country", field: "country" },
-    { header: "City", field: "city" },
-    { header: "National ID", field: "nationalId" },
-    { header: "Project", field: "projectName" },
-    { header: "Floor", field: "floorNo" },
-    { header: "Unit", field: "unitSerialNo" },
+    { header: "Customer Name", field: "customerName" },
+    { header: "Unit Serial", field: "unitSerial" },
+    { header: "Project", field: "project" },
+    { header: "Floor No", field: "floorNo" },
+    { header: "Total Amount", field: "totalAmount" },
+    { header: "Created By", field: "createdBy" },
+    { header: "Updated By", field: "updatedBy" },
+    { header: "Created Date", field: "createdDate" },
+    { header: "Updated Date", field: "updatedDate" },
   ];
 
-  const handleView = (customer) => {
-
-    const formattedCustomer = {
-      "Basic Details": {
-        "Name": customer.name,
-        "National Id": customer.nationalId,
-        "Email": customer.email,
-        "Username": customer.username,
-        "Password": customer.password
-      },
-      "Next of Kin Details": {
-        "Next Of Kin Name": customer.nextOFKinName,
-        "Next Of Kin National Id": customer.nextOFKinNationalId,
-        "Relationship With Kin": customer.relationShipWithKin
-      },
-      "Property Details": {
-        "Project Name": customer.projectName,
-        "Floor No": customer.floorNo,
-        "Unit Serial No": customer.unitSerialNo,
-        "Organization Id": customer.organizationId
-      },
-      "Location Details": {
-        "Country": customer.country,
-        "City": customer.city,
-        "Address": customer.address
-      },
-      "Audit Info": {
-        "Created By": customer.createdBy,
-        "Updated By": customer.updatedBy,
-        "Created Date": customer.createdDate,
-        "Updated Date": customer.updatedDate
-      }
-    };
-    
-
-
-    setSelectedCustomer(formattedCustomer);
-    toggleModal();
+  const handleView = (floor) => {
+    if (!floor) {
+      return notifyError("Invalid Project!", 4000);
+    }
+    history.push(`/dashboard/unit/${floor.id}`);
   };
 
   const handleEdit = (floor) => {
@@ -185,30 +155,17 @@ export default function CustomerList() {
     onDelete: handleDelete,
   };
 
-  const toggleModal = () => {
-    setBackdrop(!backdrop)
-    setIsModalOpen(!isModalOpen);
-  };
-
   return (
     <>
-      <DynamicDetailsModal
-        isOpen={isModalOpen}
-        onClose={toggleModal}
-        data={selectedCustomer}
-        title="Customer Details"
-      />
       <div className="container mx-auto p-4">
-        <div className="w-full mb-6 ">
-          <div className="flex flex-wrap  py-3">
-            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
-              <label className="block text-sm font-medium mb-1 ">
-                Select Project
-              </label>
+        <div className="relative flex flex-row min-w-0  w-full mb-6 ">
+          <div className="flex flex-nowrap gap-4">
+            <div className="bg-white shadow-lg p-5 rounded width-250p">
+              <label className="block text-sm font-medium mb-1 w-full">Project</label>
               <select
                 value={filterProject}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded px-3 py-2 w-full"
+                className="border rounded px-3 py-2"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -219,21 +176,20 @@ export default function CustomerList() {
               </select>
             </div>
 
-            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
-              <label className="block text-sm font-medium mb-1">
-                Select Floor
-              </label>
+            <div className="bg-white shadow-lg p-5 rounded width-250p">
+              <label className="block text-sm font-medium mb-1">Floor</label>
               <select
                 value={filterFloor}
                 onChange={(e) => changeSelectedFloor(e.target.value)}
                 className="border rounded px-3 py-2 w-full"
               >
                 <option value="">All Floors</option>
-                {floorOptions.map((floor) => (
-                  <option key={floor.id} value={floor.id}>
-                    {floor.floorNo}
-                  </option>
-                ))}
+                {filterProject &&
+                  floorOptions.map((floor) => (
+                    <option key={floor.id} value={floor.id}>
+                      {floor.floorNo}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
@@ -242,16 +198,16 @@ export default function CustomerList() {
 
       <div className="container mx-auto p-4">
         <DynamicTableComponent
-          fetchDataFunction={fetchCustomerDetails}
+          fetchDataFunction={fetchBookingList}
           setPage={setPage}
           page={page}
-          data={customerList}
+          data={bookingList}
           columns={tableColumns}
           pageSize={pageSize}
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}
-          title="Customer List"
+          title="Booking List"
           actions={actions}
         />
       </div>

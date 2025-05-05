@@ -11,21 +11,21 @@ import {
   FaAngleDoubleRight,
   FaPen,
   FaTrashAlt,
+  FaLayerGroup,
 } from "react-icons/fa";
 import "../../../assets/styles/projects/project.css";
-import {
-  useHistory,
-  useParams,
-} from "react-router-dom/cjs/react-router-dom.min.js";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 
 export default function ProjectListComponent() {
-  const [projects, setProjects] = useState([]);
-  const { loading, setLoading, notifySuccess, notifyError, notifyWarning } =
-    useContext(MainContext);
-
   const history = useHistory();
 
+  const [projects, setProjects] = useState([]);
+  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
+    useContext(MainContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(0);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [size, setSize] = useState(0);
@@ -60,13 +60,43 @@ export default function ProjectListComponent() {
     }
   };
 
-  const handleView = (projectId) => {
-    console.log("Edit Project:", projectId);
-    // Redirect to edit page or open modal
+  const handleClickFloor = (projectId) => {
     if (!projectId) {
       return notifyError("Invalid Project!", 4000);
     }
     history.push(`/dashboard/floor/${projectId}`);
+  };
+
+  const handleClickDetails = (project) => {
+    const formattedProject = {
+      "Project Details": {
+        "Project ID": project.projectId,
+        "Project Name": project.name,
+        "Project Type": project.projectType,
+        Description: project.information,
+        Address: project.address,
+        "Number of Floors": project.floors,
+        "Organization ID": project.organizationId,
+        Active: project.active,
+      },
+      "Financial Details": {
+        "Purchasing Amount": project.purchasingAmount,
+        "Registration Amount": project.registrationAmount,
+        "Additional Amount": project.additionalAmount,
+        "Total Amount": project.totalAmount,
+      },
+      "Duration Details": {
+        "Month Duration": project.monthDuration,
+      },
+      "Audit Info": {
+        "Created By": project.createdBy,
+        "Updated By": project.updatedBy,
+        "Created Date": project.createdDate,
+        "Updated Date": project.updatedDate,
+      },
+    };
+    setSelectedProject(formattedProject);
+    toggleModal();
   };
 
   const handleEdit = (projectId) => {
@@ -88,16 +118,19 @@ export default function ProjectListComponent() {
     fetchProjects();
   }, [page]);
 
-  const handleNextPage = () => {
-    if (page + 1 < totalPages) setPage(page + 1);
-  };
-
-  const handlePrevPage = () => {
-    if (page > 0) setPage(page - 1);
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
   };
 
   return (
     <>
+      <DynamicDetailsModal
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        data={selectedProject}
+        title="Project Details"
+      />
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
         <div className="rounded-t mb-0 px-4 py-3 border-0">
           <div className="flex flex-wrap items-center justify-between">
@@ -171,10 +204,23 @@ export default function ProjectListComponent() {
                       <div className="flex gap-4 items-center">
                         <button
                           className="green hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
-                          title="View"
-                          onClick={() => handleView(project.projectId)}
+                          title="View Details"
+                          onClick={() => handleClickDetails(project)}
                         >
                           <FaEye />
+                        </button>
+                        <button
+                          className="grey hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
+                          title="View Floor"
+                          onClick={() => handleClickFloor(project.projectId)}
+                        >
+                          <FaLayerGroup
+                            className="w-5 h-5 inline-block"
+                            style={{
+                              paddingBottom: "3px",
+                              paddingRight: "7px",
+                            }}
+                          />
                         </button>
                         <button
                           className=" blue hover:shadow-md transition-shadow text-yellow-500 hover:text-yellow-600 transition-colors duration-150"

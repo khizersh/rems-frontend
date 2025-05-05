@@ -1,40 +1,40 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../../utility/httpService.js";
+import httpService from "../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 
-export default function FloorList() {
+export default function UnitList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
-  const { projectId } = useParams();
+  const { floorId } = useParams();
   const history = useHistory();
 
-  const [floors, setFloors] = useState([]);
+  const [units, setUnits] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const pageSize = 10;
 
-  const fetchProjectDetails = async () => {
+  const fetchUnitList = async () => {
     setLoading(true);
     try {
       const requestBody = {
-        projectId,
+        floorId,
         page,
         size: pageSize,
-        sortBy: "floor",
+        sortBy: "id",
         sortDir: "asc",
       };
 
       const response = await httpService.post(
-        `/floor/getByProjectId`,
+        `/unit/getByFloorId`,
         requestBody
       );
 
-      setFloors(response?.data?.content || []);
+      setUnits(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -45,22 +45,30 @@ export default function FloorList() {
   };
 
   useEffect(() => {
-    fetchProjectDetails();
+    fetchUnitList();
   }, [page]);
 
   const tableColumns = [
+    { header: "Serial No", field: "serialNo" },
+    { header: "Square Yards", field: "squareYards" },
+    { header: "Room Count", field: "roomCount" },
+    { header: "Bathroom Count", field: "bathroomCount" },
+    { header: "Amount", field: "amount" },
+    { header: "Additional Amount", field: "additionalAmount" },
+    { header: "Unit Type", field: "unitType" },
+    { header: "Floor Number", field: "floorNo" },
     { header: "Project Name", field: "projectName" },
-    { header: "Floor Number", field: "floor" },
-    { header: "Unit Count", field: "unitCount" },
     { header: "Created By", field: "createdBy" },
     { header: "Updated By", field: "updatedBy" },
+    { header: "Created Date", field: "createdDate" },
+    { header: "Updated Date", field: "updatedDate" },
   ];
 
   const handleView = (floor) => {
-    if (!floor) {
+    if (!floorId) {
       return notifyError("Invalid Project!", 4000);
     }
-    history.push(`/dashboard/unit/${floor.id}`);
+    history.push(`/dashboard/unit/${floorId}`);
   };
 
   const handleEdit = (floor) => {
@@ -82,16 +90,16 @@ export default function FloorList() {
   return (
     <div className="container mx-auto p-4">
       <DynamicTableComponent
-        fetchDataFunction={fetchProjectDetails}
+        fetchDataFunction={fetchUnitList}
         setPage={setPage}
         page={page}
-        data={floors}
+        data={units}
         columns={tableColumns}
         pageSize={pageSize}
         totalPages={totalPages}
         totalElements={totalElements}
         loading={loading}
-        title="Floor Details"
+        title="Unit Details"
         actions={actions}
       />
     </div>

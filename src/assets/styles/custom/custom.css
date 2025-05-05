@@ -1,0 +1,9 @@
+.modal-height{
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.fixed-left-13p{
+    position: fixed;
+    left: 13%;
+}

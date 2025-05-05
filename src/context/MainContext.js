@@ -8,6 +8,7 @@ export const MainContext = React.createContext();
 export function MainProvider({ children }) {
   const [imageData, setImageData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [backdrop, setBackdrop] = useState(false);
 
   // Function to set image data
   const setImage = (data) => {
@@ -78,6 +79,8 @@ export function MainProvider({ children }) {
         setImage,
         loading,
         setLoading,
+        backdrop,
+        setBackdrop,
         notifySuccess,
         notifyError,
         notifyWarning,

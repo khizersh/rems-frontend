@@ -111,7 +111,7 @@ export default function AddBooking() {
     }));
   };
 
-  const fetchPaymentScheduleByCustomer = async (id) => {
+  const fetchPaymentScheduleByUnitId = async (id) => {
     setLoading(true);
     try {
       let request = {
@@ -156,7 +156,7 @@ export default function AddBooking() {
 
   const onChangeCustomer = (customer) => {
     if (customer) {
-      fetchPaymentScheduleByCustomer(customer.unitId);
+      fetchPaymentScheduleByUnitId(customer.unitId);
       fetchUnitDetailsByUnitId(customer.unitId);
       setSelectedCustomer(customer);
     }
@@ -173,6 +173,7 @@ export default function AddBooking() {
     updatedBooking.customerId = selectedCustomer.customerId;
     updatedBooking.unitId = selectedCustomer.unitId;
     updatedBooking.organizationId = organization.organizationId;
+    delete paymentSchedule.id;
     updatedBooking.paymentSchedule = paymentSchedule;
 
     setLoading(true);

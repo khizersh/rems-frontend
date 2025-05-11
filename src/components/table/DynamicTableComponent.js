@@ -84,44 +84,31 @@ export default function DynamicTableComponent({
                     index % 2 === 0 ? "bg-gray-50" : "bg-white"
                   } project-table-rows`}
                 >
-                  <td className="px-6 py-4">
-                    {page * pageSize + index + 1}
-                  </td>
+                  <td className="px-6 py-4">{page * pageSize + index + 1}</td>
                   {columns.map((col, i) => (
                     <td key={i} className="px-6 py-4">
-                      {getNestedValue(item, col.field)}
+                      {col.render
+                        ? col.render(getNestedValue(item, col.field), item)
+                        : getNestedValue(item, col.field)}
                     </td>
                   ))}
-                  {Object.keys(actions).length > 0 && (
+
+                  {actions.length > 0 && (
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
-                        {actions.onView && (
-                          <button
-                            onClick={() => actions.onView(item)}
-                            className="green hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
-                            title="View"
-                          >
-                            <FaEye />
-                          </button>
-                        )}
-                        {actions.onEdit && (
-                          <button
-                            onClick={() => actions.onEdit(item)}
-                            className="blue hover:shadow-md transition-shadow text-yellow-500 hover:text-yellow-600 transition-colors duration-150"
-                            title="Edit"
-                          >
-                            <FaPen />
-                          </button>
-                        )}
-                        {actions.onDelete && (
-                          <button
-                            onClick={() => actions.onDelete(item)}
-                            className="red hover:shadow-md transition-shadow text-red-500 hover:text-red-600 transition-colors duration-150"
-                            title="Delete"
-                          >
-                            <FaTrashAlt />
-                          </button>
-                        )}
+                        {actions.map((action, index) => {
+                          const IconComponent = action.icon;
+                          return (
+                            <button
+                              key={index}
+                              onClick={() => action.onClick(item)}
+                              className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
+                              title={action.title}
+                            >
+                              <IconComponent />
+                            </button>
+                          );
+                        })}
                       </div>
                     </td>
                   )}

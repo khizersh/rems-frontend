@@ -32,7 +32,6 @@ export default function Login() {
         localStorage.setItem("organization", JSON.stringify(data.data.organization));
       }
 
-      console.log("data :: ",data);
       
       notifySuccess(data.responseMessage, 3000);
       history.push("/dashboard");

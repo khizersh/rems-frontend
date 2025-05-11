@@ -6,6 +6,7 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
+import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
@@ -29,8 +30,6 @@ export default function BookingList() {
   }, []);
 
   useEffect(() => {
-    console.log("reload ....");
-    
     fetchBookingList();
   }, [page, filterProject, filterFloor]);
 
@@ -82,8 +81,6 @@ export default function BookingList() {
         requestBody.filteredBy = "organization";
       }
 
-      console.log("requestBody :: ", requestBody);
-
       const response = await httpService.post(`/booking/getByIds`, requestBody);
 
       setBookingList(response?.data?.content || []);
@@ -118,8 +115,8 @@ export default function BookingList() {
     } else {
       setFileteredId(filterProject);
       setFilteredBy("project");
-      setFilterFloor("")
-      setFilterProject(Number(filterProject)  + Number(0));
+      setFilterFloor("");
+      setFilterProject(Number(filterProject) + Number(0));
     }
   };
   const tableColumns = [
@@ -134,11 +131,12 @@ export default function BookingList() {
     { header: "Updated Date", field: "updatedDate" },
   ];
 
-  const handleView = (floor) => {
-    if (!floor) {
-      return notifyError("Invalid Project!", 4000);
+  const hanldeCustomerAccount = (customer) => {
+    console.log("customer :: ", customer);
+    if (!customer) {
+      return notifyError("Invalid Customer!", 4000);
     }
-    history.push(`/dashboard/unit/${floor.id}`);
+    history.push(`/dashboard/customer-account/?cId=${customer.customerId}`);
   };
 
   const handleEdit = (floor) => {
@@ -149,23 +147,33 @@ export default function BookingList() {
     console.log("Delete Floor:", floor);
   };
 
-  const actions = {
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
-  };
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: hanldeCustomerAccount,
+      title: "Customer Account",
+      className: "text-green-600",
+    },
+    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
+    },
+  ];
 
   return (
     <>
       <div className="container mx-auto p-4">
-        <div className="relative flex flex-row min-w-0  w-full mb-6 ">
-          <div className="flex flex-nowrap gap-4">
-            <div className="bg-white shadow-lg p-5 rounded width-250p">
-              <label className="block text-sm font-medium mb-1 w-full">Project</label>
+        <div className="w-full mb-6 ">
+          <div className="flex flex-wrap  py-3">
+            <div className="bg-white  shadow-lg p-5 rounded lg:w-4/12">
+              <label className="block text-sm font-medium mb-1">Project</label>
               <select
                 value={filterProject}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded px-3 py-2"
+                className="border rounded px-3 py-2 w-full"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -176,7 +184,7 @@ export default function BookingList() {
               </select>
             </div>
 
-            <div className="bg-white shadow-lg p-5 rounded width-250p">
+            <div className="bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
               <label className="block text-sm font-medium mb-1">Floor</label>
               <select
                 value={filterFloor}

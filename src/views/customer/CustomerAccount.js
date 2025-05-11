@@ -1,16 +1,23 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import httpService from "../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { MdOutlinePayments } from "react-icons/md";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function CustomerAccount() {
-  const { loading, setLoading, notifyError } = useContext(MainContext);
+  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
+    useContext(MainContext);
   const history = useHistory();
+  const location = useLocation();
+  const customerIdUsedRef = useRef(false);
 
-  const [floors, setFloors] = useState([]);
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState(""); // For filtering by project
+  const [customerIdUsed, setCustomerIdUsed] = useState(false); // For filtering by project
   const [filterFloor, setFilterFloor] = useState(""); // For filtering by floor
   const [filteredId, setFilteredId] = useState(""); // The ID of the selected project or floor
   const [filteredBy, setFilteredBy] = useState("organization"); // Keep track of whether we're filtering by project or floor
@@ -19,6 +26,8 @@ export default function CustomerAccount() {
   const [totalElements, setTotalElements] = useState(0);
   const [floorOptions, setFloorOptions] = useState([]);
   const [customerAccountList, setCustomerAccountList] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const pageSize = 10;
 
   useEffect(() => {
@@ -26,7 +35,20 @@ export default function CustomerAccount() {
   }, []);
 
   useEffect(() => {
-    fetchCustomerDetails();
+    const fetchData = async () => {
+      const queryParams = new URLSearchParams(location.search);
+      const myParam = queryParams.get("cId");
+
+      if (myParam && !customerIdUsedRef.current) {
+        console.log("myParam :: ", myParam);
+        await fetchCustomerDetailsById(myParam);
+        customerIdUsedRef.current = true;
+      } else {
+        await fetchCustomerDetails();
+      }
+    };
+
+    fetchData();
   }, [page, filteredId, filteredBy]);
 
   const fetchProjects = async () => {
@@ -37,7 +59,6 @@ export default function CustomerAccount() {
         const response = await httpService.get(
           `/project/getAllProjectByOrg/${organization.organizationId}`
         );
-        console.log("response :: ", response);
 
         setProjects(response.data || []);
       }
@@ -54,6 +75,27 @@ export default function CustomerAccount() {
       setFloorOptions(response.data || []);
     } catch (err) {
       notifyError("Failed to load floors", 4000);
+    }
+  };
+
+  const fetchCustomerDetailsById = async (id) => {
+    console.log("Start fetchCustomerDetailsById with ID:", id);
+    setLoading(true);
+    try {
+      const requestBody = {
+        id: id,
+      };
+
+      const response = await httpService.post(
+        "/customerAccount/getByCustomerId",
+        requestBody
+      );
+      let responseArray = [response?.data]
+      setCustomerAccountList(responseArray || []);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,14 +122,11 @@ export default function CustomerAccount() {
         requestBody.filteredBy = "organization";
       }
 
-      console.log("requestBody :: ", requestBody);
-
       const response = await httpService.post(
         "/customerAccount/getByIds",
         requestBody
       );
 
-      console.log("response :: ", response);
       setCustomerAccountList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
@@ -118,40 +157,89 @@ export default function CustomerAccount() {
 
   const tableColumns = [
     { header: "Customer Name", field: "customer.name" },
-    { header: "Country", field: "customer.country" },
-    { header: "City", field: "customer.city" },
-    { header: "Address", field: "customer.address" },
-    { header: "National ID", field: "customer.nationalId" },
-    { header: "Next of Kin Name", field: "customer.nextOFKinName" },
-    {
-      header: "Next of Kin National ID",
-      field: "customer.nextOFKinNationalId",
-    },
-    { header: "Relationship with Kin", field: "customer.relationShipWithKin" },
-    { header: "Organization ID", field: "customer.organizationId" },
     { header: "Project Name", field: "project.name" },
-    { header: "Project Address", field: "project.address" },
-    { header: "Project Type", field: "project.projectType" },
     { header: "Unit Serial No", field: "unit.serialNo" },
     { header: "Floor No", field: "unit.floorNo" },
-    { header: "Unit Amount", field: "unit.amount" },
-    { header: "Payment Schedule Duration", field: "durationInMonths" },
-    { header: "Total Amount", field: "totalAmount" },
-    { header: "Quarterly Payment", field: "quarterlyPayment" },
-    { header: "Half Yearly Payment", field: "halfYearly" },
-    { header: "Down Payment", field: "downPayment" },
-    { header: "On Possession Amount", field: "onPosessionAmount" },
-    { header: "Created By", field: "createdBy" },
-    { header: "Updated By", field: "updatedBy" },
-    { header: "Created Date", field: "createdDate" },
-    { header: "Updated Date", field: "updatedDate" },
+    { header: "Duration (Months)", field: "durationInMonths" },
+    { header: "Customer Amount", field: "totalAmount" },
   ];
 
-  const handleView = (account) => {
+  const handleViewDetails = async (account) => {
+    try {
+      console.log("account :: ", account);
+
+      let paymentRequest = {
+        id: account?.unit?.id,
+        paymentScheduleType: "CUSTOMER",
+      };
+      const responsePayment = await httpService.post(
+        `/paymentSchedule/getByUnit`,
+        paymentRequest
+      );
+
+      const monthWisePaymentList =
+        responsePayment?.data?.monthWisePaymentList?.map((month) => {
+          return {
+            "From Month": month.fromMonth,
+            "To Month": month.toMonth,
+            "Monthly Amount": month.amount,
+          };
+        });
+
+      const formattedStructure = {
+        "Account Details": {
+          Name: account.customer?.name,
+          "Payment Structure": {
+            "Duration In Months": account.durationInMonths,
+            "Actual Amount": account.actualAmount,
+            "Miscellaneous Amount": account.miscellaneousAmount,
+            "Total Amount": account.totalAmount,
+          },
+
+          "Payment Breakdown": {
+            "Down Payment": account.downPayment,
+            "Quarterly Payment": account.quarterlyPayment,
+            "Half Yearly": account.halfYearly,
+            Yearly: account.yearly,
+            "On Possession Amount": account.onPosessionAmount,
+          },
+          "Monthly Payments": monthWisePaymentList,
+        },
+        "Unit Details": {
+          "Serial No": account.unit?.serialNo,
+          "Square Yards": account.unit?.squareYards,
+          "Room Count": account.unit?.roomCount,
+          "Bathroom Count": account.unit?.bathroomCount,
+          Amount: account.unit?.amount,
+          "Additional Amount": account.unit?.additionalAmount,
+          "Unit Type": account.unit?.unitType,
+        },
+        "Project Details": {
+          Name: account.project?.name,
+          Address: account.project?.address,
+          Floors: account.project?.floors,
+        },
+
+        "Audit Info": {
+          "Created By": account.createdBy,
+          "Updated By": account.updatedBy,
+          "Created Date": account.createdDate,
+          "Updated Date": account.updatedDate,
+        },
+      };
+
+      setSelectedCustomerAccount(formattedStructure);
+      toggleModal();
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    }
+  };
+
+  const handleViewPayment = (account) => {
     if (!account) {
       return notifyError("Invalid Account!", 4000);
     }
-    console.log("account :: ",account);
+    console.log("account :: ", account);
     let cName = account?.customer?.name;
     history.push(`/dashboard/customer-payment/${account.id}?cName=${cName}`);
   };
@@ -164,23 +252,52 @@ export default function CustomerAccount() {
     console.log("Delete Floor:", floor);
   };
 
-  const actions = {
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: handleViewDetails,
+      title: "Account Detail",
+      className: "text-green-600",
+    },
+    {
+      icon: MdOutlinePayments,
+      onClick: handleViewPayment,
+      title: "Payment Detail",
+      className: "text-green-600",
+    },
+    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
+    },
+  ];
+
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
   };
 
   return (
     <>
+      <DynamicDetailsModal
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        data={selectedCustomerAccount}
+        title="Customer Account Details"
+      />
       <div className="container mx-auto p-4">
-        <div className="relative flex flex-row min-w-0 bg-white w-full mb-6 shadow-lg rounded p-4">
-          <div className="flex flex-nowrap gap-4">
-            <div className="w-50">
-              <label className="block text-sm font-medium mb-1">Project</label>
+        <div className="w-full mb-6 ">
+          <div className="flex flex-wrap  py-3">
+            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 ">
+              <label className="block text-sm font-medium mb-1">
+                Select Project
+              </label>
               <select
                 value={filterProject}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded px-3 py-2"
+                className="border rounded px-3 py-2 w-full"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -191,12 +308,14 @@ export default function CustomerAccount() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Floor</label>
+            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
+              <label className="block text-sm font-medium mb-1">
+                Select Floor
+              </label>
               <select
                 value={filterFloor}
                 onChange={(e) => changeSelectedFloor(e.target.value)}
-                className="border rounded px-3 py-2"
+                className="border rounded px-3 py-2 w-full"
               >
                 <option value="">All Floors</option>
                 {floorOptions.map((floor) => (
@@ -223,7 +342,7 @@ export default function CustomerAccount() {
           totalElements={totalElements}
           loading={loading}
           actions={actions}
-          title="Customer List"
+          title="Customer Account List"
         />
       </div>
     </>

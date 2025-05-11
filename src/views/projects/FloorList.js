@@ -6,13 +6,19 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
+import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { HiMiniBuildingStorefront } from "react-icons/hi2";
 
 export default function FloorList() {
-  const { loading, setLoading, notifyError } = useContext(MainContext);
+  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
+    useContext(MainContext);
   const { projectId } = useParams();
   const history = useHistory();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [floors, setFloors] = useState([]);
+  const [selectedFloor, setSelectedFloor] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -62,6 +68,24 @@ export default function FloorList() {
     }
     history.push(`/dashboard/unit/${floor.id}`);
   };
+  const handleViewFloor = (floor) => {
+  
+    const transformedData = {
+      "Unit Info": {
+        "Floor": floor.floor,
+        "Project Name": floor.projectName,
+        "Unit Count": floor.unitCount,
+      },
+      "Audit Info": {
+        "Created By": floor.createdBy,
+        "Updated By": floor.updatedBy,
+        "Created Date": floor.createdDate,
+        "Updated Date": floor.updatedDate,
+      },
+    };
+    setSelectedFloor(transformedData)
+    toggleModal();
+  };
 
   const handleEdit = (floor) => {
     console.log("Edit Floor:", floor);
@@ -73,14 +97,41 @@ export default function FloorList() {
     // Implement delete logic
   };
 
-  const actions = {
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: handleViewFloor,
+      title: "View Detail",
+      className: "text-green-600",
+    },
+    {
+      icon: HiMiniBuildingStorefront,
+      onClick: handleView,
+      title: "View Units",
+      className: "text-green-600",
+    },
+    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
+    },
+  ];
+
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
   };
 
   return (
     <div className="container mx-auto p-4">
+      <DynamicDetailsModal
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        data={selectedFloor}
+        title="Customer Details"
+      />
       <DynamicTableComponent
         fetchDataFunction={fetchProjectDetails}
         setPage={setPage}

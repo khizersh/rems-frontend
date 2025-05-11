@@ -7,20 +7,37 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { RiAccountPinBoxFill } from "react-icons/ri";
 
 export default function CustomerList() {
-  const { loading, backdrop, setBackdrop , setLoading, notifyError } = useContext(MainContext);
+  const { loading, backdrop, setBackdrop, setLoading, notifyError } =
+    useContext(MainContext);
   const history = useHistory();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenAccount, setIsModalOpenAccount] = useState(false);
   const [customerList, setCustomerList] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState({});
+  const [selectedCustomerAccount, setSelectedCustomerAccount] = useState({});
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
   const [fileteredId, setFileteredId] = useState("");
   const [filteredBy, setFilteredBy] = useState("organization");
   const [floorOptions, setFloorOptions] = useState([]);
+  const [paymentSchedule, setPaymentSchedule] = useState({
+    durationInMonths: 0,
+    actualAmount: 0,
+    miscellaneousAmount: 0,
+    totalAmount: 0,
+    downPayment: 0,
+    quarterlyPayment: 0,
+    halfYearlyPayment: 0,
+    yearlyPayment: 0,
+    onPossessionPayment: 0,
+    monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+  });
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -132,43 +149,144 @@ export default function CustomerList() {
   ];
 
   const handleView = (customer) => {
-
     const formattedCustomer = {
       "Basic Details": {
-        "Name": customer.name,
+        Name: customer.name,
         "National Id": customer.nationalId,
-        "Email": customer.email,
-        "Username": customer.username,
-        "Password": customer.password
+        Email: customer.email,
+        Username: customer.username,
+        Password: customer.password,
       },
       "Next of Kin Details": {
         "Next Of Kin Name": customer.nextOFKinName,
         "Next Of Kin National Id": customer.nextOFKinNationalId,
-        "Relationship With Kin": customer.relationShipWithKin
+        "Relationship With Kin": customer.relationShipWithKin,
       },
       "Property Details": {
         "Project Name": customer.projectName,
         "Floor No": customer.floorNo,
         "Unit Serial No": customer.unitSerialNo,
-        "Organization Id": customer.organizationId
+        "Organization Id": customer.organizationId,
       },
       "Location Details": {
-        "Country": customer.country,
-        "City": customer.city,
-        "Address": customer.address
+        Country: customer.country,
+        City: customer.city,
+        Address: customer.address,
       },
       "Audit Info": {
         "Created By": customer.createdBy,
         "Updated By": customer.updatedBy,
         "Created Date": customer.createdDate,
-        "Updated Date": customer.updatedDate
-      }
+        "Updated Date": customer.updatedDate,
+      },
     };
-    
-
 
     setSelectedCustomer(formattedCustomer);
     toggleModal();
+  };
+
+  const fetchPaymentScheduleByUnitId = async (id) => {
+    setLoading(true);
+    try {
+      let request = {
+        id: id,
+        paymentScheduleType: "CUSTOMER",
+      };
+      const response = await httpService.post(
+        `/paymentSchedule/getByUnit`,
+        request
+      );
+
+      console.log("response payment:: ", response);
+
+      if (response.data) {
+        setPaymentSchedule(response.data || {});
+      }
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCustomerAccount = async (customer) => {
+    try {
+      const requestBody = {
+        customerId: customer.customerId,
+        unitId: customer.unitId,
+      };
+
+      const response = await httpService.post(
+        `/customerAccount/getByCustomerIdAndUnitId`,
+        requestBody
+      );
+      const data = response.data;
+
+      let paymentRequest = {
+        id: customer.unitId,
+        paymentScheduleType: "CUSTOMER",
+      };
+      const responsePayment = await httpService.post(
+        `/paymentSchedule/getByUnit`,
+        paymentRequest
+      );
+
+      console.log("responsePayment.data? :: ", responsePayment.data);
+
+      const monthWisePaymentList =
+        responsePayment?.data?.monthWisePaymentList?.map((month) => {
+          return {
+            "From Month": month.fromMonth,
+            "To Month": month.toMonth,
+            "Monthly Amount": month.amount,
+          };
+        });
+
+      const formattedCustomerAccount = {
+        "Unit Details": {
+          "Serial No": data?.unit?.serialNo,
+          "Square Yards": data?.unit?.squareYards,
+          "Room Count": data?.unit?.roomCount,
+          "Bathroom Count": data?.unit?.bathroomCount,
+          Amount: data?.unit?.amount,
+          "Additional Amount": data?.unit?.additionalAmount,
+          "Total Amount":
+            Number(data?.unit?.additionalAmount) + Number(data?.unit?.amount),
+          "Unit Type": data?.unit?.unitType,
+          Booked: data?.unit?.booked,
+        },
+        "Customer Account Agreement": {
+          "Payment Structure": {
+            "Duration In Months": responsePayment.data?.durationInMonths,
+            "Actual Amount": responsePayment.data?.actualAmount,
+            "Miscellaneous Amount": responsePayment.data?.miscellaneousAmount,
+            "Total Amount": responsePayment.data?.totalAmount,
+          },
+
+          "Payment Breakdown": {
+            "Down Payment": responsePayment.data?.downPayment,
+            "Quarterly Payment": responsePayment.data?.quarterlyPayment,
+            "Half Yearly": responsePayment.data?.halfYearlyPayment,
+            "Yearly": responsePayment.data?.yearlyPayment,
+            "On Possession Amount": responsePayment.data?.onPossessionPayment,
+          },
+          "Monthly Payments": monthWisePaymentList,
+        },
+        "Audit Info": {
+          "Created By": data?.createdBy,
+          "Updated By": data?.updatedBy,
+          "Created Date": data?.createdDate,
+          "Updated Date": data?.updatedDate,
+        },
+      };
+
+      console.log("formattedCustomerAccount :: ", formattedCustomerAccount);
+
+      setSelectedCustomerAccount(formattedCustomerAccount);
+      toggleModalAccount();
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    }
   };
 
   const handleEdit = (floor) => {
@@ -179,15 +297,35 @@ export default function CustomerList() {
     console.log("Delete Floor:", floor);
   };
 
-  const actions = {
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
-  };
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: handleView,
+      title: "Customer Detail",
+      className: "text-green-600",
+    },
+    {
+      icon: RiAccountPinBoxFill,
+      onClick: handleCustomerAccount,
+      title: "Account Details",
+      className: "text-green-600",
+    },
+    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
+    },
+  ];
 
   const toggleModal = () => {
-    setBackdrop(!backdrop)
+    setBackdrop(!backdrop);
     setIsModalOpen(!isModalOpen);
+  };
+  const toggleModalAccount = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpenAccount(!isModalOpenAccount);
   };
 
   return (
@@ -197,6 +335,12 @@ export default function CustomerList() {
         onClose={toggleModal}
         data={selectedCustomer}
         title="Customer Details"
+      />
+      <DynamicDetailsModal
+        isOpen={isModalOpenAccount}
+        onClose={toggleModalAccount}
+        data={selectedCustomerAccount}
+        title="Account Details"
       />
       <div className="container mx-auto p-4">
         <div className="w-full mb-6 ">

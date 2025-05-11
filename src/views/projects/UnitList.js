@@ -6,9 +6,15 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
+import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 
 export default function UnitList() {
-  const { loading, setLoading, notifyError } = useContext(MainContext);
+  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
+    useContext(MainContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+
   const { floorId } = useParams();
   const history = useHistory();
 
@@ -58,17 +64,34 @@ export default function UnitList() {
     { header: "Unit Type", field: "unitType" },
     { header: "Floor Number", field: "floorNo" },
     { header: "Project Name", field: "projectName" },
-    { header: "Created By", field: "createdBy" },
-    { header: "Updated By", field: "updatedBy" },
-    { header: "Created Date", field: "createdDate" },
-    { header: "Updated Date", field: "updatedDate" },
   ];
 
-  const handleView = (floor) => {
-    if (!floorId) {
-      return notifyError("Invalid Project!", 4000);
-    }
-    history.push(`/dashboard/unit/${floorId}`);
+  const handleView = (data) => {
+    console.log("unit :: ", data);
+
+    const formattedUnitDetails = {
+      "Unit Details": {
+        "Serial No": data?.serialNo,
+        "Square Yards": data?.squareYards,
+        "Room Count": data?.roomCount,
+        "Bathroom Count": data?.bathroomCount,
+        Amount: data?.amount,
+        "Additional Amount": data?.additionalAmount,
+        "Total Amount": Number(data?.amount) + Number(data?.additionalAmount),
+        "Unit Type": data?.unitType,
+        "Floor No": data?.floorNo,
+        "Project Name": data?.projectName,
+        Booked: data?.booked ? "Yes" : "No",
+      },
+      "Audit Info": {
+        "Created By": data?.createdBy,
+        "Created Date": data?.createdDate,
+        "Updated By": data?.updatedBy,
+        "Updated Date": data?.updatedDate,
+      },
+    };
+    setSelectedUnit(formattedUnitDetails);
+    toggleModal()
   };
 
   const handleEdit = (floor) => {
@@ -81,14 +104,35 @@ export default function UnitList() {
     // Implement delete logic
   };
 
-  const actions = {
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: handleView,
+      title: "Customer Detail",
+      className: "text-green-600",
+    },
+    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
+    },
+  ];
+
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
   };
 
   return (
     <div className="container mx-auto p-4">
+      <DynamicDetailsModal
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        data={selectedUnit}
+        title="Customer Details"
+      />
       <DynamicTableComponent
         fetchDataFunction={fetchUnitList}
         setPage={setPage}

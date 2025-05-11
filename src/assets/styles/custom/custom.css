@@ -7,3 +7,8 @@
     position: fixed;
     left: 13%;
 }
+
+.margin-dynamic-modal{
+    margin-top: 2.5rem;
+    margin-left: 15px;
+}

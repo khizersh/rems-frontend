@@ -1,30 +1,19 @@
 import e from "cors";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { projectTypes, unitTypes } from "utility/Utility";
 import { FaLayerGroup } from "react-icons/fa";
 import { HiMiniBuildingStorefront } from "react-icons/hi2";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { BsBuildingFillAdd } from "react-icons/bs";
+import { MainContext } from "context/MainContext";
+import httpService from "utility/httpService";
 
 export default function AddProject() {
-  const [project, setProject] = useState({
-    name: "",
-    address: "",
-    floors: 1,
-    purchasingAmount: 0,
-    registrationAmount: 0,
-    additionalAmount: 0,
-    totalAmount: 0,
-    information: "",
-    projectType: "",
-    monthDuration: 0,
-    floorList: [],
-  });
-
+  const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
   const [floors, setFloors] = useState([
     {
-      floor: 1,
+      floor: 0,
       unitList: [
         {
           serialNo: "",
@@ -47,6 +36,20 @@ export default function AddProject() {
       ],
     },
   ]);
+  const [project, setProject] = useState({
+    name: "",
+    address: "",
+    floors: 0,
+    purchasingAmount: 0,
+    registrationAmount: 0,
+    additionalAmount: 0,
+    totalAmount: 0,
+    information: "",
+    organizationId: 0,
+    projectType: "",
+    monthDuration: 0,
+    floorList: [],
+  });
 
   const [indexes, setIndexes] = useState([
     {
@@ -95,7 +98,7 @@ export default function AddProject() {
     setFloors((prevFloors) => [
       ...prevFloors,
       {
-        floor: prevFloors.length + 1,
+        floor: prevFloors.length,
         unitList: [
           {
             serialNo: "",
@@ -148,7 +151,7 @@ export default function AddProject() {
         halfYearlyPayment: 0,
         yearlyPayment: 0,
         onPossessionPayment: 0,
-        monthWisePaymentList: [{ fromMonth: 1, toMonth: 12, amount: 33.3 }],
+        monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
       },
     });
     setFloors(updatedFloors);
@@ -240,13 +243,34 @@ export default function AddProject() {
     });
   };
 
-  const createProject = (e) => {
+  const createProject = async (e) => {
     e.preventDefault();
     const requestBody = { ...project };
     requestBody.floorList = floors;
+    requestBody.floors = floors.length;
+    const organization = JSON.parse(localStorage.getItem("organization")) || {};
+    requestBody.organizationId = organization.organizationId;
 
+
+    setLoading(true);
+    try {
+    
+      const response = await httpService.post(
+        `/project/add`,
+        requestBody
+      );
+
+      console.log("response payment:: ", response);
+
+      if (response.data) {
+        notifySuccess(response.responseMessage , 4000)
+      }
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
   };
-
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-50 border-0">
@@ -473,7 +497,7 @@ export default function AddProject() {
                 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between border-bottom-grey p-3 cursor-pointer  hover:shadow-md"
                 // onClick={() => changeCollapseFloor(floorIndex)}
               >
-                <div>Floor# {floorIndex + 1}</div>
+                <div>Floor# {floorIndex}</div>
                 <div className="flex justify-between">
                   <div>
                     <button
@@ -518,8 +542,9 @@ export default function AddProject() {
                       key={unitIndex}
                       className="mb-3 border-bottom-grey px-3 cursor-pointer  hover:shadow-md"
                     >
-                      <div className="flex justify-between p-3"
-                      // onClick={() => toggleUnitIndex(floorIndex, unitIndex)}
+                      <div
+                        className="flex justify-between p-3"
+                        // onClick={() => toggleUnitIndex(floorIndex, unitIndex)}
                       >
                         <div className="text-blueGray-600 font-bold uppercase ">
                           Unit# {unitIndex + 1}
@@ -631,7 +656,6 @@ export default function AddProject() {
                           </div>
                           <div className="px-4">
                             <div className=" flex flex-wrap">
-
                               <div className="w-full px-4 lg:w-6/12 border-right-grey">
                                 {/* Payment Schedule Heading */}
                                 <div className="mt-3 mb-3 text-blueGray-600 text-sm uppercase font-bold">

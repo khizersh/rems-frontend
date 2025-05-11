@@ -13,16 +13,31 @@
 .bg-gray-50 {
   background-color: #eee;
 }
-.red {
-  color: red;
-}
-.green {
-  color: green;
-}
-.blue {
-  color: blue;
+
+
+.text-green-600 {
+  color: #16a34a; /* Tailwind's green-600 */
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
+.text-blue-600 {
+  color: #2563eb; /* Tailwind's blue-600 */
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.text-red-600 {
+  color: #dc2626; /* Tailwind's red-600 */
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.text-gray-600 {
+  color: #4b5563; /* Tailwind's gray-600 */
+  font-weight: 600;
+  text-transform: uppercase;
+}
 .btn-hover-shadow {
   transition: box-shadow 0.2s ease-in-out;
 }

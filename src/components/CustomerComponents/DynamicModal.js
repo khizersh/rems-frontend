@@ -13,23 +13,50 @@ const RenderObject = ({ data, level = 0 }) => {
   return (
     <div>
       {Object.entries(data).map(([key, value]) => (
-        <div key={key} className="mb-1">
-          {typeof value === "object" && value !== null ? (
-            <div>
+        <div key={`${key}-${level}`} className="mb-1">
+          {(typeof value === "object" && value !== null) ? (
+            <div className="ml-3 mb-2">
               <button
                 onClick={() => toggleKey(key)}
                 className="flex items-center text-sm font-semibold focus:outline-none"
               >
-                {openKeys[key] ? (
-                  <FaChevronDown className="mr-1" />
-                ) : (
-                  <FaChevronRight className="mr-1" />
-                )}
                 {key}
+                {openKeys[key] ? (
+                  <FaChevronDown className="ml-1 mt-1" />
+                ) : (
+                  <FaChevronRight className="ml-1 mt-1" />
+                )}
               </button>
               {openKeys[key] && (
                 <div className="pl-4 border-l border-gray-300 ml-2 mt-1">
-                  <RenderObject data={value} level={level + 1} />
+                  {Array.isArray(value) ? (
+                    value.map((item, index) => (
+                      <div key={`${key}-${index}`} className="mb-1">
+                        <button
+                          onClick={() => toggleKey(`${key}-${index}`)}
+                          className="flex items-center text-sm font-medium focus:outline-none"
+                        >
+                          S# {index + 1}
+                          {openKeys[`${key}-${index}`] ? (
+                            <FaChevronDown className="ml-1 mt-1" />
+                          ) : (
+                            <FaChevronRight className="ml-1 mt-1" />
+                          )}
+                        </button>
+                        {openKeys[`${key}-${index}`] && (
+                          <div className="pl-4 border-l border-gray-200 ml-2 mt-1">
+                            {typeof item === "object" && item !== null ? (
+                              <RenderObject data={item} level={level + 1} />
+                            ) : (
+                              <div className="pl-3 text-sm">{String(item)}</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <RenderObject data={value} level={level + 1} />
+                  )}
                 </div>
               )}
             </div>
@@ -45,6 +72,7 @@ const RenderObject = ({ data, level = 0 }) => {
   );
 };
 
+
 const DynamicDetailsModal = ({ isOpen, onClose, data, title = "Details" }) => {
   if (!isOpen) return null;
 
@@ -58,7 +86,7 @@ const DynamicDetailsModal = ({ isOpen, onClose, data, title = "Details" }) => {
               onClick={onClose}
               className="text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
             >
-              <RxCross2 className="w-5 h-5"/>
+              <RxCross2 className="w-5 h-5" />
             </button>
           </div>
 

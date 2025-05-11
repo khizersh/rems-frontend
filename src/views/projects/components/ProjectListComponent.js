@@ -203,7 +203,7 @@ export default function ProjectListComponent() {
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
                         <button
-                          className="green hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
+                          className="text-green-600 hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
                           title="View Details"
                           onClick={() => handleClickDetails(project)}
                         >

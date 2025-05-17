@@ -9,6 +9,8 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import "../../assets/styles/projects/project.css";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 
 // Utility to resolve nested fields like "customer.name"
 const getNestedValue = (obj, path) =>
@@ -96,17 +98,40 @@ export default function DynamicTableComponent({
                   {actions.length > 0 && (
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
-                        {actions.map((action, index) => {
+                        {/* {actions.map((action, index) => {
                           const IconComponent = action.icon;
                           return (
-                            <button
-                              key={index}
-                              onClick={() => action.onClick(item)}
-                              className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
-                              title={action.title}
-                            >
-                              <IconComponent />
-                            </button>
+                            <>
+                              <button
+                                data-tooltip-id={`tooltip-${index}`}
+                                data-tooltip-content={action.title}
+                                onClick={() => action.onClick(item)}
+                                className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
+                                // key={index}
+                                // title={action.title}
+                              >
+                                <IconComponent />
+                              </button>
+                              <Tooltip id={`tooltip-${index}`} />
+                            </>
+                          );
+                        })} */}
+
+                        {actions.map((action, index) => {
+                          const IconComponent = action.icon;
+                          const tooltipId = `tooltip-${index}`;
+                          return (
+                            <div key={tooltipId} className="relative">
+                              <Tippy placement="top" theme="custom" content={action.title}>
+                                <button
+                                  key={tooltipId}
+                                  onClick={() => action.onClick(item)}
+                                  className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
+                                >
+                                  <IconComponent />
+                                </button>
+                              </Tippy>
+                            </div>
                           );
                         })}
                       </div>

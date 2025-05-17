@@ -13,6 +13,8 @@ import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js";
 import PaymentModal from "./component/PaymentModal.js";
 import { BsFillSave2Fill } from "react-icons/bs";
+import { MdPrint } from "react-icons/md";
+import {getOrdinal} from "../../utility/Utility.js"
 
 export default function CustomerPayment() {
   const {
@@ -26,6 +28,7 @@ export default function CustomerPayment() {
   const location = useLocation();
   const { customerAccountId } = useParams();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [customerAccountFilterId, setCustomerAccountFilterId] = useState(""); // The ID of the selected project or floor
   const [page, setPage] = useState(0);
@@ -38,12 +41,12 @@ export default function CustomerPayment() {
   const [payInstallment, setPayInstallment] = useState({
     id: 0,
     receivedAmount: 0,
+    addedAmount: 0,
     paymentType: "CASH",
     serialNo: 0,
-    customerPaymentDetails: [],
+    customerPaymentDetails: [{ amount: 0, paymentType: "CASH" }],
   });
-  const [selectedPaymetType, setselectedPaymetType] =
-    useState("SINGLE PAYMENT");
+  const [selectedPaymetType, setselectedPaymetType] = useState("SPLIT METHOD");
   const [customerAccountList, setCustomerAccountList] = useState([]);
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const [customerPaymentList, setCustomerPaymentList] = useState([]);
@@ -177,27 +180,235 @@ export default function CustomerPayment() {
         return <span className={`${baseClass} text-gray-600`}>{value}</span>;
       },
     },
-    { header: "Created By", field: "createdBy" },
-    { header: "Created Date", field: "createdDate" },
-    { header: "Updated By", field: "updatedBy" },
-    { header: "Updated Date", field: "updatedDate" },
   ];
 
   const handlePaymentModal = (customerPayment) => {
     setSelectedPayment(customerPayment);
     toggleModal();
   };
+  const handleDetailModal = (data) => {
+    const name = customerAccountList.find(
+      (custom) => custom.accountId == selectedCustomerAccount
+    );
+
+    const formattedPaymentInfo = {
+      "Payment Info": {
+        "Customer Name": name.customerName,
+        "Unit Serial No": data?.serialNo,
+        "Installment Amount": data?.amount,
+        "Received Amount": data?.receivedAmount,
+        "Payment Type": data?.paymentType,
+        "Payment Status": data?.paymentStatus,
+      },
+      "Audit Info": {
+        "Created By": data?.createdBy,
+        "Updated By": data?.updatedBy,
+        "Created Date": data?.createdDate,
+        "Updated Date": data?.updatedDate,
+      },
+    };
+
+    setSelectedPayment(formattedPaymentInfo);
+    toggleModalDetail();
+  };
 
   const handleEdit = (customerPayment) => {};
+
+  const handlePrintSlip = async (customerPayment) => {
+    const customer = customerAccountList.find(
+      (custom) => custom.accountId == customerPayment.customerAccountId
+    );
+
+    if (
+      (customerPayment.paymentStatus &&
+        customerPayment.paymentStatus == "PAID") ||
+      customerPayment.paymentStatus == "PENDING"
+    ) {
+      if (customer.customerId) {
+        const request = {
+          customerId: customer.customerId,
+          customerPaymentId: customerPayment.id,
+        };
+        const response = await httpService.post(
+          `/customer/getFullDetailsByCustomerId`,
+          request
+        );
+        if (response) {
+          let data = {
+            ...response.data,
+            ...customerPayment,
+          };
+
+          console.log("data :: ", data.paymentDetails);
+
+          const sumDetailAmount = data.paymentDetails.reduce((sum, item, i) => {
+            return sum + (parseFloat(item.amount) || 0);
+          }, 0);
+
+          const formatedData = {
+            contactNo: data.customer?.contactNo || "-",
+            customerName: data.customer?.customerName || "-",
+            cnic: data.customer?.nationalId || "-",
+            fatherHusbandName: data.customer?.guardianName || "-",
+            address: data.customer?.customerAddress || "-",
+            flatNo: data.customer?.unitSerial || "-",
+            floor: data.customer?.floorNo?.toString() || "-",
+            type: data.customer?.unitType || "-",
+            paymentType: data.payment?.paymentType || "-",
+            amount: sumDetailAmount || 0,
+            receiptNo: data.payment?.id || "-",
+            createdAt: data.payment?.createdDate || "-",
+            customerPaymentDetails: data.paymentDetails,
+          };
+
+          const win = window.open("", "_blank");
+          const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string
+          win.document.write(printContent);
+          win.document.close();
+          win.focus();
+          setTimeout(() => win.print(), 500); // slight delay to render
+        }
+      }
+    } else {
+      notifyError(
+        customerPayment.paymentStatus + " payments not allowed!",
+        "",
+        4000
+      );
+    }
+  };
+
+  const generateReceiptHTML = (data) => {
+    const {
+      contactNo,
+      customerName,
+      cnic,
+      fatherHusbandName,
+      address,
+      flatNo,
+      floor,
+      type,
+      amount,
+      receiptNo,
+      customerPaymentDetails,
+    } = data;
+
+    const formattedDate = new Date().toLocaleString();
+
+    return `
+    <html>
+    <head>
+      <title>Receipt</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+        .receipt-container { width: 800px; margin: auto; }
+        .header { text-align: center; }
+        .header h2 { margin: 0; font-size: 20px; }
+        .header p { margin: 0; font-size: 12px; }
+        .receipt-title { font-weight: bold; font-size: 16px; background: #000; color: #fff; padding: 5px; display: inline-block; margin: 10px 0; }
+        .info { display: flex; justify-content: space-between; margin-top: 20px; }
+        .info div { width: 48%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size : 13px; }
+        .footer { margin-top: 30px; border-top : 1px solid black; }
+        .footer-div { display: flex; justify-content: space-left;}
+        .signature { text-align: right; margin-top: 50px; }
+        .page {margin-left : 10px;}
+      </style>
+    </head>
+    <body>
+      <div class="receipt-container">
+        <div class="header">
+          <h2>VISION BUILDERS & MARKETING</h2>
+          <p>SHOP # 4, B-81 Mustafabad, Malir City, Karachi</p>
+          <p>0336-2590911, 03132107640, 0313-2510343, 0347-2494998</p>
+          <div class="receipt-title">RECEIPT</div>
+        </div>
+
+        <div class="info">
+          <div>
+            <p><strong>Receipt No:</strong> ${receiptNo}</p>
+            <p><strong>Customer Name:</strong> ${customerName}</p>
+            <p><strong>CNIC:</strong> ${cnic}</p>
+            <p><strong>Father / Husband Name:</strong> ${fatherHusbandName}</p>
+            <p><strong>Contact No:</strong> ${contactNo}</p>
+            <p><strong>Address:</strong> ${address}</p>
+            <p><strong>Receipt Date:</strong> ${formattedDate}</p>
+          </div>
+          <div>
+            <p><strong>Unit No:</strong> ${flatNo}</p>
+            <p><strong>Floor:</strong> ${getOrdinal(floor)}</p>
+            <p><strong>Type:</strong> ${type}</p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Sr#</th>
+              <th>Paid Date</th>
+              <th>Type</th>
+              <th>Payment Method</th>
+              <th>Receipt Date</th>
+              <th>Receipt Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${customerPaymentDetails
+              .map((detail, ind) => {
+                return `
+                <tr>
+                  <td>${ind + 1}</td>
+                  <td>${detail.createdDate.split("T")[0]}</td>
+                  <td>INSTALLMENT</td>
+                  <td>${detail.paymentType}</td>
+                  <td>${detail.createdDate.split("T")[0]}</td>
+                  <td>${parseFloat(detail.amount).toLocaleString()}</td>
+                </tr>
+              `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+
+        <h3 style="text-align: right;">Grand Total: ${parseFloat(
+          amount
+        ).toLocaleString()}</h3>
+
+        <div class="footer">
+          <div class="footer-div">
+            <p><strong>Print Date:</strong> ${formattedDate}</p>
+          </div>
+          <div class="signature">
+            <p>Signature</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  };
 
   const handleDelete = (customerPayment) => {};
 
   const actions = [
     {
+      icon: FaEye,
+      onClick: handleDetailModal,
+      title: "View Details",
+      className: "text-green-600",
+    },
+    {
       icon: BsFillSave2Fill,
       onClick: handlePaymentModal,
-      title: "Pay",
+      title: "Payment",
       className: "text-green-600",
+    },
+    {
+      icon: MdPrint,
+      onClick: handlePrintSlip,
+      title: "Print Slip",
+      className: "yellow",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
@@ -208,6 +419,11 @@ export default function CustomerPayment() {
     },
   ];
 
+  const toggleModalDetail = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
+  };
+
   const toggleModal = () => {
     setBackdrop(!backdrop);
     setIsFormModalOpen(!isFormModalOpen);
@@ -215,16 +431,12 @@ export default function CustomerPayment() {
     onResetFormDetail();
   };
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
-
   const handleSubmit = async () => {
     const validAmount =
       payInstallment.receivedAmount > 0 ||
       payInstallment.customerPaymentDetails.some((detail) => detail.amount > 0);
 
-    if (!validAmount) {
+    if (!validAmount || validAmount < 0) {
       return notifyError(
         "Invalid Amount!",
         "Amount should be greater than 0",
@@ -249,33 +461,6 @@ export default function CustomerPayment() {
       setLoading(false);
     }
   };
-
-  const formFields = [
-    {
-      name: "name",
-      label: "Name",
-      type: "text",
-      value: name,
-      setter: setName,
-      col: 6,
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-      value: email,
-      setter: setEmail,
-      col: 6,
-    },
-    {
-      name: "age",
-      label: "Age",
-      type: "number",
-      value: age,
-      setter: setAge,
-      col: 6,
-    },
-  ];
 
   const onChangeForm = (e) => {
     const { name, value } = e.target;
@@ -309,7 +494,7 @@ export default function CustomerPayment() {
   const onResetFormDetail = () => {
     setPayInstallment((prev) => ({
       ...prev,
-      customerPaymentDetails: [],
+      customerPaymentDetails: [{ amount: 0, paymentType: "CASH" }],
     }));
   };
 
@@ -335,7 +520,16 @@ export default function CustomerPayment() {
 
   return (
     <>
+      <DynamicDetailsModal
+        isOpen={isModalOpen}
+        onClose={toggleModalDetail}
+        data={selectedPayment}
+        title="Customer Details"
+      />
       <PaymentModal
+        selectedPayment={selectedPayment}
+        orginalAmount={selectedPayment.amount}
+        remainingAmount={selectedPayment.remainingAmount}
         isOpen={isFormModalOpen}
         onClose={toggleModal}
         formTitle="Installment Payment Form"

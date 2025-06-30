@@ -1,14 +1,26 @@
-.modal-height{
-    max-height: 80vh;
-    overflow-y: auto;
+.modal-height {
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-.fixed-left-13p{
-    position: fixed;
-    left: 13%;
+.fixed-left-13p {
+  position: fixed;
+  left: 13%;
 }
 
-.margin-dynamic-modal{
-    margin-top: 2.5rem;
-    margin-left: 15px;
+.margin-dynamic-modal {
+  margin-top: 2.5rem;
+  margin-left: 15px;
+}
+
+.payback-modal {
+  position: fixed;
+  left: 29%;
+  top: 32%;
+}
+.payback-form {
+  padding-top: 20px;
+  padding-left: 50px;
+  padding-right: 60px;
+  padding-bottom: 40px;
 }

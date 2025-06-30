@@ -83,6 +83,7 @@ export default function ProjectListComponent() {
         "Purchasing Amount": project.purchasingAmount,
         "Registration Amount": project.registrationAmount,
         "Additional Amount": project.additionalAmount,
+        "Construction Amount": project.constructionAmount,
         "Total Amount": project.totalAmount,
       },
       "Duration Details": {
@@ -100,11 +101,10 @@ export default function ProjectListComponent() {
   };
 
   const handleEdit = (projectId) => {
-    console.log("Edit Project:", projectId);
-    // Redirect to edit page or open modal
     if (!projectId) {
       notifyError("Invalid Project!", 4000);
     }
+    history.push(`/dashboard/update-project/${projectId}`);
   };
 
   const handleDelete = (projectId) => {
@@ -225,6 +225,7 @@ export default function ProjectListComponent() {
                         <button
                           className=" blue hover:shadow-md transition-shadow text-yellow-500 hover:text-yellow-600 transition-colors duration-150"
                           title="Edit"
+                          onClick={() => handleEdit(project.projectId)}
                         >
                           <FaPen />
                         </button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import {
   FaAngleDoubleLeft,
   FaAngleLeft,
@@ -11,6 +11,7 @@ import {
 import "../../assets/styles/projects/project.css";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+import { RxReload } from "react-icons/rx";
 
 // Utility to resolve nested fields like "customer.name"
 const getNestedValue = (obj, path) =>
@@ -28,18 +29,46 @@ export default function DynamicTableComponent({
   loading = false,
   actions = {},
   title,
+  addButton = null,
 }) {
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
         <h3 className="font-semibold text-base text-gray-700">{title}</h3>
-        <button
-          onClick={fetchDataFunction}
-          className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded"
-        >
-          Refresh
-        </button>
+        <div>
+          {addButton ? (
+            <button
+              onClick={addButton.onClick}
+              className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded mr-3"
+            >
+              {[0].map((m) => {
+                const IconComponent = addButton.icon;
+
+                return (
+                  <IconComponent
+                    className="w-5 h-5 inline-block "
+                    style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                  />
+                );
+              })}
+
+              {addButton.title}
+            </button>
+          ) : (
+            <></>
+          )}
+          <button
+            onClick={fetchDataFunction}
+            className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded "
+          >
+            <RxReload
+              className="w-5 h-5 inline-block "
+              style={{ paddingBottom: "3px", paddingRight: "5px" }}
+            />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -98,31 +127,16 @@ export default function DynamicTableComponent({
                   {actions.length > 0 && (
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
-                        {/* {actions.map((action, index) => {
-                          const IconComponent = action.icon;
-                          return (
-                            <>
-                              <button
-                                data-tooltip-id={`tooltip-${index}`}
-                                data-tooltip-content={action.title}
-                                onClick={() => action.onClick(item)}
-                                className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
-                                // key={index}
-                                // title={action.title}
-                              >
-                                <IconComponent />
-                              </button>
-                              <Tooltip id={`tooltip-${index}`} />
-                            </>
-                          );
-                        })} */}
-
                         {actions.map((action, index) => {
                           const IconComponent = action.icon;
                           const tooltipId = `tooltip-${index}`;
                           return (
                             <div key={tooltipId} className="relative">
-                              <Tippy placement="top" theme="custom" content={action.title}>
+                              <Tippy
+                                placement="top"
+                                theme="custom"
+                                content={action.title}
+                              >
                                 <button
                                   key={tooltipId}
                                   onClick={() => action.onClick(item)}

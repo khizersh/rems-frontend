@@ -2,20 +2,20 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
-import {
-  useHistory,
-  useParams,
-} from "react-router-dom/cjs/react-router-dom.min.js";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { RiAccountPinBoxFill } from "react-icons/ri";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function CustomerList() {
   const { loading, backdrop, setBackdrop, setLoading, notifyError } =
     useContext(MainContext);
-  const history = useHistory();
+  const location = useLocation();
 
+  const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cId, setCId] = useState(null);
   const [isModalOpenAccount, setIsModalOpenAccount] = useState(false);
   const [customerList, setCustomerList] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState({});
@@ -49,7 +49,10 @@ export default function CustomerList() {
   }, []);
 
   useEffect(() => {
-    fetchCustomerDetails();
+    const queryParams = new URLSearchParams(location.search);
+    const cid = queryParams.get("cId");
+    setCId(cid);
+    fetchCustomerDetails(cid);
   }, [page, filterProject, filterFloor]);
 
   const fetchProjects = async () => {
@@ -63,7 +66,7 @@ export default function CustomerList() {
         setProjects(response.data || []);
       }
     } catch (err) {
-      notifyError("Failed to load projects", 4000);
+      if (!cId) notifyError(err.message, err.data, 4000);
     }
   };
 
@@ -74,11 +77,11 @@ export default function CustomerList() {
       );
       setFloorOptions(response.data || []);
     } catch (err) {
-      notifyError("Failed to load floors", 4000);
+      if (!cId) notifyError(err.message, err.data, 4000);
     }
   };
 
-  const fetchCustomerDetails = async () => {
+  const fetchCustomerDetails = async (cid) => {
     setLoading(true);
     try {
       const requestBody = {
@@ -104,14 +107,18 @@ export default function CustomerList() {
         requestBody.filteredBy = "organization";
       }
 
-      console.log("requestBody :: ", requestBody);
+      var response = null;
+      var dataList = [];
 
-      const response = await httpService.post(
-        `/customer/getByIds`,
-        requestBody
-      );
+      if (cid) {
+        response = await httpService.get(`/customer/${cid}`);
+        dataList = [response?.data];
+      } else {
+        response = await httpService.post(`/customer/getByIds`, requestBody);
+        dataList = response?.data?.content;
+      }
 
-      setCustomerList(response?.data?.content || []);
+      setCustomerList(dataList || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -142,7 +149,6 @@ export default function CustomerList() {
     { header: "Name", field: "name" },
     { header: "Country", field: "country" },
     { header: "City", field: "city" },
-    { header: "National ID", field: "nationalId" },
     { header: "Project", field: "projectName" },
     { header: "Floor", field: "floorNo" },
     { header: "Unit", field: "unitSerialNo" },
@@ -267,7 +273,7 @@ export default function CustomerList() {
             "Down Payment": responsePayment.data?.downPayment,
             "Quarterly Payment": responsePayment.data?.quarterlyPayment,
             "Half Yearly": responsePayment.data?.halfYearlyPayment,
-            "Yearly": responsePayment.data?.yearlyPayment,
+            Yearly: responsePayment.data?.yearlyPayment,
             "On Possession Amount": responsePayment.data?.onPossessionPayment,
           },
           "Monthly Payments": monthWisePaymentList,
@@ -289,8 +295,8 @@ export default function CustomerList() {
     }
   };
 
-  const handleEdit = (floor) => {
-    console.log("Edit Floor:", floor);
+  const handleEdit = (customer) => {
+    history.push(`/dashboard/update-customer/${customer.customerId}`);
   };
 
   const handleDelete = (floor) => {

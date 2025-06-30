@@ -3,32 +3,31 @@ import { FaLayerGroup } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { paymentTypes } from "utility/Utility";
 import { IoMdAddCircle } from "react-icons/io";
-import { MdDeleteForever } from "react-icons/md";
+import { MdDeleteForever, MdPrint } from "react-icons/md";
 import httpService from "utility/httpService";
 import DynamicTableComponent from "components/table/DynamicTableComponent";
 import { MainContext } from "context/MainContext";
 
 const PaymentModal = ({
   selectedPayment,
-  // orginalAmount,
-  // remainingAmount,
   isOpen,
   onClose,
   formTitle = "Form",
   fields = {},
-  onChangeForm,
   onChangeFormDetail,
+  onChangeAccountDetail,
   onAddDetailRow,
-  onResetForm,
+  onAddAccountRow,
   onRemoveDetailRow,
-  onResetFormDetail,
-  selectedPaymetType,
-  setselectedPaymetType,
+  onRemoveAccountRow,
+  onPrintDetail,
   onSubmit,
 }) => {
   const { loading, setLoading } = useContext(MainContext);
   const [remainingAmountState, setRemainingAmountState] = useState(0);
   const [paidDetailsList, setPaidDetailsList] = useState([]);
+  const [accountList, setAccountList] = useState([]);
+
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -47,6 +46,22 @@ const PaymentModal = ({
       setLoading(false);
     }
   };
+  const fetchAccountList = async () => {
+    try {
+      setLoading(true);
+      let organizationLocal = JSON.parse(localStorage.getItem("organization"));
+      if (organizationLocal) {
+        const response = await httpService.get(
+          `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`
+        );
+
+        setAccountList(response?.data || []);
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setRemainingAmountState(selectedPayment.remainingAmount);
@@ -57,6 +72,10 @@ const PaymentModal = ({
       fetchPaymentDetails();
     }
   }, [selectedPayment?.id]);
+
+  useEffect(() => {
+    fetchAccountList();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -95,7 +114,18 @@ const PaymentModal = ({
   };
   const pageSize = 10;
 
-  const actions = [];
+  const actions = [
+    {
+      icon: MdPrint,
+      onClick: onPrintDetail,
+      title: "Print Slip",
+      className: "yellow",
+    },
+  ];
+
+  const changeSelectedProjected = (data) => {
+    console.log("account :: ", data);
+  };
 
   return (
     <>
@@ -117,21 +147,25 @@ const PaymentModal = ({
           </button>
         </div>
 
-        <div className="container mx-auto p-4">
-          <DynamicTableComponent
-            fetchDataFunction={fetchPaymentDetails}
-            setPage={setPage}
-            page={page}
-            data={paidDetailsList}
-            columns={tableColumns} // You need to define the columns for the table
-            pageSize={pageSize}
-            totalPages={totalPages}
-            totalElements={totalElements}
-            loading={loading}
-            actions={actions}
-            title={"Payment History"}
-          />
-        </div>
+        {paidDetailsList && paidDetailsList.length > 0 ? (
+          <div className="container mx-auto p-4">
+            <DynamicTableComponent
+              fetchDataFunction={fetchPaymentDetails}
+              setPage={setPage}
+              page={page}
+              data={paidDetailsList}
+              columns={tableColumns} // You need to define the columns for the table
+              pageSize={pageSize}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              loading={loading}
+              actions={actions}
+              title={"Payment History"}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className={`px-4 mt-5`}>
@@ -164,7 +198,7 @@ const PaymentModal = ({
             </h6>
 
             {fields?.customerPaymentDetails?.map((detail, ind) => (
-              <div className="flex flex-wrap" key={ind}>
+              <div className="flex flex-wrap border-bottom-grey" key={ind}>
                 <div className={`w-full lg:w-6/12  my-2 `}>
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Received Amount
@@ -221,6 +255,77 @@ const PaymentModal = ({
                 </div>
               </div>
             ))}
+
+            <div className="mt-10 ">
+              <div className={`flex justify-between`}>
+                <h2 id="modal-title" className="text-lg font-bold">
+                  Receiving Account Management
+                </h2>
+                <button
+                  type="button"
+                  onClick={onAddAccountRow}
+                  className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                >
+                  <IoMdAddCircle
+                    className="w-5 h-5 inline-block"
+                    style={{ paddingBottom: "3px", paddingRight: "7px" }}
+                  />
+                  Add Account
+                </button>
+              </div>
+              {fields?.organizationAccountDetails?.map((detail, ind) => (
+                <div className="flex flex-wrap border-bottom-grey">
+                  <div className={`w-full lg:w-6/12  my-2 p-2 `}>
+                    <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                      Received Amount
+                    </label>
+                    <input
+                      name="amount"
+                      type="number"
+                      value={detail.amount}
+                      onChange={(e) => onChangeAccountDetail(e, ind)}
+                      className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                      required
+                    />
+                  </div>
+                  <div className="w-full lg:w-6/12  my-2 p-2 ">
+                    <div className="flex flex-wrap">
+                      <div className="w-full lg:w-8/12">
+                        <label className="block text-sm font-medium mb-1">
+                          Select Account
+                        </label>
+                        <select
+                          name="organizationAcctId"
+                          value={detail.name}
+                          onChange={(e) => onChangeAccountDetail(e, ind)}
+                          className="border rounded px-3 py-2 w-full"
+                        >
+                          <option value="">Select Receiving Account</option>
+                          {accountList.map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full lg:w-4/12   ">
+                        <div className=" mt-7 ml-5">
+                          <button
+                            type="button"
+                            onClick={() => onRemoveAccountRow(ind)}
+                            className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                          >
+                            <MdDeleteForever
+                              style={{ fontSize: "25px", marginTop: "7px" }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="margin-dynamic-modal">

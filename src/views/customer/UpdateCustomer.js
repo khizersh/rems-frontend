@@ -1,118 +1,68 @@
 import React, { useContext, useEffect, useState } from "react";
 import { MainContext } from "context/MainContext";
 import httpService from "../../utility/httpService.js";
-import { BsBuildingFillAdd } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function AddCustomer() {
   const { loading, setLoading, notifyError, notifySuccess } =
     useContext(MainContext);
-
+  const { customerId } = useParams();
   const [customer, setCustomer] = useState({
     name: "",
     country: "",
     city: "",
     address: "",
+    contactNo: "",
     nationalId: "",
     nextOFKinName: "",
-    contactNo: "",
-    guardianName:"",
+    guardianName: "",
     nextOFKinNationalId: "",
     relationShipWithKin: "",
     organizationId: 1, // default org id
     projectId: 0,
     floorId: 0,
     unitId: 0,
-    createdBy: "admin", // assuming static for now
-    updatedBy: "admin",
+    createdBy: "", // assuming static for now
+    updatedBy: "",
     email: "",
     username: "",
     password: "",
   });
-  const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
-  const [fileteredId, setFileteredId] = useState("");
-  const [filteredBy, setFilteredBy] = useState("organization");
-  const [floorOptions, setFloorOptions] = useState([]);
-  const [unitList, setUnitList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
 
   const resetState = () => {
     setCustomer({
       name: "",
       country: "",
+      contactNo: "",
       city: "",
       address: "",
-      contactNo: "",
       nationalId: "",
-      guardianName: "",
       nextOFKinName: "",
+      guardianName: "",
       nextOFKinNationalId: "",
       relationShipWithKin: "",
       organizationId: 1,
       projectId: 0,
       floorId: 0,
       unitId: 0,
-      createdBy: "admin",
-      updatedBy: "admin",
+      createdBy: "",
+      updatedBy: "",
       email: "",
       username: "",
       password: "",
     });
   };
 
-  const fetchProjects = async () => {
+  const fetchCustomerDetail = async () => {
     try {
-      const sidebarData =
-        JSON.parse(localStorage.getItem("organization")) || null;
-      if (sidebarData) {
-        const response = await httpService.get(
-          `/project/getAllProjectByOrg/${sidebarData.organizationId}`
-        );
-        setProjects(response.data || []);
-      }
+      const response = await httpService.get(`/customer/${customerId}`);
+      setCustomer(response.data || []);
     } catch (err) {
       notifyError("Failed to load projects", 4000);
-    }
-  };
-
-  const fetchFloors = async (projectId) => {
-    try {
-      const response = await httpService.get(
-        `/floor/getAllFloorsByProject/${projectId}`
-      );
-      setFloorOptions(response.data || []);
-    } catch (err) {
-      notifyError("Failed to load floors", 4000);
-    }
-  };
-  const fetchUnits = async (floorId) => {
-    try {
-      const response = await httpService.get(
-        `/unit/getIdSerialByFloorId/${floorId}`
-      );
-      setUnitList(response.data || []);
-    } catch (err) {
-      notifyError("Failed to load floors", 4000);
-    }
-  };
-
-  const changeSelectedProjected = (projectId) => {
-    if (projectId) {
-      setFileteredId(projectId);
-      setFilteredBy("project");
-      setFilterProject(projectId);
-      fetchFloors(projectId);
-    }
-  };
-
-  const changeSelectedFloor = (floorId) => {
-    if (floorId) {
-      setFileteredId(floorId);
-      setFilteredBy("floor");
-      setFilterFloor(floorId);
-      fetchUnits(floorId);
     }
   };
 
@@ -125,13 +75,8 @@ export default function AddCustomer() {
     e.preventDefault();
     setLoading(true);
     try {
-      customer.floorId = filterFloor;
-      customer.projectId = filterProject;
-      customer.unitId = selectedUnit;
-
-      console.log("customer :: ", customer);
       const response = await httpService.post(
-        `/customer/addCustomer`,
+        `/customer/updateCustomer`,
         customer
       );
       notifySuccess(
@@ -147,7 +92,7 @@ export default function AddCustomer() {
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchCustomerDetail();
   }, []);
 
   return (
@@ -155,60 +100,11 @@ export default function AddCustomer() {
       <div className="rounded-t bg-white mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            Add Customer
+            Update Customer
           </h6>
         </div>
       </div>
       <div className="bg-white flex flex-wrap  py-3 mb-5">
-        <div className=" shadow-lg p-5 rounded lg:w-3/12 mx-4">
-          <label className="block text-sm font-medium mb-1 ">
-            Select Project
-          </label>
-          <select
-            value={filterProject}
-            onChange={(e) => changeSelectedProjected(e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          >
-            <option value="">All Projects</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="bg-white shadow-lg p-5 rounded lg:w-3/12">
-          <label className="block text-sm font-medium mb-1">Select Floor</label>
-          <select
-            value={filterFloor}
-            onChange={(e) => changeSelectedFloor(e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          >
-            <option value="">All Floors</option>
-            {floorOptions.map((floor) => (
-              <option key={floor.id} value={floor.id}>
-                {floor.floorNo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="bg-white shadow-lg p-5 rounded lg:w-3/12 ml-4">
-          <label className="block text-sm font-medium mb-1">Select Unit</label>
-          <select
-            value={selectedUnit}
-            onChange={(e) => setSelectedUnit(e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-          >
-            <option value="">All Floors</option>
-            {unitList.map((unit) => (
-              <option key={unit.id} value={unit.id}>
-                {unit.serialNo}
-              </option>
-            ))}
-          </select>
-        </div>
         <form onSubmit={createCustomer}>
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5">
             <div className="w-full lg:w-12/12 px-4 mt-2">
@@ -231,49 +127,19 @@ export default function AddCustomer() {
                     placeholder="Enter name"
                   />
                 </div>
-
-                <div className="w-full lg:w-6/12 px-4 mb-3">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={customer.email}
-                    onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                    placeholder="Enter email"
-                  />
-                </div>
-
-                {/* Username */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Username
-                  </label>
-                  <input
-                    name="username"
-                    value={customer.username}
-                    onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                    placeholder="Enter username"
-                  />
-                </div>
-                {/* Username */}
                 <div className="w-full lg:w-6/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Contact No
                   </label>
                   <input
+                    type="text"
                     name="contactNo"
                     value={customer.contactNo}
                     onChange={changeCustomerFields}
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                    placeholder="Enter contactNo"
+                    placeholder="Enter contact no"
                   />
                 </div>
-
-       
 
                 {/* National ID */}
                 <div className="w-full lg:w-6/12 px-4 mb-3">
@@ -283,19 +149,6 @@ export default function AddCustomer() {
                   <input
                     name="nationalId"
                     value={customer.nationalId}
-                    onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                    placeholder="Enter national ID"
-                  />
-                </div>
-                {/* National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Guardian Name
-                  </label>
-                  <input
-                    name="guardianName"
-                    value={customer.guardianName}
                     onChange={changeCustomerFields}
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter national ID"
@@ -338,6 +191,19 @@ export default function AddCustomer() {
                   <input
                     name="relationShipWithKin"
                     value={customer.relationShipWithKin}
+                    onChange={changeCustomerFields}
+                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    placeholder="Enter relationship"
+                  />
+                </div>
+                {/* Relationship with Kin */}
+                <div className="w-full lg:w-6/12 px-4 mb-3">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Guardian Name
+                  </label>
+                  <input
+                    name="guardianName"
+                    value={customer.guardianName}
                     onChange={changeCustomerFields}
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter relationship"

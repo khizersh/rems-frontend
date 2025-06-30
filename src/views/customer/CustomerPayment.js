@@ -14,7 +14,7 @@ import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js"
 import PaymentModal from "./component/PaymentModal.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
-import {getOrdinal} from "../../utility/Utility.js"
+import { getOrdinal } from "../../utility/Utility.js";
 
 export default function CustomerPayment() {
   const {
@@ -45,8 +45,19 @@ export default function CustomerPayment() {
     paymentType: "CASH",
     serialNo: 0,
     customerPaymentDetails: [{ amount: 0, paymentType: "CASH" }],
+    organizationAccountDetails: [
+      {
+        organizationAcctId: 0,
+        transactionType: "CREDIT",
+        amount: 0,
+        comments: "",
+        customerId: 0,
+        customerPaymentId: 0,
+        customerPaymentDetailId: 0,
+        customerAccountId: 0,
+      },
+    ],
   });
-  const [selectedPaymetType, setselectedPaymetType] = useState("SPLIT METHOD");
   const [customerAccountList, setCustomerAccountList] = useState([]);
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const [customerPaymentList, setCustomerPaymentList] = useState([]);
@@ -88,7 +99,7 @@ export default function CustomerPayment() {
 
       setCustomerAccountList(response.data || []);
     } catch (err) {
-      notifyError(err.message, err.data, 4000);
+      // notifyError(err.message, err.data, 4000);
     } finally {
       setLoading(false);
     }
@@ -139,7 +150,7 @@ export default function CustomerPayment() {
         setProjects(response.data || []);
       }
     } catch (err) {
-      notifyError("Failed to load projects", 4000);
+      // notifyError(err.message, err.data, 4000);
     }
   };
 
@@ -193,7 +204,7 @@ export default function CustomerPayment() {
 
     const formattedPaymentInfo = {
       "Payment Info": {
-        "Customer Name": name.customerName,
+        "Customer Name": name?.customerName || customerName,
         "Unit Serial No": data?.serialNo,
         "Installment Amount": data?.amount,
         "Received Amount": data?.receivedAmount,
@@ -349,7 +360,6 @@ export default function CustomerPayment() {
               <th>Paid Date</th>
               <th>Type</th>
               <th>Payment Method</th>
-              <th>Receipt Date</th>
               <th>Receipt Amount</th>
             </tr>
           </thead>
@@ -362,7 +372,6 @@ export default function CustomerPayment() {
                   <td>${detail.createdDate.split("T")[0]}</td>
                   <td>INSTALLMENT</td>
                   <td>${detail.paymentType}</td>
-                  <td>${detail.createdDate.split("T")[0]}</td>
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;
@@ -447,6 +456,22 @@ export default function CustomerPayment() {
     payInstallment.id = selectedPayment.id;
     setLoading(true);
     try {
+      let customerObj = customerAccountList.find(
+        (customer) => customer.accountId == selectedCustomerAccount
+      );
+      const orgAccountList = payInstallment.organizationAccountDetails?.map(
+        (orgAccount) => {
+          return {
+            ...orgAccount,
+            customerAccountId: selectedPayment.customerAccountId,
+            customerPaymentId: selectedPayment.id,
+            customerId: customerObj?.customerId,
+          };
+        }
+      );
+
+      payInstallment.organizationAccountDetails = orgAccountList;
+
       const response = await httpService.post(
         `/customerPayment/payInstallment`,
         payInstallment
@@ -480,6 +505,16 @@ export default function CustomerPayment() {
       customerPaymentDetails: updatedInstallmentDetail,
     }));
   };
+  const onChangeAccountDetail = (e, index) => {
+    const { name, value } = e.target;
+    const updatedAccountDetail = [...payInstallment.organizationAccountDetails];
+    updatedAccountDetail[index][name] = value;
+
+    setPayInstallment((prev) => ({
+      ...prev,
+      organizationAccountDetails: updatedAccountDetail,
+    }));
+  };
 
   const onResetForm = () => {
     setPayInstallment((prev) => ({
@@ -508,6 +543,27 @@ export default function CustomerPayment() {
       customerPaymentDetails: updatedInstallmentDetail,
     });
   };
+  const onAddAccountRow = () => {
+    const updatedAccountDetail = [
+      ...payInstallment.organizationAccountDetails,
+      {
+        organizationAcctId: 0,
+        transactionType: "CREDIT",
+        amount: 0,
+        comments: "",
+        customerId: 0,
+        customerPaymentId: 0,
+        customerPaymentDetailId: 0,
+        customerAccountId: 0,
+      },
+    ];
+    console.log("updatedAccountDetail :: ", updatedAccountDetail);
+
+    setPayInstallment({
+      ...payInstallment,
+      organizationAccountDetails: updatedAccountDetail,
+    });
+  };
 
   const onRemoveDetailRow = (index) => {
     const updatedInstallmentDetail = [...payInstallment.customerPaymentDetails];
@@ -516,6 +572,66 @@ export default function CustomerPayment() {
       ...payInstallment,
       customerPaymentDetails: updatedInstallmentDetail,
     });
+  };
+  const onRemoveAccountRow = (index) => {
+    const updatedAccountDetail = [...payInstallment.organizationAccountDetails];
+    updatedAccountDetail.splice(index, 1);
+    setPayInstallment({
+      ...payInstallment,
+      organizationAccountDetails: updatedAccountDetail,
+    });
+  };
+
+  const onPrintDetail = async (customerPaymentDetail) => {
+    const customerPayment = customerPaymentList.find(
+      (payment) => payment.id == customerPaymentDetail.customerPaymentId
+    );
+
+    const customer = customerAccountList.find(
+      (custom) => custom.accountId == customerPayment.customerAccountId
+    );
+
+    if (customer.customerId) {
+      const request = {
+        customerId: customer.customerId,
+        customerPaymentId: customerPayment.id,
+      };
+      const response = await httpService.post(
+        `/customer/getFullDetailsByCustomerId`,
+        request
+      );
+      if (response) {
+        let data = {
+          ...response.data,
+          ...customerPayment,
+        };
+
+        const formatedData = {
+          contactNo: data.customer?.contactNo || "-",
+          customerName: data.customer?.customerName || "-",
+          cnic: data.customer?.nationalId || "-",
+          fatherHusbandName: data.customer?.guardianName || "-",
+          address: data.customer?.customerAddress || "-",
+          flatNo: data.customer?.unitSerial || "-",
+          floor: data.customer?.floorNo?.toString() || "-",
+          type: data.customer?.unitType || "-",
+          paymentType: data.payment?.paymentType || "-",
+          amount: customerPaymentDetail?.amount || 0,
+          receiptNo: data.payment?.id || "-",
+          createdAt: data.payment?.createdDate || "-",
+          customerPaymentDetails: [customerPaymentDetail],
+        };
+
+        console.log("formatedData :: ", formatedData);
+
+        const win = window.open("", "_blank");
+        const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string
+        win.document.write(printContent);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 500); // slight delay to render
+      }
+    }
   };
 
   return (
@@ -528,20 +644,18 @@ export default function CustomerPayment() {
       />
       <PaymentModal
         selectedPayment={selectedPayment}
-        orginalAmount={selectedPayment.amount}
-        remainingAmount={selectedPayment.remainingAmount}
         isOpen={isFormModalOpen}
         onClose={toggleModal}
         formTitle="Installment Payment Form"
         fields={payInstallment}
         onChangeForm={onChangeForm}
-        onResetForm={onResetForm}
-        onResetFormDetail={onResetFormDetail}
         onChangeFormDetail={onChangeFormDetail}
+        onChangeAccountDetail={onChangeAccountDetail}
         onAddDetailRow={onAddDetailRow}
+        onAddAccountRow={onAddAccountRow}
         onRemoveDetailRow={onRemoveDetailRow}
-        selectedPaymetType={selectedPaymetType}
-        setselectedPaymetType={setselectedPaymetType}
+        onRemoveAccountRow={onRemoveAccountRow}
+        onPrintDetail={onPrintDetail}
         onSubmit={handleSubmit}
       />
       <div className="container mx-auto ">

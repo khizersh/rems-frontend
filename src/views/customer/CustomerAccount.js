@@ -265,7 +265,6 @@ export default function CustomerAccount() {
       title: "Payment Detail",
       className: "text-green-600",
     },
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
       icon: FaTrashAlt,
       onClick: handleDelete,

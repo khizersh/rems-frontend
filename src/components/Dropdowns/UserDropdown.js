@@ -5,6 +5,7 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { MainContext } from "context/MainContext";
+import { FaUserCircle } from "react-icons/fa";
 
 const UserDropdown = () => {
   const { notifySuccess } = useContext(MainContext);
@@ -42,12 +43,13 @@ const UserDropdown = () => {
         }}
       >
         <div className="items-center flex">
-          <span className="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full">
-            <img
+          <span className="w-12 h-12 text-sm text-white bg-blue inline-flex items-center justify-center rounded-full">
+            {/* <img
               alt="..."
               className="w-full rounded-full align-middle border-none shadow-lg"
               src={require("assets/img/team-1-800x800.jpg").default}
-            />
+            /> */}
+            <FaUserCircle className="w-5 h-5 "/>
           </span>
         </div>
       </a>

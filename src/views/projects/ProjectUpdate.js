@@ -1,4 +1,3 @@
-import e from "cors";
 import React, { useContext, useEffect, useState } from "react";
 import { projectTypes, unitTypes } from "utility/Utility";
 import { FaLayerGroup } from "react-icons/fa";

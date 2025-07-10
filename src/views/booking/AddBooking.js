@@ -1,8 +1,4 @@
-import e from "cors";
 import React, { useContext, useEffect, useState } from "react";
-import { projectTypes, unitTypes } from "utility/Utility";
-import { FaLayerGroup } from "react-icons/fa";
-import { HiMiniBuildingStorefront } from "react-icons/hi2";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { BsBuildingFillAdd } from "react-icons/bs";
@@ -122,8 +118,6 @@ export default function AddBooking() {
         `/paymentSchedule/getByUnit`,
         request
       );
-
-      console.log("response payment:: ", response);
 
       if (response.data) {
         setPaymentSchedule(response.data || {});

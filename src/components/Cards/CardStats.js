@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import "../../assets/styles/custom/custom.css"
 
 export default function CardStats({
   statSubtitle,
@@ -10,6 +11,9 @@ export default function CardStats({
   statDescripiron,
   statIconName,
   statIconColor,
+  dataList,
+  filterValue,
+  onChange
 }) {
   return (
     <>
@@ -35,20 +39,33 @@ export default function CardStats({
               </div>
             </div>
           </div>
-          <p className="text-sm text-blueGray-400 mt-4">
-            <span className={statPercentColor + " mr-2"}>
+          <p className="flex flex-wrap justify-between text-sm text-blueGray-400 mt-4">
+            <p className={statPercentColor + " mr-2"} style={{marginTop :"11px"}}> 
               <i
                 className={
                   statArrow === "up"
                     ? "fas fa-arrow-up"
                     : statArrow === "down"
-                    ? "fas fa-arrow-down"
-                    : ""
+                      ? "fas fa-arrow-down"
+                      : ""
                 }
               ></i>{" "}
               {statPercent}%
-            </span>
-            <span className="whitespace-nowrap">{statDescripiron}</span>
+            </p>
+            <p className="">
+              <select
+                value={filterValue}
+                onChange={(e) => onChange(e.target.value)}
+                className="stats-selectbox  px-1 "
+              >
+                {dataList && dataList.length > 0 && dataList.map((data) => (
+                  <option key={data.value} value={data.value}>
+                    {data.title}
+                  </option>
+                ))}
+              </select>
+            </p>
+
           </p>
         </div>
       </div>

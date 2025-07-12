@@ -24,3 +24,9 @@
   padding-right: 60px;
   padding-bottom: 40px;
 }
+
+
+.stats-selectbox{
+  border: none;
+  font-size: 14px;
+}

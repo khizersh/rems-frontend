@@ -1,37 +1,84 @@
-import React from "react";
+import React, { useContext } from "react";
 import Chart from "chart.js";
+import { MainContext } from "context/MainContext";
+import { MONTH_LABELS } from "utility/Utility";
+import httpService from "utility/httpService";
 
 export default function CardLineChart() {
-  React.useEffect(() => {
+
+  const { setLoading, notifyError } = useContext(MainContext);
+
+
+  const fetchSumData = async () => {
+    setLoading(true);
+    try {
+
+      const organization = JSON.parse(localStorage.getItem("organization")) || null;
+
+      const response = await httpService.get(
+        `/analytics/getBookingAmountSum/${organization.organizationId}`
+      );
+
+      const dataSet = prepareDataSet(response.data);
+
+      prepareChartFullData(dataSet)
+
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  function prepareDataSet(apiData) {
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+
+    // Initialize arrays with 0 for each month
+    const currentYearData = new Array(12).fill(0);
+    const lastYearData = new Array(12).fill(0);
+
+    // Fill current year data
+    apiData.currentYear?.forEach(item => {
+      const monthIndex = item.month - 1;
+      currentYearData[monthIndex] = item.amount;
+    });
+
+    // Fill last year data
+    apiData.lastYear?.forEach(item => {
+      const monthIndex = item.month - 1;
+      lastYearData[monthIndex] = item.amount;
+    });
+
+    // Return chart.js compatible structure
+    return {
+      labels: MONTH_LABELS,
+      datasets: [
+        {
+          label: currentYear,
+          backgroundColor: "#4c51bf",
+          borderColor: "#4c51bf",
+          data: currentYearData,
+          fill: false,
+          barThickness: 8,
+        },
+        {
+          label: lastYear,
+          backgroundColor: "#fff",
+          borderColor: "#fff",
+          data: lastYearData,
+          fill: false,
+          barThickness: 8,
+        },
+      ],
+    };
+  }
+
+  function prepareChartFullData(dataset) {
     var config = {
       type: "line",
-      data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-        ],
-        datasets: [
-          {
-            label: new Date().getFullYear(),
-            backgroundColor: "#4c51bf",
-            borderColor: "#4c51bf",
-            data: [65, 78, 66, 44, 56, 67, 75],
-            fill: false,
-          },
-          {
-            label: new Date().getFullYear() - 1,
-            fill: false,
-            backgroundColor: "#fff",
-            borderColor: "#fff",
-            data: [40, 68, 86, 74, 56, 60, 87],
-          },
-        ],
-      },
+      data: dataset,
       options: {
         maintainAspectRatio: false,
         responsive: true,
@@ -105,6 +152,10 @@ export default function CardLineChart() {
     };
     var ctx = document.getElementById("line-chart").getContext("2d");
     window.myLine = new Chart(ctx, config);
+  }
+
+  React.useEffect(() => {
+    fetchSumData()
   }, []);
   return (
     <>

@@ -223,7 +223,7 @@ export default function CustomerPayment() {
     toggleModalDetail();
   };
 
-  const handleEdit = (customerPayment) => {};
+  const handleEdit = (customerPayment) => { };
 
   const handlePrintSlip = async (customerPayment) => {
     const customer = customerAccountList.find(
@@ -365,8 +365,8 @@ export default function CustomerPayment() {
           </thead>
           <tbody>
             ${customerPaymentDetails
-              .map((detail, ind) => {
-                return `
+        .map((detail, ind) => {
+          return `
                 <tr>
                   <td>${ind + 1}</td>
                   <td>${detail.createdDate.split("T")[0]}</td>
@@ -375,8 +375,8 @@ export default function CustomerPayment() {
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;
-              })
-              .join("")}
+        })
+        .join("")}
           </tbody>
         </table>
 
@@ -398,7 +398,7 @@ export default function CustomerPayment() {
   `;
   };
 
-  const handleDelete = (customerPayment) => {};
+  const handleDelete = (customerPayment) => { };
 
   const actions = [
     {
@@ -456,9 +456,15 @@ export default function CustomerPayment() {
     payInstallment.id = selectedPayment.id;
     setLoading(true);
     try {
+
+      let filterId = selectedCustomerAccount || customerAccountId;
       let customerObj = customerAccountList.find(
-        (customer) => customer.accountId == selectedCustomerAccount
+        (customer) => customer.accountId == filterId
       );
+
+
+      console.log("customerObj :: ", selectedCustomerAccount, customerAccountList);
+
       const orgAccountList = payInstallment.organizationAccountDetails?.map(
         (orgAccount) => {
           return {

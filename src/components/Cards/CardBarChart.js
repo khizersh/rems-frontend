@@ -1,39 +1,84 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import Chart from "chart.js";
+import { MONTH_LABELS } from "utility/Utility";
+import httpService from "utility/httpService";
+import { MainContext } from "context/MainContext";
 
 export default function CardBarChart() {
-  React.useEffect(() => {
+
+  const { setLoading, notifyError } = useContext(MainContext);
+
+
+  const fetchCountData = async () => {
+    setLoading(true);
+    try {
+
+      const organization = JSON.parse(localStorage.getItem("organization")) || null;
+
+      const response = await httpService.get(
+        `/analytics/getBookingCount/${organization.organizationId}`
+      );
+
+      const dataSet = prepareDataSet(response.data);
+
+      prepareChartFullData(dataSet)
+
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  function prepareDataSet(apiData) {
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+
+    // Initialize arrays with 0 for each month
+    const currentYearData = new Array(12).fill(0);
+    const lastYearData = new Array(12).fill(0);
+
+    // Fill current year data
+    apiData.currentYear?.forEach(item => {
+      const monthIndex = item.month - 1;
+      currentYearData[monthIndex] = item.count;
+    });
+
+    // Fill last year data
+    apiData.lastYear?.forEach(item => {
+      const monthIndex = item.month - 1;
+      lastYearData[monthIndex] = item.count;
+    });
+
+    // Return chart.js compatible structure
+    return {
+      labels: MONTH_LABELS,
+      datasets: [
+        {
+          label: currentYear,
+          backgroundColor: "#ed64a6",
+          borderColor: "#ed64a6",
+          data: currentYearData,
+          fill: false,
+          barThickness: 8,
+        },
+        {
+          label: lastYear,
+          backgroundColor: "#4c51bf",
+          borderColor: "#4c51bf",
+          data: lastYearData,
+          fill: false,
+          barThickness: 8,
+        },
+      ],
+    };
+  }
+
+  function prepareChartFullData(dataset) {
     let config = {
       type: "bar",
-      data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-        ],
-        datasets: [
-          {
-            label: new Date().getFullYear(),
-            backgroundColor: "#ed64a6",
-            borderColor: "#ed64a6",
-            data: [30, 78, 56, 34, 100, 45, 13],
-            fill: false,
-            barThickness: 8,
-          },
-          {
-            label: new Date().getFullYear() - 1,
-            fill: false,
-            backgroundColor: "#4c51bf",
-            borderColor: "#4c51bf",
-            data: [27, 68, 86, 74, 10, 4, 87],
-            barThickness: 8,
-          },
-        ],
-      },
+      data: dataset,
       options: {
         maintainAspectRatio: false,
         responsive: true,
@@ -97,7 +142,13 @@ export default function CardBarChart() {
     };
     let ctx = document.getElementById("bar-chart").getContext("2d");
     window.myBar = new Chart(ctx, config);
+  }
+
+  useEffect(() => {
+    fetchCountData()
   }, []);
+
+
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">

@@ -3,6 +3,7 @@
   overflow-y: auto;
 }
 
+
 .fixed-left-13p {
   position: fixed;
   left: 13%;
@@ -28,5 +29,16 @@
 
 .stats-selectbox{
   border: none;
+  font-size: 14px;
+}
+
+.d-inline{
+  display: inline;
+}
+
+
+.datepicker-size{
+  width: 230px;
+  height: 50%;
   font-size: 14px;
 }

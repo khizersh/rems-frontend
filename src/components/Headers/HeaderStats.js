@@ -27,6 +27,10 @@ export default function HeaderStats() {
     {
       title: "Last 90 days",
       value: 90
+    },
+    {
+      title: "Last 365 days",
+      value: 365
     }
   ]
 

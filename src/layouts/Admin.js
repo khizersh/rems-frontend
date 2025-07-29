@@ -41,6 +41,8 @@ import ExpenseList from "views/expense/ExpenseList";
 import AddExpense from "views/expense/AddExpense";
 import ExpenseDetailList from "views/expense/ExpenseDetailList";
 import ProjectUpdate from "views/projects/ProjectUpdate";
+import ProjectAnalytics from "views/analytics/ProjectAnalytics";
+import RevenueAnalytics from "views/analytics/RevenueAnalytics";
 
 export default function Admin() {
   return (
@@ -57,6 +59,8 @@ export default function Admin() {
             <NotificationContainer />
             <Switch>
               <Route path="/dashboard" exact component={Dashboard} />
+              <Route path="/dashboard/project-analysis/:projectId" exact component={ProjectAnalytics} />
+              <Route path="/dashboard/revenue-analysis" exact component={RevenueAnalytics} />
               <Route path="/dashboard/organization" exact component={OrganizationHome} />
               <Route path="/dashboard/organization-account" exact component={OrganizationAccount} />
               <Route path="/dashboard/add-organization-account" exact component={AddOrganizationComponent} />

@@ -1537,6 +1537,9 @@ select {
   height: 0.5rem;
 }
 
+.h-4 {
+  height: 1rem;
+}
 .h-5 {
   height: 1.25rem;
 }
@@ -1699,6 +1702,12 @@ select {
 .mx-4 {
   margin-left: 1rem;
   margin-right: 1rem;
+}
+
+
+.mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .my-6 {
@@ -2604,6 +2613,9 @@ select {
   overflow-wrap: break-word;
 }
 
+.w-4 {
+  width: 1rem;
+}
 .w-5 {
   width: 1.25rem;
 }
@@ -2642,6 +2654,12 @@ select {
 
 .w-full {
   width: 100%;
+}
+.w-50 {
+  width: 50%;
+}
+.w-47 {
+  width: 47%;
 }
 
 .z-2 {

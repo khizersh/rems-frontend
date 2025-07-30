@@ -87,7 +87,6 @@ export default function RevenueAnalytics() {
       let endingDate = update[1]?.toLocaleDateString().split("/");
       endingDate = endingDate[1] + "-" + endingDate[0] + "-" + endingDate[2];
 
-      console.log("setting date :: ");
       
       setSaleChartRequest({
         ...saleChartRequest,

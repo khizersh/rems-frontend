@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import "assets/styles/loading.css";
+import HorizontalLogo from "../../assets/img/horizontal-logo.png"
 
 // components
 
@@ -26,7 +27,7 @@ export default function Navbar(props) {
               className="text-white text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
               to="/"
             >
-              Notus React
+              <img src={HorizontalLogo} />
             </Link>
             <button
               className="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"

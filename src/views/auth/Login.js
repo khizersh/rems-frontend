@@ -105,11 +105,11 @@ export default function Login() {
                 <small>Forgot password?</small>
               </a>
             </div>
-            <div className="w-1/2 text-right">
+            {/* <div className="w-1/2 text-right">
               <Link to="/auth/register" className="text-blueGray-200">
                 <small>Create new account</small>
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

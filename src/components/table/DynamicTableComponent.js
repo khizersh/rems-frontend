@@ -32,7 +32,7 @@ export default function DynamicTableComponent({
   addButton = null,
 }) {
   return (
-    <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded">
+    <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
         <h3 className="font-semibold text-base text-gray-700">{title}</h3>

@@ -345,12 +345,12 @@ export default function RevenueAnalytics() {
   };
   return (
     <>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 mt-12">
         <div className="w-full mb-6 ">
           <div className="flex flex-wrap">
             <div className="w-full">
               <div className="flex flex-wrap justify-between">
-                <div className="w-47 bg-white  rounded shadow-lg  m-2 p-2">
+                <div className="w-47 md:w-47 sm:w-100 bg-white shadow-lg m-2 p-4 rounded-12">
                   <h5 className="text-blueGray-400 uppercase font-bold text-xs">
                     Account Balance
                   </h5>
@@ -366,7 +366,7 @@ export default function RevenueAnalytics() {
                       ></i>
                       <p className="d-inline ml-2">{accountBalance}</p>
                     </div>
-                    <div>
+                    <div className="w-30P w-50P">
                       <select
                         value={accountFileteredId}
                         onChange={(e) => changeSelectedAccount(e.target.value)}
@@ -383,7 +383,7 @@ export default function RevenueAnalytics() {
                     </div>
                   </div>
                 </div>
-                <div className="w-47 bg-white  rounded shadow-lg  m-2 p-2">
+                <div className="w-47 md:w-47 sm:w-100 bg-white shadow-lg m-2 p-4 rounded-12">
                   <h5 className="text-blueGray-400 uppercase font-bold text-xs">
                     <i
                       className={
@@ -418,7 +418,7 @@ export default function RevenueAnalytics() {
                       {/* <i className={"text-white p-3 text-center inline-flex items-center justify-center w-8 h-8 shadow-lg rounded-full bg-red-500 fas fa-dollar-sign"}></i>
                                             <p className="d-inline ml-2">{accountBalance}</p> */}
                     </div>
-                    <div>
+                    <div className="w-30P w-50P">
                       <select
                         value={expenseTenure}
                         onChange={(e) => changeExpenseTenure(e.target.value)}
@@ -436,7 +436,7 @@ export default function RevenueAnalytics() {
                 </div>
               </div>
               <div className="flex flex-wrap justify-between">
-                <div className="w-47 m-2">
+                <div className="w-47 md:w-47 m-2 sm:w-100">
                   <Card
                     props={{
                       statSubtitle: "Total Payables",
@@ -446,7 +446,7 @@ export default function RevenueAnalytics() {
                     }}
                   />
                 </div>
-                <div className="w-47 m-2">
+                <div className="w-47 md:w-47 m-2 sm:w-100">
                   <Card
                     props={{
                       statSubtitle: "Total Receivables",

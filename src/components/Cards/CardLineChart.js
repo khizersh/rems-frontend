@@ -159,7 +159,7 @@ export default function CardLineChart() {
   }, []);
   return (
     <>
-      <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded bg-blueGray-700">
+      <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-12 bg-blueGray-700">
         <div className="rounded-t mb-0 px-4 py-3 bg-transparent">
           <div className="flex flex-wrap items-center">
             <div className="relative w-full max-w-full flex-grow flex-1">

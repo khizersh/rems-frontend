@@ -664,9 +664,10 @@ export default function CustomerPayment() {
         onPrintDetail={onPrintDetail}
         onSubmit={handleSubmit}
       />
-      <div className="container mx-auto ">
-        <div className="flex flex-wrap  py-3 px-4">
-          <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 ">
+      <div className="container mx-auto p-4">
+        <div className="flex flex-wrap py-3 md:justify-content-between">
+
+          <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
             <label className="block text-sm font-medium mb-1">Project</label>
             <select
               value={filterProject}
@@ -681,7 +682,7 @@ export default function CustomerPayment() {
               ))}
             </select>
           </div>
-          <div className="bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
+          <div className="bg-white shadow-lg p-5 mx-4 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
             <label className="block text-sm font-medium mb-1">
               Customer Account
             </label>

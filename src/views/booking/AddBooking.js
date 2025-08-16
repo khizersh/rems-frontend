@@ -183,23 +183,23 @@ export default function AddBooking() {
   };
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg  border-0">
-      <div className="rounded-t bg-white mb-0 px-6 py-6">
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
+      <div className=" mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
             Create Booking
           </h6>
         </div>
       </div>
-      <div className="flex-auto px-4 lg:px-10 py-10 pt-0 bg-white">
+      <div className="flex-auto px-4 py-5 bg-white rounded-12 shadow-lg">
         <form>
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5">
-            <div className="w-full lg:w-12/12 px-4   mt-2">
+            <div className="w-full lg:w-12/12 px-4 mt-2 md:px-0">
               <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
                 Basic Details
               </h6>
               <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4">
+                <div className="w-full lg:w-6/12 px-4 md:px-0">
                   <div className="relative w-full mb-3">
                     <div className="w-72">
                       <DebounceSearch
@@ -212,7 +212,7 @@ export default function AddBooking() {
                     </div>
                   </div>
                 </div>
-                <div className="w-full lg:w-6/12 px-4">
+                <div className="w-full lg:w-6/12 px-4 md:px-0">
                   <div className="relative w-full mb-3">
                     <p className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                       Unit Information
@@ -259,19 +259,19 @@ export default function AddBooking() {
             </div>
           </div>
 
-          <div className="px-4">
+          <div className="">
             <div className=" flex flex-wrap">
-              <div className="w-full px-4 lg:w-6/12 border-right-grey">
+              <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
                 {/* Payment Schedule Heading */}
                 <div className="mt-3 mb-3 text-blueGray-600 text-sm uppercase font-bold">
                   Payment Schedule
                 </div>
 
-                <div className="px-4 flex flex-wrap">
+                <div className="flex flex-wrap">
                   {/* === First Section: Payment Overview === */}
                   <div className="w-full flex flex-wrap  border-bottom-grey border-blueGray-200 pb-4 mb-4">
                     {/* Duration In Months */}
-                    <div className="w-full px-4 lg:w-6/12">
+                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -283,7 +283,7 @@ export default function AddBooking() {
                           id="durationInMonths"
                           type="text"
                           name="durationInMonths"
-                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
                           value={paymentSchedule.durationInMonths}
                         />
@@ -291,7 +291,7 @@ export default function AddBooking() {
                     </div>
 
                     {/* Actual Amount */}
-                    <div className="w-full px-4 lg:w-6/12">
+                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -303,7 +303,7 @@ export default function AddBooking() {
                           id="actualAmount"
                           type="text"
                           name="actualAmount"
-                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
                           value={paymentSchedule.actualAmount}
                         />
@@ -311,7 +311,7 @@ export default function AddBooking() {
                     </div>
 
                     {/* Miscellaneous Amount */}
-                    <div className="w-full px-4 lg:w-6/12">
+                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -323,7 +323,7 @@ export default function AddBooking() {
                           id="miscellaneousAmount"
                           type="text"
                           name="miscellaneousAmount"
-                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
                           value={paymentSchedule.miscellaneousAmount}
                         />
@@ -331,7 +331,7 @@ export default function AddBooking() {
                     </div>
 
                     {/* Total Amount */}
-                    <div className="w-full px-4 lg:w-6/12">
+                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -344,7 +344,7 @@ export default function AddBooking() {
                           type="text"
                           name="totalAmount"
                           disabled
-                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           value={
                             Number(paymentSchedule.actualAmount) +
                             Number(paymentSchedule.miscellaneousAmount)
@@ -355,7 +355,7 @@ export default function AddBooking() {
                   </div>
 
                   {/* Down Payment */}
-                  <div className="w-full px-4 lg:w-6/12">
+                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -367,7 +367,7 @@ export default function AddBooking() {
                         id="downPayment"
                         type="text"
                         name="downPayment"
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => changePaymentScheduleFields(e)}
                         value={paymentSchedule.downPayment}
                       />
@@ -375,7 +375,7 @@ export default function AddBooking() {
                   </div>
 
                   {/* Quarterly Payment */}
-                  <div className="w-full px-4 lg:w-6/12">
+                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -387,7 +387,7 @@ export default function AddBooking() {
                         id="quarterlyPayment"
                         type="text"
                         name="quarterlyPayment"
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => changePaymentScheduleFields(e)}
                         value={paymentSchedule.quarterlyPayment}
                       />
@@ -395,7 +395,7 @@ export default function AddBooking() {
                   </div>
 
                   {/* Half-Yearly Payment */}
-                  <div className="w-full px-4 lg:w-6/12">
+                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -407,14 +407,14 @@ export default function AddBooking() {
                         id="halfYearlyPayment"
                         type="text"
                         name="halfYearlyPayment"
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => changePaymentScheduleFields(e)}
                         value={paymentSchedule.halfYearlyPayment}
                       />
                     </div>
                   </div>
 
-                  <div className="w-full px-4 lg:w-6/12">
+                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -426,14 +426,14 @@ export default function AddBooking() {
                         id="yearlyPayment"
                         type="text"
                         name="yearlyPayment"
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => changePaymentScheduleFields(e)}
                         value={paymentSchedule.yearlyPayment}
                       />
                     </div>
                   </div>
 
-                  <div className="w-full px-4 lg:w-6/12">
+                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                     <div className="relative w-full mb-3">
                       <label
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -445,7 +445,7 @@ export default function AddBooking() {
                         id="onPossessionPayment"
                         type="text"
                         name="onPossessionPayment"
-                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => changePaymentScheduleFields(e)}
                         value={paymentSchedule.onPossessionPayment}
                       />
@@ -457,9 +457,9 @@ export default function AddBooking() {
               <div className="w-full lg:w-6/12 ">
                 <div className="relative w-full">
                   <div>
-                    <div className="px-4 mt-3 mb-3  rounded">
+                    <div className="px-4 mt-3 mb-3 rounded md:px-0">
                       <div className="flex justify-between">
-                        <div className="uppercase text-blueGray-600 font-bold text-sm text-center">
+                        <div className="uppercase text-blueGray-600 font-bold text-sm text-left">
                           Month Wise Payment
                         </div>
                         <button
@@ -477,7 +477,7 @@ export default function AddBooking() {
 
                       {paymentSchedule?.monthWisePaymentList?.map(
                         (monthly, mIndex) => (
-                          <div className="mt-6 flex flex-wrap">
+                          <div className="mt-6 flex flex-wrap justify-between">
                             <div className="mt-6 text-left pt-4">
                               {mIndex + 1} -
                             </div>
@@ -493,7 +493,7 @@ export default function AddBooking() {
                                   id="name"
                                   type="text"
                                   name="fromMonth"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeMonthlyPaymentFields(mIndex, e)
                                   }
@@ -501,7 +501,7 @@ export default function AddBooking() {
                                 />
                               </div>
                             </div>
-                            <div className="w-full lg:w-3/12 px-2">
+                            <div className="w-full lg:w-3/12 px-2 md:px-0">
                               <div className="relative w-full mb-3">
                                 <label
                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -513,7 +513,7 @@ export default function AddBooking() {
                                   id="name"
                                   type="text"
                                   name="toMonth"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeMonthlyPaymentFields(mIndex, e)
                                   }
@@ -533,7 +533,7 @@ export default function AddBooking() {
                                   id="name"
                                   type="text"
                                   name="amount"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeMonthlyPaymentFields(mIndex, e)
                                   }
@@ -541,7 +541,7 @@ export default function AddBooking() {
                                 />
                               </div>
                             </div>
-                            <div className=" pl-7 mt-6 text-right pt-1">
+                            <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
                               <button
                                 type="button"
                                 onClick={() => removeMonthWisePayment(mIndex)}
@@ -569,7 +569,7 @@ export default function AddBooking() {
           <button
             onClick={(e) => createBooking(e)}
             type="submit"
-            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 float-right"
           >
             <BsBuildingFillAdd
               className="w-5 h-5 inline-block "

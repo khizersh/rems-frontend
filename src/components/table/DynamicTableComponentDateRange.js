@@ -40,7 +40,7 @@ export default function DynamicTableComponent({
   // const [startDate, endDate] = dateRange;
 
   return (
-    <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded">
+    <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
         <h3 className="font-semibold text-base text-gray-700">{title}</h3>
@@ -49,8 +49,7 @@ export default function DynamicTableComponent({
             <select
               value={selectTransactionType}
               onChange={(e) => changeTransactionType(e.target.value)}
-              className=" rounded mr-2"
-              style={{ height : "89%" , fontSize : '13px' }}
+              className="accountList rounded mr-2"
             >
               {TRANSACTION_TYPES.map((type) => (
                 <option key={type} value={type}>

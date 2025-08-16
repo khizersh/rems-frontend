@@ -142,14 +142,14 @@ const AddExpense = () => {
   ];
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg border-0">
-      <div className="rounded-t bg-white mb-0 px-6 py-6">
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
+      <div className="mb-0 px-6 py-6">
         <h6 className="text-blueGray-700 text-xl font-bold uppercase">
           Add Expense
         </h6>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="py-4 bg-white rounded-12 shadow-lg">
         <div className="flex flex-wrap bg-white">
           <div className="w-full lg:w-6/12 px-4 mb-3 border-right-grey">
             <div className="px-4 mb-5">
@@ -190,7 +190,7 @@ const AddExpense = () => {
             </div>
           </div>
 
-          <div className="w-full lg:w-12/12 px-4 mb-3">
+          <div className="w-full lg:w-12/12 px-4 text-right">
             <button
               type="submit"
               disabled={loading}
@@ -230,7 +230,7 @@ const InputField = ({
       value={value}
       onChange={onChange}
       readOnly={readOnly}
-      className={`w-full p-2 border rounded ${
+      className={`w-full p-2 border rounded-lg ${
         readOnly ? "bg-gray-100 cursor-not-allowed" : ""
       }`}
     />
@@ -244,7 +244,7 @@ const SelectField = ({ label, name, value, onChange, options }) => (
       name={name}
       value={value}
       onChange={onChange}
-      className="border rounded px-3 py-2 w-full"
+      className="border rounded-lg px-3 py-2 w-full"
     >
       <option value="">Select</option>
       {options.map((opt) => (

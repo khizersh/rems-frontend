@@ -50,7 +50,7 @@ export default function Admin() {
       <MainProvider>
         <Sidebar />
         {/* <div className="relative md:ml-64 bg-blueGray-100"> */}
-        <div className="md:ml-64 bg-blueGray-50">
+        <div className="md:ml-64 bg-blueGray-50 ">
           {/* Header */}
           <AdminNavbar />
        

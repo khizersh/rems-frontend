@@ -25,7 +25,9 @@ Use a more readable tab size (opinionated).
   -moz-tab-size: 4;
   tab-size: 4;
 }
-
+#root {
+  height: 100vh;
+}
 /**
 1. Correct the line height in all browsers.
 2. Prevent adjustments of font size after orientation changes in iOS.
@@ -327,18 +329,6 @@ ul {
   width: 250px;
 }
 
-.border-bottom-grey {
-  border-bottom: #c2cdda 0.5px solid;
-}
-.border-left-grey {
-  border-left: #c2cdda 0.5px solid;
-}
-.border-right-grey {
-  border-right: #c2cdda 0.5px solid;
-}
-.border-top-grey {
-  border-right: #c2cdda 0.5px solid;
-}
 
 /**
  * 1. Use the user's configured `sans` font-family (with Tailwind's default
@@ -2815,6 +2805,11 @@ select {
   .sm\:w-6\/12 {
     width: 50%;
   }
+
+  .sm\:mb-16{
+    margin-bottom: 4rem;
+  }
+
 }
 
 @media (min-width: 768px) {
@@ -2979,12 +2974,19 @@ select {
   }
 
   .md\:w-6\/12 {
-    width: 50%;
+    width: 47%;
   }
 
   .md\:w-8\/12 {
     width: 66.666667%;
   }
+
+
+  .md\:py-16{
+    padding-bottom: 4rem;
+    padding-top: 4rem;
+  }
+
 }
 
 @media (min-width: 1024px) {
@@ -3141,16 +3143,10 @@ select {
   .lg\:w-2\/12 {
     width: 20%;
   }
-  .lg\:w-3\/12 {
-    width: 25%;
-  }
+
 
   .lg\:w-4\/12 {
     width: 33.333333%;
-  }
-
-  .lg\:w-6\/12 {
-    width: 50%;
   }
 
   .lg\:w-8\/12 {
@@ -3163,6 +3159,12 @@ select {
   .lg\:w-10\/12 {
     width: 84%;
   }
+
+  .lg\:py-20{
+    padding-bottom: 5rem;
+    padding-top: 5rem;
+  }
+
 }
 
 @media (min-width: 1280px) {
@@ -3185,7 +3187,25 @@ select {
   .xl\:w-8\/12 {
     width: 66.666667%;
   }
+
+  .lg\:w-6\/12 {
+    width: 50%;
+  }
+
+    .lg\:w-3\/12 {
+    width: 25%;
+  }
 }
 
 @media (min-width: 1536px) {
+}
+
+
+@media (max-width: 768px) {
+
+  .sm\:py-16 {
+    padding-bottom: 4rem;
+    padding-top: 4rem;
+  }
+
 }

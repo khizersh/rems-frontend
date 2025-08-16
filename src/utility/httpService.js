@@ -1,6 +1,6 @@
 const BASE_URL =
-  // process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://bapi.propertydhoondo.com/api";
+  // process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

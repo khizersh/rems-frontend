@@ -42,3 +42,210 @@
   height: 50%;
   font-size: 14px;
 }
+
+
+.rounded-12{
+  border-radius: 1rem;
+}
+
+
+#root{
+    background: #f8fafc;
+}
+
+
+.canvas{
+  width: 100%;
+}
+
+.accountList{
+    font-size: 13px;
+    padding: 5px 6px 4px 10px;
+    width: 130px;
+}
+
+.h-100vh{
+  height: 100vh;
+}
+
+.float-right{
+  float: right;
+}
+
+
+/* Extra Css */
+
+@media only screen and (min-width: 1280px)  {
+
+.lg\:rounded-none{
+  border-radius: 0rem;
+}
+
+  .w-30P{
+  width: 30%;
+}
+
+.border-bottom-grey {
+  border-bottom: #c2cdda 0.5px solid;
+}
+.border-left-grey {
+  border-left: #c2cdda 0.5px solid;
+}
+.border-right-grey {
+  border-right: #c2cdda 0.5px solid;
+}
+.border-top-grey {
+  border-right: #c2cdda 0.5px solid;
+}
+
+ .lg\:px-0{
+    padding-left: 0rem;
+    padding-right: 0rem;
+  }
+
+  .lg\:ml-auto{
+    margin-left: auto;
+  }
+
+   .lg\:pt-0{
+    padding-top: 0rem;
+  }
+
+  
+
+}
+
+
+
+@media only screen and (min-width: 981px)  {
+
+  .md\:w-47{
+    width: 46%;
+  }
+
+}
+
+
+
+@media only screen and (max-width: 1280px)  {
+  
+  .header-stats {
+      left: auto !important;
+      width: 100% !important;
+  }
+
+  .md\:rounded-12{
+    border-radius: 1rem;
+  }
+
+
+  .md\:w-6{
+    width: 50%;
+  }
+
+.w-50P{
+  width: 50%;
+}
+
+  .md\:px-0{
+    padding-left: 0rem;
+    padding-right: 0rem;
+  }
+
+  .md\:ml-auto{
+    margin-left: auto;
+  }
+
+   .md\:mt-2{
+    margin-top: 0.5rem;
+  }
+
+   .md\:mt-5{
+    margin-top: 1.5rem;
+  }
+
+ 
+
+
+  
+
+   .lg\:mt-5{
+    margin-top: 1.5rem;
+  }
+
+  .md\:pt-0{
+    padding-top: 0rem;
+  }
+
+}
+
+/* medium size */
+@media only screen and (max-width: 1024px)  {
+ .md\:w-full{
+    width: 100%;
+  }
+  
+  .md\:w-6\/12 {
+    width: 47%;
+  }
+
+.md\:justify-content-between{
+    justify-content: space-between;
+  }
+
+     .md\:mx-0{
+    margin-left: 0rem;
+    margin-right: 0rem;
+  }
+
+  
+
+
+
+}
+
+/* small size */
+@media only screen and (max-width: 981px)  {
+ 
+    .md\:w-47{
+    width: 46%;
+  }
+
+    .sm\:w-12{
+    width: 100%;
+  }
+
+}
+
+@media only screen and (max-width: 767px)  {
+  .sm\:w-100{
+    width: 100%;
+  }
+
+  .sm-none{
+    display: none;
+  }
+
+  .sm\:mt-10{
+    margin-top: 2rem;
+  }
+}
+
+@media only screen and (max-width: 598px)  {
+  .sm\:w-100{
+    width: 100%;
+  }
+
+   .sm\:w-12\/12 {
+    width: 100%;
+  }
+
+  .sm\:mt-5{
+    margin-top: 1.5rem;
+  }
+
+    .sm\:mb-0{
+    margin-bottom: 0rem;
+  }
+}
+

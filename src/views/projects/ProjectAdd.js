@@ -272,15 +272,15 @@ export default function AddProject() {
   };
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-50 border-0">
-      <div className="rounded-t bg-white mb-0 px-6 py-6">
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 bg-blueGray-50 mt-12">
+      <div className="mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
             Create Project
           </h6>
         </div>
       </div>
-      <div className="flex-auto px-4 lg:px-10 py-10 pt-0 bg-white">
+      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-4">
         <form>
           <div className="flex flex-wrap">
             <div className="w-full lg:w-6/12 px-4  border-right-grey mt-2">
@@ -300,7 +300,7 @@ export default function AddProject() {
                       type="text"
                       name="name"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.name}
                     />
                   </div>
@@ -319,7 +319,7 @@ export default function AddProject() {
                       type="text"
                       name="address"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.address}
                     />
                   </div>
@@ -336,7 +336,7 @@ export default function AddProject() {
                     <select
                       id="projectType"
                       name="projectType"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.projectType}
                       onChange={changeProjectFields}
                     >
@@ -363,7 +363,7 @@ export default function AddProject() {
                       type="number"
                       name="monthDuration"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.monthDuration}
                     />
                   </div>
@@ -381,7 +381,7 @@ export default function AddProject() {
                       name="information"
                       rows="3"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.information}
                     ></textarea>
                   </div>
@@ -406,7 +406,7 @@ export default function AddProject() {
                       type="number"
                       name="purchasingAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.purchasingAmount}
                     />
                   </div>
@@ -424,7 +424,7 @@ export default function AddProject() {
                       type="number"
                       name="registrationAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.registrationAmount}
                     />
                   </div>
@@ -442,7 +442,7 @@ export default function AddProject() {
                       type="number"
                       name="additionalAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={project.additionalAmount}
                     />
                   </div>
@@ -460,7 +460,7 @@ export default function AddProject() {
                       id="totalAmount"
                       type="number"
                       name="totalAmount"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       value={
                         Number(project.additionalAmount) +
                         Number(project.purchasingAmount) +
@@ -475,7 +475,7 @@ export default function AddProject() {
 
           <hr className="mt-6 border-b-1 border-blueGray-300" />
 
-          <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between">
+          <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between px-4">
             Floor List
             <button
               type="button"
@@ -539,7 +539,7 @@ export default function AddProject() {
                   {floor.unitList.map((unit, unitIndex) => (
                     <div
                       key={unitIndex}
-                      className="mb-3 border-bottom-grey px-3 cursor-pointer  hover:shadow-md"
+                      className="mb-3 border-bottom-grey px-3 cursor-pointer pb-4 hover:shadow-md"
                     >
                       <div
                         className="flex justify-between p-3"
@@ -589,7 +589,7 @@ export default function AddProject() {
                                   id="name"
                                   type="text"
                                   name="serialNo"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -612,7 +612,7 @@ export default function AddProject() {
                                   id="name"
                                   type="text"
                                   name="squareYards"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -634,7 +634,7 @@ export default function AddProject() {
                                 <select
                                   id="projectType"
                                   name="unitType"
-                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   value={
                                     floors[floorIndex].unitList[unitIndex]
                                       .unitType
@@ -653,19 +653,19 @@ export default function AddProject() {
                               </div>
                             </div>
                           </div>
-                          <div className="px-4">
+                          <div className="px-4 lg:px-0">
                             <div className=" flex flex-wrap">
-                              <div className="w-full px-4 lg:w-6/12 border-right-grey">
+                              <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
                                 {/* Payment Schedule Heading */}
                                 <div className="mt-3 mb-3 text-blueGray-600 text-sm uppercase font-bold">
                                   Payment Schedule
                                 </div>
 
-                                <div className="px-4 flex flex-wrap">
+                                <div className="px-4 flex flex-wrap md:px-0">
                                   {/* === First Section: Payment Overview === */}
                                   <div className="w-full flex flex-wrap  border-bottom-grey border-blueGray-200 pb-4 mb-4">
                                     {/* Duration In Months */}
-                                    <div className="w-full px-4 lg:w-6/12">
+                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
                                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -677,7 +677,7 @@ export default function AddProject() {
                                           id="durationInMonths"
                                           type="text"
                                           name="durationInMonths"
-                                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -695,7 +695,7 @@ export default function AddProject() {
                                     </div>
 
                                     {/* Actual Amount */}
-                                    <div className="w-full px-4 lg:w-6/12">
+                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
                                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -707,7 +707,7 @@ export default function AddProject() {
                                           id="actualAmount"
                                           type="text"
                                           name="actualAmount"
-                                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -725,7 +725,7 @@ export default function AddProject() {
                                     </div>
 
                                     {/* Miscellaneous Amount */}
-                                    <div className="w-full px-4 lg:w-6/12">
+                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
                                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -737,7 +737,7 @@ export default function AddProject() {
                                           id="miscellaneousAmount"
                                           type="text"
                                           name="miscellaneousAmount"
-                                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -756,7 +756,7 @@ export default function AddProject() {
                                     </div>
 
                                     {/* Total Amount */}
-                                    <div className="w-full px-4 lg:w-6/12">
+                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
                                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -769,7 +769,7 @@ export default function AddProject() {
                                           type="text"
                                           name="totalAmount"
                                           disabled
-                                          className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                           value={
                                             Number(
                                               floors[floorIndex].unitList[
@@ -789,7 +789,7 @@ export default function AddProject() {
                                   </div>
 
                                   {/* Down Payment */}
-                                  <div className="w-full px-4 lg:w-6/12">
+                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                                     <div className="relative w-full mb-3">
                                       <label
                                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -801,7 +801,7 @@ export default function AddProject() {
                                         id="downPayment"
                                         type="text"
                                         name="downPayment"
-                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         onChange={(e) =>
                                           changePaymentScheduleFields(
                                             floorIndex,
@@ -818,7 +818,7 @@ export default function AddProject() {
                                   </div>
 
                                   {/* Quarterly Payment */}
-                                  <div className="w-full px-4 lg:w-6/12">
+                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                                     <div className="relative w-full mb-3">
                                       <label
                                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -830,7 +830,7 @@ export default function AddProject() {
                                         id="quarterlyPayment"
                                         type="text"
                                         name="quarterlyPayment"
-                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         onChange={(e) =>
                                           changePaymentScheduleFields(
                                             floorIndex,
@@ -847,7 +847,7 @@ export default function AddProject() {
                                   </div>
 
                                   {/* Half-Yearly Payment */}
-                                  <div className="w-full px-4 lg:w-6/12">
+                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                                     <div className="relative w-full mb-3">
                                       <label
                                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -859,7 +859,7 @@ export default function AddProject() {
                                         id="halfYearlyPayment"
                                         type="text"
                                         name="halfYearlyPayment"
-                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         onChange={(e) =>
                                           changePaymentScheduleFields(
                                             floorIndex,
@@ -875,7 +875,7 @@ export default function AddProject() {
                                     </div>
                                   </div>
 
-                                  <div className="w-full px-4 lg:w-6/12">
+                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                                     <div className="relative w-full mb-3">
                                       <label
                                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -887,7 +887,7 @@ export default function AddProject() {
                                         id="yearlyPayment"
                                         type="text"
                                         name="yearlyPayment"
-                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         onChange={(e) =>
                                           changePaymentScheduleFields(
                                             floorIndex,
@@ -903,7 +903,7 @@ export default function AddProject() {
                                     </div>
                                   </div>
 
-                                  <div className="w-full px-4 lg:w-6/12">
+                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
                                     <div className="relative w-full mb-3">
                                       <label
                                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -915,7 +915,7 @@ export default function AddProject() {
                                         id="onPossessionPayment"
                                         type="text"
                                         name="onPossessionPayment"
-                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         onChange={(e) =>
                                           changePaymentScheduleFields(
                                             floorIndex,
@@ -936,7 +936,7 @@ export default function AddProject() {
                               <div className="w-full lg:w-6/12 ">
                                 <div className="relative w-full">
                                   <div>
-                                    <div className="px-4 mt-3 mb-3  rounded">
+                                    <div className="px-4 mt-3 mb-3 rounded-12 md:px-0">
                                       <div className="flex justify-between">
                                         <div className="uppercase text-blueGray-600 font-bold text-sm text-center">
                                           Month Wise Payment
@@ -977,7 +977,7 @@ export default function AddProject() {
                                                   id="name"
                                                   type="text"
                                                   name="fromMonth"
-                                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                                   onChange={(e) =>
                                                     changeMonthlyPaymentFields(
                                                       floorIndex,
@@ -997,7 +997,7 @@ export default function AddProject() {
                                                 />
                                               </div>
                                             </div>
-                                            <div className="w-full lg:w-3/12 px-2">
+                                            <div className="w-full lg:w-3/12 px-2 md:px-0">
                                               <div className="relative w-full mb-3">
                                                 <label
                                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -1009,7 +1009,7 @@ export default function AddProject() {
                                                   id="name"
                                                   type="text"
                                                   name="toMonth"
-                                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                                   onChange={(e) =>
                                                     changeMonthlyPaymentFields(
                                                       floorIndex,
@@ -1041,7 +1041,7 @@ export default function AddProject() {
                                                   id="name"
                                                   type="text"
                                                   name="amount"
-                                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                                   onChange={(e) =>
                                                     changeMonthlyPaymentFields(
                                                       floorIndex,
@@ -1061,7 +1061,7 @@ export default function AddProject() {
                                                 />
                                               </div>
                                             </div>
-                                            <div className=" pl-7 mt-6 text-right pt-1">
+                                            <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
                                               <button
                                                 type="button"
                                                 onClick={() =>
@@ -1071,7 +1071,7 @@ export default function AddProject() {
                                                     mIndex
                                                   )
                                                 }
-                                                className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                                                className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                                               >
                                                 <MdDeleteForever
                                                   style={{
@@ -1103,7 +1103,7 @@ export default function AddProject() {
           <button
             onClick={(e) => createProject(e)}
             type="submit"
-            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 float-right"
           >
             <BsBuildingFillAdd
               className="w-5 h-5 inline-block "

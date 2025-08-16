@@ -391,13 +391,14 @@ export default function CustomerLedger() {
   return (
     <>
       <div className="container mx-auto ">
-        <div className="flex flex-wrap  py-3 px-4">
-          <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 ">
+        <div className="flex flex-wrap py-3 px-4 md:justify-content-between">
+
+          <div className="bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
             <label className="block text-sm font-medium mb-1">Project</label>
             <select
               value={filterProject}
               onChange={(e) => changeSelectedProjected(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded-lg px-3 py-2 w-full"
             >
               <option value="">All Projects</option>
               {projects.map((project) => (
@@ -407,14 +408,15 @@ export default function CustomerLedger() {
               ))}
             </select>
           </div>
-          <div className="bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
+
+          <div className="bg-white shadow-lg p-5 rounded-12 mx-4 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
             <label className="block text-sm font-medium mb-1">
               Customer Account
             </label>
             <select
               value={selectedCustomerAccount}
               onChange={(e) => changeCustomerAccount(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
+              className="border rounded-lg px-3 py-2 w-full"
             >
               <option value="">Select Account</option>
               {customerAccountList.map((account) => (
@@ -424,11 +426,12 @@ export default function CustomerLedger() {
               ))}
             </select>
           </div>
+
         </div>
       </div>
-      <div className="container mx-auto">
-        <div className="shadow-lg flex flex-wrap  my-3 mx-4 ">
-          <div className=" bg-white p-5 rounded lg:w-6/12 text-sm">
+      <div className="container mx-auto mt-4">
+        <div className="bg-white shadow-lg flex flex-wrap my-3 mx-4 rounded-12 md:justify-content-between">
+          <div className="p-5 lg:w-6/12 text-sm md:w-6/12 sm:w-12/12">
             <p className="py-1">
               <span className="font-semibold pr-2">Customer Name:</span>{" "}
               {customer?.customerName}
@@ -454,7 +457,7 @@ export default function CustomerLedger() {
               {amounts?.totalAmount}
             </p>
           </div>
-          <div className=" bg-white p-5 rounded text-sm lg:w-6/12 ">
+          <div className="p-5 lg:w-6/12 text-sm md:w-6/12 sm:w-12/12">
             <p className="py-1">
               <span className="font-semibold pr-2">Unit No:</span>{" "}
               {customer?.unitSerial}
@@ -485,8 +488,8 @@ export default function CustomerLedger() {
       </div>
 
       {/* Dynamic Table */}
-      <div className="container mx-auto p-4">
-        <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded">
+      <div className="container mx-auto p-4 mt-5">
+        <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
           {/* Header */}
           <div className="px-4 py-3 border-b flex justify-between items-center">
             <div>

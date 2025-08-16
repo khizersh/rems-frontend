@@ -131,7 +131,7 @@ export default function ProjectListComponent() {
         data={selectedProject}
         title="Project Details"
       />
-      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-12">
         <div className="rounded-t mb-0 px-4 py-3 border-0">
           <div className="flex flex-wrap items-center justify-between">
             <h3 className="font-semibold text-base text-blueGray-700">

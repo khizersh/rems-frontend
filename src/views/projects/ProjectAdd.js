@@ -7,6 +7,7 @@ import { MdDeleteForever } from "react-icons/md";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MainContext } from "context/MainContext";
 import httpService from "utility/httpService";
+import { PAYMENT_PLANS_TYPE } from "utility/Utility";
 
 export default function AddProject() {
   const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
@@ -17,8 +18,11 @@ export default function AddProject() {
         {
           serialNo: "",
           amount: 0,
-          squareYards: 0,
+          squareFoot: 0,
+          roomCount: 0,
+          bathroomCount: 0,
           unitType: "APARTMENT",
+          paymentPlanType: "ONE-TIME-PAYMENT",
           paymentSchedule: {
             durationInMonths: 0,
             actualAmount: 0,
@@ -102,7 +106,10 @@ export default function AddProject() {
           {
             serialNo: "",
             amount: 0,
-            squareYards: 0,
+            squareFoot: 0,
+            roomCount: 0,
+            bathroomCount: 0,
+            paymentPlanType: "ONE-TIME-PAYMENT",
             unitType: "APARTMENT",
             paymentSchedule: {
               durationInMonths: 0,
@@ -138,8 +145,11 @@ export default function AddProject() {
     updatedFloors[floorIndex].unitList.push({
       serialNo: "",
       amount: 0,
-      squareYards: 0,
+      squareFoot: 0,
       unitType: "APARTMENT",
+      roomCount: 0,
+      bathroomCount: 0,
+      paymentPlanType: "ONE-TIME-PAYMENT",
       paymentSchedule: {
         durationInMonths: 0,
         actualAmount: 0,
@@ -250,19 +260,16 @@ export default function AddProject() {
     const organization = JSON.parse(localStorage.getItem("organization")) || {};
     requestBody.organizationId = organization.organizationId;
 
-
     setLoading(true);
     try {
-    
-      const response = await httpService.post(
-        `/project/add`,
-        requestBody
-      );
+      console.log("requestBody :: ", requestBody);
+
+      const response = await httpService.post(`/project/add`, requestBody);
 
       console.log("response payment:: ", response);
 
       if (response.data) {
-        notifySuccess(response.responseMessage , 4000)
+        notifySuccess(response.responseMessage, 4000);
       }
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -606,19 +613,19 @@ export default function AddProject() {
                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
                                   htmlFor="name"
                                 >
-                                  Square Yards
+                                  Square Foot
                                 </label>
                                 <input
                                   id="name"
                                   type="text"
-                                  name="squareYards"
+                                  name="squareFoot"
                                   className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
                                   value={
                                     floors[floorIndex].unitList[unitIndex]
-                                      .squareYards
+                                      .squareFoot
                                   }
                                 />
                               </div>
@@ -645,6 +652,83 @@ export default function AddProject() {
                                 >
                                   <option value="">SELECT UNIT TYPE</option>
                                   {unitTypes.map((type, index) => (
+                                    <option key={index} value={type}>
+                                      {type}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="name"
+                                >
+                                  Room Count
+                                </label>
+                                <input
+                                  id="name"
+                                  type="text"
+                                  name="roomCount"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .roomCount
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="name"
+                                >
+                                  Bathroom Count
+                                </label>
+                                <input
+                                  id="name"
+                                  type="text"
+                                  name="bathroomCount"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .bathroomCount
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="projectType"
+                                >
+                                  Payment Plan Type
+                                </label>
+                                <select
+                                  id="projectType"
+                                  name="paymentPlanType"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .paymentPlanType
+                                  }
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                >
+                                  <option value="">
+                                    SELECT PAYMENT PLAN TYPE
+                                  </option>
+                                  {PAYMENT_PLANS_TYPE.map((type, index) => (
                                     <option key={index} value={type}>
                                       {type}
                                     </option>
@@ -789,147 +873,187 @@ export default function AddProject() {
                                   </div>
 
                                   {/* Down Payment */}
-                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                    <div className="relative w-full mb-3">
-                                      <label
-                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                        htmlFor="downPayment"
-                                      >
-                                        Down Payment
-                                      </label>
-                                      <input
-                                        id="downPayment"
-                                        type="text"
-                                        name="downPayment"
-                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        onChange={(e) =>
-                                          changePaymentScheduleFields(
-                                            floorIndex,
-                                            unitIndex,
-                                            e
-                                          )
-                                        }
-                                        value={
-                                          floors[floorIndex].unitList[unitIndex]
-                                            .paymentSchedule.downPayment
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-
-                                  {/* Quarterly Payment */}
-                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                    <div className="relative w-full mb-3">
-                                      <label
-                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                        htmlFor="quarterlyPayment"
-                                      >
-                                        Quarterly Payment
-                                      </label>
-                                      <input
-                                        id="quarterlyPayment"
-                                        type="text"
-                                        name="quarterlyPayment"
-                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        onChange={(e) =>
-                                          changePaymentScheduleFields(
-                                            floorIndex,
-                                            unitIndex,
-                                            e
-                                          )
-                                        }
-                                        value={
-                                          floors[floorIndex].unitList[unitIndex]
-                                            .paymentSchedule.quarterlyPayment
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-
-                                  {/* Half-Yearly Payment */}
-                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                    <div className="relative w-full mb-3">
-                                      <label
-                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                        htmlFor="halfYearlyPayment"
-                                      >
-                                        Half-Yearly Payment
-                                      </label>
-                                      <input
-                                        id="halfYearlyPayment"
-                                        type="text"
-                                        name="halfYearlyPayment"
-                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        onChange={(e) =>
-                                          changePaymentScheduleFields(
-                                            floorIndex,
-                                            unitIndex,
-                                            e
-                                          )
-                                        }
-                                        value={
-                                          floors[floorIndex].unitList[unitIndex]
-                                            .paymentSchedule.halfYearlyPayment
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                    <div className="relative w-full mb-3">
-                                      <label
-                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                        htmlFor="yearlyPayment"
-                                      >
-                                        Yearly Payment
-                                      </label>
-                                      <input
-                                        id="yearlyPayment"
-                                        type="text"
-                                        name="yearlyPayment"
-                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        onChange={(e) =>
-                                          changePaymentScheduleFields(
-                                            floorIndex,
-                                            unitIndex,
-                                            e
-                                          )
-                                        }
-                                        value={
-                                          floors[floorIndex].unitList[unitIndex]
-                                            .paymentSchedule.yearlyPayment
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                    <div className="relative w-full mb-3">
-                                      <label
-                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                        htmlFor="onPossessionPayment"
-                                      >
-                                        On Possession Payment
-                                      </label>
-                                      <input
-                                        id="onPossessionPayment"
-                                        type="text"
-                                        name="onPossessionPayment"
-                                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        onChange={(e) =>
-                                          changePaymentScheduleFields(
-                                            floorIndex,
-                                            unitIndex,
-                                            e
-                                          )
-                                        }
-                                        value={
-                                          floors[floorIndex].unitList[unitIndex]
-                                            .paymentSchedule.onPossessionPayment
-                                        }
-                                      />
-                                    </div>
-                                  </div>
+                                  {floors[floorIndex]?.unitList[unitIndex]
+                                    ?.paymentPlanType == "INSTALLMENT" ? (
+                                    <>
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="downPayment"
+                                          >
+                                            Down Payment
+                                          </label>
+                                          <input
+                                            id="downPayment"
+                                            type="text"
+                                            name="downPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule.downPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                      {/* Quarterly Payment */}
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="quarterlyPayment"
+                                          >
+                                            Quarterly Payment
+                                          </label>
+                                          <input
+                                            id="quarterlyPayment"
+                                            type="text"
+                                            name="quarterlyPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule.quarterlyPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                      {/* Half-Yearly Payment */}
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="halfYearlyPayment"
+                                          >
+                                            Half-Yearly Payment
+                                          </label>
+                                          <input
+                                            id="halfYearlyPayment"
+                                            type="text"
+                                            name="halfYearlyPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule
+                                                .halfYearlyPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>{" "}
+                                      {/* Half-Yearly Payment */}
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="halfYearlyPayment"
+                                          >
+                                            Half-Yearly Payment
+                                          </label>
+                                          <input
+                                            id="halfYearlyPayment"
+                                            type="text"
+                                            name="halfYearlyPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule
+                                                .halfYearlyPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="yearlyPayment"
+                                          >
+                                            Yearly Payment
+                                          </label>
+                                          <input
+                                            id="yearlyPayment"
+                                            type="text"
+                                            name="yearlyPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule.yearlyPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                      <div className="w-full px-4 lg:w-6/12 md:px-0">
+                                        <div className="relative w-full mb-3">
+                                          <label
+                                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                            htmlFor="onPossessionPayment"
+                                          >
+                                            On Possession Payment
+                                          </label>
+                                          <input
+                                            id="onPossessionPayment"
+                                            type="text"
+                                            name="onPossessionPayment"
+                                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                            onChange={(e) =>
+                                              changePaymentScheduleFields(
+                                                floorIndex,
+                                                unitIndex,
+                                                e
+                                              )
+                                            }
+                                            value={
+                                              floors[floorIndex].unitList[
+                                                unitIndex
+                                              ].paymentSchedule
+                                                .onPossessionPayment
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    ""
+                                  )}
                                 </div>
                               </div>
 

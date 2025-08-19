@@ -21,7 +21,7 @@ export default function ProjectUpdate() {
         {
           serialNo: "",
           amount: 0,
-          squareYards: 0,
+          squareFoot: 0,
           unitType: "APARTMENT",
           paymentSchedule: {
             durationInMonths: 0,
@@ -108,8 +108,11 @@ export default function ProjectUpdate() {
           {
             serialNo: "",
             amount: 0,
-            squareYards: 0,
+            squareFoot: 0,
             unitType: "APARTMENT",
+            roomCount: 0,
+            bathroomCount: 0,
+            paymentPlanType: "ONE-TIME-PAYMENT",
             paymentSchedule: {
               durationInMonths: 0,
               actualAmount: 0,
@@ -144,8 +147,11 @@ export default function ProjectUpdate() {
     updatedFloors[floorIndex].unitList.push({
       serialNo: "",
       amount: 0,
-      squareYards: 0,
+      squareFoot: 0,
+      roomCount: 0,
+      bathroomCount: 0,
       unitType: "APARTMENT",
+      paymentPlanType: "ONE-TIME-PAYMENT",
       paymentSchedule: {
         durationInMonths: 0,
         actualAmount: 0,
@@ -258,7 +264,6 @@ export default function ProjectUpdate() {
 
     setLoading(true);
     try {
-      
       const response = await httpService.post(`/project/update`, requestBody);
 
       console.log("response payment:: ", response);
@@ -629,19 +634,19 @@ export default function ProjectUpdate() {
                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
                                   htmlFor="name"
                                 >
-                                  Square Yards
+                                  Square Foot
                                 </label>
                                 <input
                                   id="name"
                                   type="text"
-                                  name="squareYards"
+                                  name="squareFoot"
                                   className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
                                   value={
                                     floors[floorIndex].unitList[unitIndex]
-                                      .squareYards
+                                      .squareFoot
                                   }
                                 />
                               </div>
@@ -673,6 +678,52 @@ export default function ProjectUpdate() {
                                     </option>
                                   ))}
                                 </select>
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="name"
+                                >
+                                  Room Count
+                                </label>
+                                <input
+                                  id="name"
+                                  type="text"
+                                  name="roomCount"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .squareFoot
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="name"
+                                >
+                                  Bathroom Count
+                                </label>
+                                <input
+                                  id="name"
+                                  type="text"
+                                  name="bathroomCount"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .squareFoot
+                                  }
+                                />
                               </div>
                             </div>
                           </div>

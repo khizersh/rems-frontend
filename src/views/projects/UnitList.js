@@ -13,10 +13,17 @@ import { HiMiniBuildingStorefront } from "react-icons/hi2";
 import { RxCross2 } from "react-icons/rx";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
+import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
 
 export default function UnitList() {
-  const { loading, setLoading, notifyError, notifySuccess, backdrop, setBackdrop } =
-    useContext(MainContext);
+  const {
+    loading,
+    setLoading,
+    notifyError,
+    notifySuccess,
+    backdrop,
+    setBackdrop,
+  } = useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addModal, setAddModal] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -28,9 +35,12 @@ export default function UnitList() {
   const [unit, setUnit] = useState({
     serialNo: "",
     amount: 0,
-    squareYards: 0,
+    squareFoot: 0,
     floorId: floorId,
     unitType: "APARTMENT",
+    paymentPlanType: "ONE-TIME-PAYMENT",
+    roomCount: 0,
+    bathroomCount: 0,
     paymentSchedule: {
       durationInMonths: 0,
       actualAmount: 0,
@@ -78,9 +88,10 @@ export default function UnitList() {
 
   const tableColumns = [
     { header: "Serial No", field: "serialNo" },
-    { header: "Square Yards", field: "squareYards" },
+    { header: "Square Foot", field: "squareFoot" },
     { header: "Room Count", field: "roomCount" },
     { header: "Bathroom Count", field: "bathroomCount" },
+    { header: "Payment Plan Type", field: "paymentPlanType" },
     { header: "Amount", field: "amount" },
     { header: "Additional Amount", field: "additionalAmount" },
     { header: "Unit Type", field: "unitType" },
@@ -92,9 +103,10 @@ export default function UnitList() {
     const formattedUnitDetails = {
       "Unit Details": {
         "Serial No": data?.serialNo,
-        "Square Yards": data?.squareYards,
+        "Square Foot": data?.squareFoot,
         "Room Count": data?.roomCount,
         "Bathroom Count": data?.bathroomCount,
+        "Payment Plan Type": data?.paymentPlanType,
         Amount: data?.amount,
         "Additional Amount": data?.additionalAmount,
         "Total Amount": Number(data?.amount) + Number(data?.additionalAmount),
@@ -115,11 +127,14 @@ export default function UnitList() {
   };
 
   const handleEdit = async (unit) => {
-     setLoading(true);
+    setLoading(true);
     try {
       const response = await httpService.get(`/unit/getDetailsById/${unit.id}`);
       const data = await response.data;
-      setUnit(data)
+
+      console.log("data :: ", data);
+
+      setUnit(data);
       toggleAdd();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -158,10 +173,10 @@ export default function UnitList() {
     try {
       const response = await httpService.post(`/unit/addOrUpdate`, unit);
       const data = await response.data;
-      const updatedUnit = [...units , data]
-    
+      const updatedUnit = [...units, data];
+
       notifySuccess(response.responseMessage, 4000);
-      await fetchUnitList()
+      await fetchUnitList();
       toggleAdd();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -243,7 +258,9 @@ export default function UnitList() {
           >
             <div className="bg-white rounded shadow-lg  w-full max-w-xl">
               <div className="flex justify-between items-center mb-4 p-4">
-                <h2 className="text-xl font-bold uppercase">Add Unit Form</h2>
+                <h2 className="text-xl font-bold uppercase">
+                  Update Unit Form
+                </h2>
                 <button onClick={toggleAdd}>
                   <RxCross2 className="w-5 h-5 text-red-500" />
                 </button>
@@ -275,15 +292,15 @@ export default function UnitList() {
                         className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
                         htmlFor="name"
                       >
-                        Square Yards
+                        Square Foot
                       </label>
                       <input
                         id="name"
                         type="text"
-                        name="squareYards"
+                        name="squareFoot"
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => onChangeUnit(e)}
-                        value={unit.squareYards}
+                        value={unit.squareFoot}
                       />
                     </div>
                   </div>
@@ -304,6 +321,67 @@ export default function UnitList() {
                       >
                         <option value="">SELECT UNIT TYPE</option>
                         {unitTypes.map((type, index) => (
+                          <option key={index} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="w-full lg:w-4/12 px-4">
+                    <div className="relative w-full mb-3">
+                      <label
+                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                        htmlFor="name"
+                      >
+                        Room Count
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        name="roomCount"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        onChange={(e) => onChangeUnit(e)}
+                        value={unit.roomCount}
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full lg:w-4/12 px-4">
+                    <div className="relative w-full mb-3">
+                      <label
+                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                        htmlFor="name"
+                      >
+                        Bathroom Count
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        name="bathroomCount"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        onChange={(e) => onChangeUnit(e)}
+                        value={unit.bathroomCount}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full lg:w-4/12 px-4">
+                    <div className="relative w-full mb-3">
+                      <label
+                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                        htmlFor="projectType"
+                      >
+                        Payment Plan Type
+                      </label>
+                      <select
+                        id="projectType"
+                        name="paymentPlanType"
+                        className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        value={unit.paymentPlanType}
+                        onChange={(e) => onChangeUnit(e)}
+                      >
+                        <option value="">SELECT PAYMENT PLAN TYPE</option>
+                        {PAYMENT_PLANS_TYPE.map((type, index) => (
                           <option key={index} value={type}>
                             {type}
                           </option>
@@ -410,103 +488,121 @@ export default function UnitList() {
                           </div>
                         </div>
 
-                        {/* Down Payment */}
-                        <div className="w-full px-4 lg:w-6/12">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="downPayment"
-                            >
-                              Down Payment
-                            </label>
-                            <input
-                              id="downPayment"
-                              type="text"
-                              name="downPayment"
-                              className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={unit.paymentSchedule.downPayment}
-                            />
-                          </div>
-                        </div>
+                        {unit.paymentPlanType == "INSTALLMENT" ? (
+                          <>
+                            {/* Down Payment */}
+                            <div className="w-full px-4 lg:w-6/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="downPayment"
+                                >
+                                  Down Payment
+                                </label>
+                                <input
+                                  id="downPayment"
+                                  type="text"
+                                  name="downPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={unit.paymentSchedule.downPayment}
+                                />
+                              </div>
+                            </div>
 
-                        {/* Quarterly Payment */}
-                        <div className="w-full px-4 lg:w-6/12">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="quarterlyPayment"
-                            >
-                              Quarterly Payment
-                            </label>
-                            <input
-                              id="quarterlyPayment"
-                              type="text"
-                              name="quarterlyPayment"
-                              className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={unit.paymentSchedule.quarterlyPayment}
-                            />
-                          </div>
-                        </div>
+                            {/* Quarterly Payment */}
+                            <div className="w-full px-4 lg:w-6/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="quarterlyPayment"
+                                >
+                                  Quarterly Payment
+                                </label>
+                                <input
+                                  id="quarterlyPayment"
+                                  type="text"
+                                  name="quarterlyPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={unit.paymentSchedule.quarterlyPayment}
+                                />
+                              </div>
+                            </div>
 
-                        {/* Half-Yearly Payment */}
-                        <div className="w-full px-4 lg:w-6/12">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="halfYearlyPayment"
-                            >
-                              Half-Yearly Payment
-                            </label>
-                            <input
-                              id="halfYearlyPayment"
-                              type="text"
-                              name="halfYearlyPayment"
-                              className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={unit.paymentSchedule.halfYearlyPayment}
-                            />
-                          </div>
-                        </div>
+                            {/* Half-Yearly Payment */}
+                            <div className="w-full px-4 lg:w-6/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="halfYearlyPayment"
+                                >
+                                  Half-Yearly Payment
+                                </label>
+                                <input
+                                  id="halfYearlyPayment"
+                                  type="text"
+                                  name="halfYearlyPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={unit.paymentSchedule.halfYearlyPayment}
+                                />
+                              </div>
+                            </div>
 
-                        <div className="w-full px-4 lg:w-6/12">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="yearlyPayment"
-                            >
-                              Yearly Payment
-                            </label>
-                            <input
-                              id="yearlyPayment"
-                              type="text"
-                              name="yearlyPayment"
-                              className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={unit.paymentSchedule.yearlyPayment}
-                            />
-                          </div>
-                        </div>
+                            <div className="w-full px-4 lg:w-6/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="yearlyPayment"
+                                >
+                                  Yearly Payment
+                                </label>
+                                <input
+                                  id="yearlyPayment"
+                                  type="text"
+                                  name="yearlyPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={unit.paymentSchedule.yearlyPayment}
+                                />
+                              </div>
+                            </div>
 
-                        <div className="w-full px-4 lg:w-6/12">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="onPossessionPayment"
-                            >
-                              On Possession Payment
-                            </label>
-                            <input
-                              id="onPossessionPayment"
-                              type="text"
-                              name="onPossessionPayment"
-                              className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={unit.paymentSchedule.onPossessionPayment}
-                            />
-                          </div>
-                        </div>
+                            <div className="w-full px-4 lg:w-6/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="onPossessionPayment"
+                                >
+                                  On Possession Payment
+                                </label>
+                                <input
+                                  id="onPossessionPayment"
+                                  type="text"
+                                  name="onPossessionPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={
+                                    unit.paymentSchedule.onPossessionPayment
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </div>
                     </div>
 

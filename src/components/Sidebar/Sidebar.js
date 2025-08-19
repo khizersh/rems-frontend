@@ -30,7 +30,7 @@ export default function Sidebar() {
           </button>
           {/* Brand */}
           <Link
-            className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold "
+            className="md:block text-left  text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold "
             to="/"
           >
             <img src={horizontalLogo} />
@@ -87,7 +87,7 @@ export default function Sidebar() {
             {/* Divider */}
             <hr className="my-4 md:min-w-full" />
             {/* Heading */}
-           
+
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
@@ -146,8 +146,6 @@ export default function Sidebar() {
                 );
               })}
             </ul>
-
-     
 
             {/* <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
               <li className="items-center">

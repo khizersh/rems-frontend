@@ -132,9 +132,11 @@ export default function AddBooking() {
   const fetchUnitDetailsByUnitId = async (id) => {
     setLoading(true);
     try {
-      const response = await httpService.get(`/unit/getDetailsById/${id}`);
+      const response = await httpService.get(`/unit/getUnitDetailsById/${id}`);
 
 
+      console.log("response detail :: ", response);
+      
       if (response.data) {
         setProject(response.data.projectName)
         setFloor(response.data.floorNo)

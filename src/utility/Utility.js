@@ -1,5 +1,6 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
 export const unitTypes = ["APARTMENT", "SHOP"];
+export const PAYMENT_PLANS_TYPE = ["INSTALLMENT", "ONE_TIME_PAYMENT"];
 export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CUSTOM"];
 export const MONTH_LABELS = [
   "January", "February", "March", "April", "May", "June",

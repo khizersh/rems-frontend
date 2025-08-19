@@ -207,11 +207,12 @@ export default function CustomerAccount() {
         },
         "Unit Details": {
           "Serial No": account.unit?.serialNo,
-          "Square Yards": account.unit?.squareYards,
+          "Square Foot": account.unit?.squareFoot,
           "Room Count": account.unit?.roomCount,
           "Bathroom Count": account.unit?.bathroomCount,
           Amount: account.unit?.amount,
           "Additional Amount": account.unit?.additionalAmount,
+          "Payment Plan Type": account.unit?.paymentPlanType,
           "Unit Type": account.unit?.unitType,
         },
         "Project Details": {

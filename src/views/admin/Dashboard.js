@@ -23,14 +23,14 @@ export default function Dashboard() {
           <CardBarChart />
         </div>
       </div>
-      <div className="flex flex-wrap mt-4">
+      {/* <div className="flex flex-wrap mt-4">
         <div className="w-full xl:w-8/12 mb-6 px-4">
           <CardPageVisits />
         </div>
         <div className="w-full xl:w-4/12 px-4">
           <CardSocialTraffic />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

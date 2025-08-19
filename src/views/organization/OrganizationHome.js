@@ -116,7 +116,7 @@ export default function UpdateOrganization() {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow hover:shadow-md"
+                className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow hover:shadow-md"
               >
                 <BsBuildingFillAdd className="inline-block mr-2" />
                 {loading ? "Updating..." : "Update Organization"}

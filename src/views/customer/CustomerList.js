@@ -251,7 +251,7 @@ export default function CustomerList() {
       const formattedCustomerAccount = {
         "Unit Details": {
           "Serial No": data?.unit?.serialNo,
-          "Square Yards": data?.unit?.squareYards,
+          "Square Foot": data?.unit?.squareFoot,
           "Room Count": data?.unit?.roomCount,
           "Bathroom Count": data?.unit?.bathroomCount,
           Amount: data?.unit?.amount,

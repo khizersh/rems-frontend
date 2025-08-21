@@ -33,7 +33,7 @@ export default function Sidebar() {
             className="md:block text-left  text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold "
             to="/"
           >
-            <img src={horizontalLogo} />
+            <img src={horizontalLogo} className="sidebar-logo" />
           </Link>
           {/* User */}
           <ul className="md:hidden items-center flex flex-wrap list-none">

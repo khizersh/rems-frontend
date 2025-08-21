@@ -11,6 +11,7 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
+import { PAYMENT_PLANS_TYPE } from "utility/Utility";
 
 export default function ProjectUpdate() {
   const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
@@ -304,7 +305,7 @@ export default function ProjectUpdate() {
       <div className="rounded-t bg-white mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            Create Project
+            Update Project
           </h6>
         </div>
       </div>
@@ -724,6 +725,37 @@ export default function ProjectUpdate() {
                                       .squareFoot
                                   }
                                 />
+                              </div>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-4">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="projectType"
+                                >
+                                  Payment Plan Type
+                                </label>
+                                <select
+                                  id="projectType"
+                                  name="paymentPlanType"
+                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  value={
+                                    floors[floorIndex].unitList[unitIndex]
+                                      .paymentPlanType
+                                  }
+                                  onChange={(e) =>
+                                    changeUnitFields(floorIndex, unitIndex, e)
+                                  }
+                                >
+                                  <option value="">
+                                    SELECT PAYMENT PLAN TYPE
+                                  </option>
+                                  {PAYMENT_PLANS_TYPE.map((type, index) => (
+                                    <option key={index} value={type}>
+                                      {type}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                             </div>
                           </div>

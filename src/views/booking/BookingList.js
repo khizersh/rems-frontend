@@ -7,6 +7,7 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { MdPrint } from "react-icons/md";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
@@ -131,8 +132,11 @@ export default function BookingList() {
     { header: "Updated Date", field: "updatedDate" },
   ];
 
+  const onClickPrintBooking = (data) => {
+    console.log("data :: ", data);
+  };
+
   const hanldeCustomerAccount = (customer) => {
-    console.log("customer :: ", customer);
     if (!customer) {
       return notifyError("Invalid Customer!", 4000);
     }
@@ -160,6 +164,12 @@ export default function BookingList() {
       onClick: handleDelete,
       title: "Delete",
       className: "text-red-600",
+    },
+    {
+      icon: MdPrint,
+      onClick: onClickPrintBooking,
+      title: "Print Slip",
+      className: "yellow",
     },
   ];
 

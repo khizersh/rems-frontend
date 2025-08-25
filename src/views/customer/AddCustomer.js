@@ -13,10 +13,11 @@ export default function AddCustomer() {
     country: "",
     city: "",
     address: "",
+    age: "",
     nationalId: "",
     nextOFKinName: "",
     contactNo: "",
-    guardianName:"",
+    guardianName: "",
     nextOFKinNationalId: "",
     relationShipWithKin: "",
     organizationId: 1, // default org id
@@ -129,7 +130,6 @@ export default function AddCustomer() {
       customer.projectId = filterProject;
       customer.unitId = selectedUnit;
 
-      console.log("customer :: ", customer);
       const response = await httpService.post(
         `/customer/addCustomer`,
         customer
@@ -160,7 +160,6 @@ export default function AddCustomer() {
         </div>
       </div>
       <div className="flex flex-wrap md:justify-content-between px-4 py-6 md:pt-0">
-
         <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5">
           <label className="block text-sm font-medium mb-1 ">
             Select Project
@@ -254,7 +253,7 @@ export default function AddCustomer() {
                     Username
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="username"
                     value={customer.username}
                     onChange={changeCustomerFields}
@@ -268,12 +267,26 @@ export default function AddCustomer() {
                     Contact No
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="contactNo"
                     value={customer.contactNo}
                     onChange={changeCustomerFields}
                     className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
                     placeholder="Enter contactNo"
+                  />
+                </div>
+
+                <div className="w-full lg:w-6/12 px-4 mb-3">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Age
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={customer.age}
+                    onChange={changeCustomerFields}
+                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
+                    placeholder="Enter age"
                   />
                 </div>
 
@@ -283,7 +296,7 @@ export default function AddCustomer() {
                     National ID
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="nationalId"
                     value={customer.nationalId}
                     onChange={changeCustomerFields}
@@ -297,7 +310,7 @@ export default function AddCustomer() {
                     Guardian Name
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="guardianName"
                     value={customer.guardianName}
                     onChange={changeCustomerFields}
@@ -312,7 +325,7 @@ export default function AddCustomer() {
                     Next of Kin Name
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="nextOFKinName"
                     value={customer.nextOFKinName}
                     onChange={changeCustomerFields}
@@ -327,7 +340,7 @@ export default function AddCustomer() {
                     Next of Kin National ID
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="nextOFKinNationalId"
                     value={customer.nextOFKinNationalId}
                     onChange={changeCustomerFields}
@@ -342,7 +355,7 @@ export default function AddCustomer() {
                     Relationship With Kin
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="relationShipWithKin"
                     value={customer.relationShipWithKin}
                     onChange={changeCustomerFields}
@@ -371,7 +384,7 @@ export default function AddCustomer() {
                     City
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="city"
                     value={customer.city}
                     onChange={changeCustomerFields}
@@ -385,7 +398,7 @@ export default function AddCustomer() {
                     Country
                   </label>
                   <input
-                   type="text"
+                    type="text"
                     name="country"
                     value={customer.country}
                     onChange={changeCustomerFields}

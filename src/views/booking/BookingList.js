@@ -8,6 +8,8 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdPrint } from "react-icons/md";
+import { generateBookingHtml } from "utility/Utility.js";
+import { getOrdinal } from "utility/Utility.js";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
@@ -132,8 +134,44 @@ export default function BookingList() {
     { header: "Updated Date", field: "updatedDate" },
   ];
 
-  const onClickPrintBooking = (data) => {
-    console.log("data :: ", data);
+  const onClickPrintBooking = async (data) => {
+    const response = await httpService.get(
+      `/booking/getDetailById/${data?.id}`
+    );
+
+    const unit = response?.data?.unit;
+    const customer = response?.data?.customer;
+
+    const formattedData = {
+      bookingNo: data?.id,
+      customerNo: data?.customerId,
+      serial: data?.unitSerial,
+      type: unit?.unitType,
+      floor: getOrdinal(data?.floorNo),
+      size: unit?.squareFoot + " sqft",
+      name: data?.customerName,
+      guardianName: customer?.guardianName,
+      postalAddress: customer?.address,
+      residentialAddress: customer?.address,
+      phone: customer?.contactNow9,
+      email: customer?.email,
+      age: customer?.age,
+      nationality: "Pakistani",
+      cnic: customer?.nationalId,
+      nominee: customer?.nextOFKinName,
+      nomineeRelation: customer?.relationShipWithKin,
+      amount: unit?.amount,
+      payOrderNo: "",
+      bank: "",
+      date: data?.createdDate?.split("T")[0],
+    };
+
+    const win = window.open("", "_blank");
+    const printContent = generateBookingHtml(formattedData);
+
+    win.document.write(printContent);
+    win.document.close();
+    win.focus();
   };
 
   const hanldeCustomerAccount = (customer) => {

@@ -5,6 +5,8 @@ import { BsBuildingFillAdd } from "react-icons/bs";
 import { MainContext } from "context/MainContext";
 import httpService from "../../utility/httpService.js";
 import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDropDown.js";
+import { getOrdinal } from "utility/Utility.js";
+import { generateBookingHtml } from "utility/Utility.js";
 
 export default function AddBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -121,6 +123,7 @@ export default function AddBooking() {
         request
       );
 
+      console.log("response :: ", response);
 
       if (response.data) {
         setPaymentSchedule(response.data || {});
@@ -158,10 +161,12 @@ export default function AddBooking() {
     }
   };
 
+
+
   const createBooking = async (e) => {
     e.preventDefault();
 
-    const organization =
+     const organization =
       JSON.parse(localStorage.getItem("organization")) || null;
     const updatedBooking = { ...booking };
     paymentSchedule.totalAmount =

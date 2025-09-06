@@ -7,6 +7,7 @@ import httpService from "../../utility/httpService.js";
 import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDropDown.js";
 import { getOrdinal } from "utility/Utility.js";
 import { generateBookingHtml } from "utility/Utility.js";
+import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
 
 export default function AddBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -161,12 +162,10 @@ export default function AddBooking() {
     }
   };
 
-
-
   const createBooking = async (e) => {
     e.preventDefault();
 
-     const organization =
+    const organization =
       JSON.parse(localStorage.getItem("organization")) || null;
     const updatedBooking = { ...booking };
     paymentSchedule.totalAmount =
@@ -207,15 +206,43 @@ export default function AddBooking() {
               </h6>
               <div className="flex flex-wrap">
                 <div className="w-full lg:w-6/12 px-4 md:px-0">
-                  <div className="relative w-full mb-3">
-                    <div className="w-72">
-                      <DebounceSearch
-                        setSearch={setSearch}
-                        dataList={customerList}
-                        setData={onChangeCustomer}
-                        placeholder="Search customers..."
-                        label="Select Customer"
-                      />
+                  <div className="flex flex-wrap">
+                    <div className="w-full lg:w-6/12 px-4 md:px-0">
+                      <div className="relative w-full mb-3">
+                        <div className="w-72">
+                          <DebounceSearch
+                            setSearch={setSearch}
+                            dataList={customerList}
+                            setData={onChangeCustomer}
+                            placeholder="Search customers..."
+                            label="Select Customer"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full lg:w-6/12 px-4 md:px-0">
+                      <div className="relative w-full mb-3">
+                        <label
+                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                          htmlFor="projectType"
+                        >
+                          Payment Plan Type
+                        </label>
+                        <select
+                          id="projectType"
+                          name="paymentPlanType"
+                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                          value={paymentSchedule?.paymentPlanType}
+                          onChange={(e) => changePaymentScheduleFields(e)}
+                        >
+                          <option value="">NONE</option>
+                          {PAYMENT_PLANS_TYPE.map((type, index) => (
+                            <option key={index} value={type}>
+                              {type}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>

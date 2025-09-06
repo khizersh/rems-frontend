@@ -132,7 +132,7 @@ export default function UnitList() {
       const response = await httpService.get(`/unit/getDetailsById/${unit.id}`);
       const data = await response.data;
 
-      console.log("data :: ", data);
+      console.log("edit data :: ", data);
 
       setUnit(data);
       toggleAdd();

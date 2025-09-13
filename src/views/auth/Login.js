@@ -26,15 +26,26 @@ export default function Login() {
         password: formData.password,
       });
 
+
       if (data?.data?.token) {
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("sidebar", JSON.stringify(data.data.sidebar));
-        localStorage.setItem("organization", JSON.stringify(data.data.organization));
-      }
+        localStorage.setItem(
+          "organization",
+          JSON.stringify(data.data.organization)
+        );
 
-      
-      notifySuccess(data.responseMessage, 3000);
-      history.push("/dashboard");
+        notifySuccess(data.responseMessage, 3000);
+
+        const homeurl = data.data.sidebar.find((side) => {
+          if (side.url.includes("/dashboard/customers")) {
+            return side;
+          }
+        });
+ 
+        if (data.data.r == "ur") history.push(homeurl?.url)
+        if (data.data.r == "ar") history.push("/dashboard");
+      }
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {

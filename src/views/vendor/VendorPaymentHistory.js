@@ -53,19 +53,12 @@ export default function VendorPaymentHistory() {
   }, [page]);
 
   const tableColumns = [
-    { header: "ID", field: "id" },
-    { header: "Organization Account ID", field: "organizationAcctId" },
+    { header: "From Account", field: "organizationAccount" },
+    { header: "Vendor", field: "vendorAccount" },
     { header: "Transaction Type", field: "transactionType" },
-    { header: "Amount", field: "amount" },
-    { header: "Comments", field: "comments" },
-    { header: "Customer ID", field: "customerId" },
-    { header: "Customer Payment ID", field: "customerPaymentId" },
-    { header: "Customer Payment Detail ID", field: "customerPaymentDetailId" },
-    { header: "Customer Account ID", field: "customerAccountId" },
-    { header: "Created By", field: "createdBy" },
-    { header: "Updated By", field: "updatedBy" },
-    { header: "Created Date", field: "createdDate" },
-    { header: "Updated Date", field: "updatedDate" },
+    { header: "Paid Amount", field: "amountPaid" },
+    { header: "Credit Amount", field: "creditAmount" },
+    { header: "Date", field: "createdDate" },
   ];
 
   const handleView = (data) => {
@@ -99,22 +92,7 @@ export default function VendorPaymentHistory() {
     // Implement delete logic
   };
 
-  const actions = [
-    {
-      icon: FaEye,
-      onClick: handleView,
-      title: "View Detail",
-      className: "text-green-600",
-    },
-
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
-  ];
+  const actions = [];
 
   const toggleModal = () => {
     setBackdrop(!backdrop);
@@ -127,7 +105,7 @@ export default function VendorPaymentHistory() {
         isOpen={isModalOpen}
         onClose={toggleModal}
         data={selectedUnit}
-        title="Organization Account Detail"
+        title="Vendor Account Detail"
       />
       <DynamicTableComponent
         fetchDataFunction={fetchAccountList}
@@ -139,7 +117,7 @@ export default function VendorPaymentHistory() {
         totalPages={totalPages}
         totalElements={totalElements}
         loading={loading}
-        title="Organization Account Detail"
+        title="Vendor Account Detail"
         actions={actions}
       />
     </div>

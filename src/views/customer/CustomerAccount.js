@@ -40,7 +40,6 @@ export default function CustomerAccount() {
       const myParam = queryParams.get("cId");
 
       if (myParam && !customerIdUsedRef.current) {
-        console.log("myParam :: ", myParam);
         await fetchCustomerDetailsById(myParam);
         customerIdUsedRef.current = true;
       } else {
@@ -79,7 +78,6 @@ export default function CustomerAccount() {
   };
 
   const fetchCustomerDetailsById = async (id) => {
-    console.log("Start fetchCustomerDetailsById with ID:", id);
     setLoading(true);
     try {
       const requestBody = {
@@ -90,6 +88,10 @@ export default function CustomerAccount() {
         "/customerAccount/getByCustomerId",
         requestBody
       );
+
+      console.log("response :: ",response);
+
+      
       let responseArray = [response?.data]
       setCustomerAccountList(responseArray || []);
     } catch (err) {
@@ -166,7 +168,6 @@ export default function CustomerAccount() {
 
   const handleViewDetails = async (account) => {
     try {
-      console.log("account :: ", account);
 
       let paymentRequest = {
         id: account?.unit?.id,
@@ -240,7 +241,6 @@ export default function CustomerAccount() {
     if (!account) {
       return notifyError("Invalid Account!", 4000);
     }
-    console.log("account :: ", account);
     let cName = account?.customer?.name;
     history.push(`/dashboard/customer-payment/${account.id}?cName=${cName}`);
   };

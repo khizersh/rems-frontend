@@ -129,7 +129,7 @@ export default function OrganizationAccount() {
         isOpen={isModalOpen}
         onClose={toggleModal}
         data={selectedUnit}
-        title="Organization Account Detail"
+        title="Organization Account"
       />
       <DynamicTableComponent
         fetchDataFunction={fetchAccountList}
@@ -141,7 +141,7 @@ export default function OrganizationAccount() {
         totalPages={totalPages}
         totalElements={totalElements}
         loading={loading}
-        title="Organization Account Detail"
+        title="Organization Account"
         actions={actions}
       />
     </div>

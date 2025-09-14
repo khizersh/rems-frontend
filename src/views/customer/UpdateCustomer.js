@@ -27,7 +27,8 @@ export default function AddCustomer() {
     updatedBy: "",
     email: "",
     username: "",
-    password: "",
+    createdDate: "",
+    updatedDate: null,
   });
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
@@ -54,6 +55,7 @@ export default function AddCustomer() {
       email: "",
       username: "",
       password: "",
+      updatedDate: null,
     });
   };
 
@@ -125,6 +127,20 @@ export default function AddCustomer() {
                     onChange={changeCustomerFields}
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter name"
+                  />
+                </div>
+
+                {/* Created Date */}
+                <div className="w-full lg:w-6/12 px-4 mb-3">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Created Date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="createdDate"
+                    value={customer.createdDate}
+                    onChange={changeCustomerFields}
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
                   />
                 </div>
                 <div className="w-full lg:w-6/12 px-4 mb-3">

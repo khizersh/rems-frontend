@@ -55,6 +55,8 @@ const PaymentModal = ({
           `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`
         );
 
+        console.log("response?.data :: ", response?.data);
+
         setAccountList(response?.data || []);
       }
     } catch (err) {
@@ -123,9 +125,7 @@ const PaymentModal = ({
     },
   ];
 
-  const changeSelectedProjected = (data) => {
-    console.log("account :: ", data);
-  };
+  console.log("fields :: ", fields);
 
   return (
     <>
@@ -199,7 +199,7 @@ const PaymentModal = ({
 
             {fields?.customerPaymentDetails?.map((detail, ind) => (
               <div className="flex flex-wrap border-bottom-grey" key={ind}>
-                <div className={`w-full lg:w-6/12  my-2 `}>
+                <div className={`w-full lg:w-4/12  my-2 `}>
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Received Amount
                   </label>
@@ -212,9 +212,9 @@ const PaymentModal = ({
                     required
                   />
                 </div>
-                <div className="w-full lg:w-6/12 px-4 my-2">
+                <div className="w-full lg:w-8/12 px-4 my-2">
                   <div className="flex flex-wrap" key={ind}>
-                    <div className="w-full lg:w-9/12 px-4">
+                    <div className="w-full lg:w-6/12 px-4">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -238,7 +238,21 @@ const PaymentModal = ({
                         </select>
                       </div>
                     </div>
-                    <div className="w-full lg:w-3/12 px-4">
+                    <div className="w-full lg:w-4/12 px-4">
+                      <div className="relative w-full mb-3">
+                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                          Created Date
+                        </label>
+                        <input
+                          type="datetime-local"
+                          name="createdDate"
+                          value={detail.createdDate}
+                          onChange={(e) => onChangeFormDetail(e, ind)}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                        />
+                      </div>
+                    </div>
+                    <div className="w-full lg:w-1/12 px-4">
                       <div className=" mt-7">
                         <button
                           type="button"
@@ -275,7 +289,7 @@ const PaymentModal = ({
               </div>
               {fields?.organizationAccountDetails?.map((detail, ind) => (
                 <div className="flex flex-wrap border-bottom-grey">
-                  <div className={`w-full lg:w-6/12  my-2 p-2 `}>
+                  <div className={`w-full lg:w-4/12  my-2 p-2 `}>
                     <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                       Received Amount
                     </label>
@@ -288,9 +302,9 @@ const PaymentModal = ({
                       required
                     />
                   </div>
-                  <div className="w-full lg:w-6/12  my-2 p-2 ">
+                  <div className="w-full lg:w-8/12  my-2 p-2 ">
                     <div className="flex flex-wrap">
-                      <div className="w-full lg:w-8/12">
+                      <div className="w-full lg:w-6/12">
                         <label className="block text-sm font-medium mb-1">
                           Select Account
                         </label>
@@ -303,12 +317,24 @@ const PaymentModal = ({
                           <option value="">Select Receiving Account</option>
                           {accountList.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.name}
+                              {account.name} - {account.bankName}
                             </option>
                           ))}
                         </select>
                       </div>
-                      <div className="w-full lg:w-4/12   ">
+                      <div className="w-full lg:w-4/12 px-4">
+                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                          Created Date
+                        </label>
+                        <input
+                          type="datetime-local"
+                          name="createdDate"
+                          value={detail.createdDate}
+                          onChange={(e) => onChangeAccountDetail(e, ind)}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                        />
+                      </div>
+                      <div className="w-full lg:w-1/12   ">
                         <div className=" mt-7 ml-5">
                           <button
                             type="button"

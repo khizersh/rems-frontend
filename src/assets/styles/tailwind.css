@@ -532,6 +532,7 @@ video {
 }
 
 [type="text"],
+[type="datetime-local"],
 [type="email"],
 [type="url"],
 [type="password"],
@@ -557,6 +558,7 @@ select {
 }
 
 [type="text"]:focus,
+[type="datetime-local"]:focus,
 [type="email"]:focus,
 [type="url"]:focus,
 [type="password"]:focus,
@@ -3137,6 +3139,10 @@ select {
 
   .lg\:w-auto {
     width: auto;
+  }
+
+  .lg\:w-1\/12 {
+    width: 10%;
   }
 
   .lg\:w-2\/12 {

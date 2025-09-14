@@ -44,7 +44,13 @@ export default function CustomerPayment() {
     addedAmount: 0,
     paymentType: "CASH",
     serialNo: 0,
-    customerPaymentDetails: [{ amount: 0, paymentType: "CASH" }],
+    customerPaymentDetails: [
+      {
+        amount: 0,
+        paymentType: "CASH",
+        createdDate: new Date().toISOString().slice(0, 16),
+      },
+    ],
     organizationAccountDetails: [
       {
         organizationAcctId: 0,
@@ -55,6 +61,7 @@ export default function CustomerPayment() {
         customerPaymentId: 0,
         customerPaymentDetailId: 0,
         customerAccountId: 0,
+        createdDate: new Date().toISOString().slice(0, 16),
       },
     ],
   });
@@ -223,7 +230,7 @@ export default function CustomerPayment() {
     toggleModalDetail();
   };
 
-  const handleEdit = (customerPayment) => { };
+  const handleEdit = (customerPayment) => {};
 
   const handlePrintSlip = async (customerPayment) => {
     const customer = customerAccountList.find(
@@ -249,8 +256,6 @@ export default function CustomerPayment() {
             ...response.data,
             ...customerPayment,
           };
-
-          console.log("data :: ", data.paymentDetails);
 
           const sumDetailAmount = data.paymentDetails.reduce((sum, item, i) => {
             return sum + (parseFloat(item.amount) || 0);
@@ -365,8 +370,8 @@ export default function CustomerPayment() {
           </thead>
           <tbody>
             ${customerPaymentDetails
-        .map((detail, ind) => {
-          return `
+              .map((detail, ind) => {
+                return `
                 <tr>
                   <td>${ind + 1}</td>
                   <td>${detail.createdDate.split("T")[0]}</td>
@@ -375,8 +380,8 @@ export default function CustomerPayment() {
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;
-        })
-        .join("")}
+              })
+              .join("")}
           </tbody>
         </table>
 
@@ -398,7 +403,7 @@ export default function CustomerPayment() {
   `;
   };
 
-  const handleDelete = (customerPayment) => { };
+  const handleDelete = (customerPayment) => {};
 
   const actions = [
     {
@@ -456,14 +461,10 @@ export default function CustomerPayment() {
     payInstallment.id = selectedPayment.id;
     setLoading(true);
     try {
-
       let filterId = selectedCustomerAccount || customerAccountId;
       let customerObj = customerAccountList.find(
         (customer) => customer.accountId == filterId
       );
-
-
-      console.log("customerObj :: ", selectedCustomerAccount, customerAccountList);
 
       const orgAccountList = payInstallment.organizationAccountDetails?.map(
         (orgAccount) => {
@@ -535,14 +536,14 @@ export default function CustomerPayment() {
   const onResetFormDetail = () => {
     setPayInstallment((prev) => ({
       ...prev,
-      customerPaymentDetails: [{ amount: 0, paymentType: "CASH" }],
+      customerPaymentDetails: [{ amount: 0, paymentType: "CASH" ,  createdDate: new Date().toISOString().slice(0, 16), }],
     }));
   };
 
   const onAddDetailRow = () => {
     const updatedInstallmentDetail = [
       ...payInstallment.customerPaymentDetails,
-      { amount: 0, paymentType: "CASH" },
+      { amount: 0, paymentType: "CASH" , createdDate : new Date().toISOString().slice(0, 16)},
     ];
     setPayInstallment({
       ...payInstallment,
@@ -561,9 +562,9 @@ export default function CustomerPayment() {
         customerPaymentId: 0,
         customerPaymentDetailId: 0,
         customerAccountId: 0,
+        createdDate : new Date().toISOString().slice(0, 16)
       },
     ];
-    console.log("updatedAccountDetail :: ", updatedAccountDetail);
 
     setPayInstallment({
       ...payInstallment,
@@ -666,7 +667,6 @@ export default function CustomerPayment() {
       />
       <div className="container mx-auto p-4">
         <div className="flex flex-wrap py-3 md:justify-content-between">
-
           <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
             <label className="block text-sm font-medium mb-1">Project</label>
             <select

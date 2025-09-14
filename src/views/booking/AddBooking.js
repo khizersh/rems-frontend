@@ -25,7 +25,13 @@ export default function AddBooking() {
     yearlyPayment: 0,
     onPossessionPayment: 0,
     paymentPlanType: "",
-    monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+    monthWisePaymentList: [
+      {
+        fromMonth: 0,
+        toMonth: 0,
+        amount: 0,
+      },
+    ],
   });
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [project, setProject] = useState("-");
@@ -39,6 +45,8 @@ export default function AddBooking() {
     projectId: 0,
     organizationId: 0,
     paymentSchedule: {},
+    createdDate: new Date().toISOString().slice(0, 16),
+    updatedDate: null,
   });
 
   useEffect(() => {
@@ -162,12 +170,17 @@ export default function AddBooking() {
     }
   };
 
+  const onChangeCreatedDate = (e) => {
+    setBooking({...booking , createdDate : e.target.value})
+  }
+
   const createBooking = async (e) => {
     e.preventDefault();
 
     const organization =
       JSON.parse(localStorage.getItem("organization")) || null;
     const updatedBooking = { ...booking };
+    updatedBooking.updatedDate = booking.createdDate;
     paymentSchedule.totalAmount =
       paymentSchedule.actualAmount + paymentSchedule.miscellaneousAmount;
     updatedBooking.customerId = selectedCustomer.customerId;
@@ -200,7 +213,7 @@ export default function AddBooking() {
       <div className="flex-auto px-4 py-5 bg-white rounded-12 shadow-lg">
         <form>
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5">
-            <div className="w-full lg:w-12/12 px-4 mt-2 md:px-0">
+            <div className="w-full lg:w-12/12  mt-2 md:px-0">
               <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
                 Basic Details
               </h6>
@@ -243,6 +256,19 @@ export default function AddBooking() {
                           ))}
                         </select>
                       </div>
+                    </div>
+                    {/* Created Date */}
+                    <div className="w-full lg:w-6/12 px-4 mb-3">
+                      <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                        Created Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="createdDate"
+                        value={booking.createdDate}
+                        onChange={onChangeCreatedDate}
+                        className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
+                      />
                     </div>
                   </div>
                 </div>
@@ -522,7 +548,7 @@ export default function AddBooking() {
                               <div className="mt-6 text-left pt-4">
                                 {mIndex + 1} -
                               </div>
-                              <div className="w-full lg:w-3/12 ">
+                              <div className="w-full lg:w-2/12 ">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -542,7 +568,7 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
-                              <div className="w-full lg:w-3/12 px-2 md:px-0">
+                              <div className="w-full lg:w-2/12 px-2 md:px-0">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -562,7 +588,7 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
-                              <div className="w-full lg:w-4/12">
+                              <div className="w-full lg:w-2/12">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -582,6 +608,23 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
+                              <div className="w-full lg:w-2/12">
+                                <div className="relative w-full mb-3">
+                                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                                    Created Date
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    name="createdDate"
+                                    value={monthly.createdDate}
+                                    onChange={(e) =>
+                                      changeMonthlyPaymentFields(mIndex, e)
+                                    }
+                                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
+                                  />
+                                </div>
+                              </div>
+
                               <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
                                 <button
                                   type="button"

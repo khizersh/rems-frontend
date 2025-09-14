@@ -14,7 +14,7 @@ const DebouncedSearchDropdown = ({
   // Show dropdown if dataList has items (even initially)
   useEffect(() => {
     if (dataList.length > 0) {
-      setShowDropdown(true);
+      setShowDropdown(false);
     } else {
       setShowDropdown(false);
     }

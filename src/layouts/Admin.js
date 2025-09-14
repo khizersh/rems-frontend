@@ -43,6 +43,8 @@ import ExpenseDetailList from "views/expense/ExpenseDetailList";
 import ProjectUpdate from "views/projects/ProjectUpdate";
 import ProjectAnalytics from "views/analytics/ProjectAnalytics";
 import RevenueAnalytics from "views/analytics/RevenueAnalytics";
+import AddExpenseType from "views/expense/AddExpenseType";
+import ExpenseTypeList from "views/expense/ExpenseTypeList";
 
 export default function Admin() {
   return (
@@ -68,6 +70,8 @@ export default function Admin() {
               <Route path="/dashboard/vendor-account-detail/:accountId" exact component={VendorPaymentHistory} />
               <Route path="/dashboard/vendor" exact component={VendorHome} />
               <Route path="/dashboard/expense-list" exact component={ExpenseList} />
+              <Route path="/dashboard/expense-type-list" exact component={ExpenseTypeList} />
+              <Route path="/dashboard/expense-type-add" exact component={AddExpenseType} />
               <Route path="/dashboard/add-expense" exact component={AddExpense} />
               <Route path="/dashboard/expense-detail/:expenseId" exact component={ExpenseDetailList} />
               <Route path="/dashboard/vendor-account" exact component={VendorAccount} />

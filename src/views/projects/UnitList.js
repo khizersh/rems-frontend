@@ -93,10 +93,19 @@ export default function UnitList() {
     { header: "Bathroom Count", field: "bathroomCount" },
     { header: "Payment Plan Type", field: "paymentPlanType" },
     { header: "Amount", field: "amount" },
-    { header: "Additional Amount", field: "additionalAmount" },
-    { header: "Unit Type", field: "unitType" },
     { header: "Floor Number", field: "floorNo" },
     { header: "Project Name", field: "projectName" },
+     {
+      header: "Booked",
+      field: "booked",
+      render: (value) => {
+        const baseClass = "font-semibold uppercase";
+        if (value === true)
+          return <span className={`${baseClass} text-green-600`}>YES</span>;
+        if (value === false)
+          return <span className={`${baseClass} text-blue-600`}>NO</span>;
+      },
+    },
   ];
 
   const handleView = (data) => {
@@ -155,12 +164,6 @@ export default function UnitList() {
       className: "text-green-600",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
   ];
 
   const toggleModal = () => {
@@ -171,6 +174,9 @@ export default function UnitList() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+
+      console.log("request body update :: ", unit);
+      
       const response = await httpService.post(`/unit/addOrUpdate`, unit);
       const data = await response.data;
       const updatedUnit = [...units, data];
@@ -296,7 +302,7 @@ export default function UnitList() {
                       </label>
                       <input
                         id="name"
-                        type="text"
+                        type="number"
                         name="squareFoot"
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         onChange={(e) => onChangeUnit(e)}

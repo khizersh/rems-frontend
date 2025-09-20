@@ -44,6 +44,7 @@ export default function CustomerPayment() {
     addedAmount: 0,
     paymentType: "CASH",
     serialNo: 0,
+    customerAccountId: null,
     customerPaymentDetails: [
       {
         amount: 0,
@@ -52,17 +53,17 @@ export default function CustomerPayment() {
       },
     ],
     organizationAccountDetails: [
-      {
-        organizationAcctId: 0,
-        transactionType: "CREDIT",
-        amount: 0,
-        comments: "",
-        customerId: 0,
-        customerPaymentId: 0,
-        customerPaymentDetailId: 0,
-        customerAccountId: 0,
-        createdDate: new Date().toISOString().slice(0, 16),
-      },
+      // {
+      //   organizationAcctId: null,
+      //   transactionType: "CREDIT",
+      //   amount: 0,
+      //   comments: "",
+      //   customerId: null,
+      //   customerPaymentId: null,
+      //   customerPaymentDetailId: null,
+      //   customerAccountId: null,
+      //   createdDate: new Date().toISOString().slice(0, 16),
+      // },
     ],
   });
   const [customerAccountList, setCustomerAccountList] = useState([]);
@@ -104,6 +105,9 @@ export default function CustomerPayment() {
         request
       );
 
+
+      console.log("response :: ",response);
+      
       setCustomerAccountList(response.data || []);
     } catch (err) {
       // notifyError(err.message, err.data, 4000);
@@ -478,6 +482,8 @@ export default function CustomerPayment() {
       );
 
       payInstallment.organizationAccountDetails = orgAccountList;
+      payInstallment.customerAccountId = filterId;
+
 
       const response = await httpService.post(
         `/customerPayment/payInstallment`,
@@ -536,14 +542,24 @@ export default function CustomerPayment() {
   const onResetFormDetail = () => {
     setPayInstallment((prev) => ({
       ...prev,
-      customerPaymentDetails: [{ amount: 0, paymentType: "CASH" ,  createdDate: new Date().toISOString().slice(0, 16), }],
+      customerPaymentDetails: [
+        {
+          amount: 0,
+          paymentType: "CASH",
+          createdDate: new Date().toISOString().slice(0, 16),
+        },
+      ],
     }));
   };
 
   const onAddDetailRow = () => {
     const updatedInstallmentDetail = [
       ...payInstallment.customerPaymentDetails,
-      { amount: 0, paymentType: "CASH" , createdDate : new Date().toISOString().slice(0, 16)},
+      {
+        amount: 0,
+        paymentType: "CASH",
+        createdDate: new Date().toISOString().slice(0, 16),
+      },
     ];
     setPayInstallment({
       ...payInstallment,
@@ -562,7 +578,7 @@ export default function CustomerPayment() {
         customerPaymentId: 0,
         customerPaymentDetailId: 0,
         customerAccountId: 0,
-        createdDate : new Date().toISOString().slice(0, 16)
+        createdDate: new Date().toISOString().slice(0, 16),
       },
     ];
 
@@ -694,7 +710,7 @@ export default function CustomerPayment() {
               <option value="">Select Account</option>
               {customerAccountList.map((account) => (
                 <option key={account.accountId} value={account.accountId}>
-                  {account.customerName}
+                  {account.customerName} - {account.unitSerial}
                 </option>
               ))}
             </select>

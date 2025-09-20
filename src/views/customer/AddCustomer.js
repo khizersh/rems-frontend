@@ -165,7 +165,7 @@ export default function AddCustomer() {
         </div>
       </div>
       <div className="flex flex-wrap md:justify-content-between px-4 py-6 md:pt-0">
-        <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5">
+        {/* <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5">
           <label className="block text-sm font-medium mb-1 ">
             Select Project
           </label>
@@ -181,9 +181,9 @@ export default function AddCustomer() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
-        <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 mx-4 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 ">
+        {/* <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 mx-4 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 ">
           <label className="block text-sm font-medium mb-1">Select Floor</label>
           <select
             value={filterFloor}
@@ -197,8 +197,8 @@ export default function AddCustomer() {
               </option>
             ))}
           </select>
-        </div>
-
+        </div> */}
+{/* 
         <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 lg:mt-5">
           <label className="block text-sm font-medium mb-1">Select Unit</label>
           <select
@@ -213,7 +213,7 @@ export default function AddCustomer() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <form onSubmit={createCustomer} className="mt-6">
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5 mt-5 bg-white rounded-12 shadow-lg">

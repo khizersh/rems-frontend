@@ -12,32 +12,32 @@ import { PAYMENT_PLANS_TYPE } from "utility/Utility";
 export default function AddProject() {
   const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
   const [floors, setFloors] = useState([
-    {
-      floor: 0,
-      unitList: [
-        {
-          serialNo: "",
-          amount: 0,
-          squareFoot: 0,
-          roomCount: 0,
-          bathroomCount: 0,
-          unitType: "APARTMENT",
-          paymentPlanType: "ONE-TIME-PAYMENT",
-          paymentSchedule: {
-            durationInMonths: 0,
-            actualAmount: 0,
-            miscellaneousAmount: 0,
-            totalAmount: 0,
-            downPayment: 0,
-            quarterlyPayment: 0,
-            halfYearlyPayment: 0,
-            yearlyPayment: 0,
-            onPossessionPayment: 0,
-            monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
-          },
-        },
-      ],
-    },
+    // {
+    //   floor: 0,
+    //   unitList: [
+        // {
+        //   serialNo: "",
+        //   amount: 0,
+        //   squareFoot: 0,
+        //   roomCount: 0,
+        //   bathroomCount: 0,
+        //   unitType: "APARTMENT",
+        //   paymentPlanType: "ONE-TIME-PAYMENT",
+        //   paymentSchedule: {
+        //     durationInMonths: 0,
+        //     actualAmount: 0,
+        //     miscellaneousAmount: 0,
+        //     totalAmount: 0,
+        //     downPayment: 0,
+        //     quarterlyPayment: 0,
+        //     halfYearlyPayment: 0,
+        //     yearlyPayment: 0,
+        //     onPossessionPayment: 0,
+        //     monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+        //   },
+        // },
+    //   ],
+    // },
   ]);
   const [project, setProject] = useState({
     name: "",
@@ -103,27 +103,27 @@ export default function AddProject() {
       {
         floor: prevFloors.length,
         unitList: [
-          {
-            serialNo: "",
-            amount: 0,
-            squareFoot: 0,
-            roomCount: 0,
-            bathroomCount: 0,
-            paymentPlanType: "ONE-TIME-PAYMENT",
-            unitType: "APARTMENT",
-            paymentSchedule: {
-              durationInMonths: 0,
-              actualAmount: 0,
-              miscellaneousAmount: 0,
-              totalAmount: 0,
-              downPayment: 0,
-              quarterlyPayment: 0,
-              halfYearlyPayment: 0,
-              yearlyPayment: 0,
-              onPossessionPayment: 0,
-              monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
-            },
-          },
+          // {
+          //   serialNo: "",
+          //   amount: 0,
+          //   squareFoot: 0,
+          //   roomCount: 0,
+          //   bathroomCount: 0,
+          //   paymentPlanType: "ONE-TIME-PAYMENT",
+          //   unitType: "APARTMENT",
+          //   paymentSchedule: {
+          //     durationInMonths: 0,
+          //     actualAmount: 0,
+          //     miscellaneousAmount: 0,
+          //     totalAmount: 0,
+          //     downPayment: 0,
+          //     quarterlyPayment: 0,
+          //     halfYearlyPayment: 0,
+          //     yearlyPayment: 0,
+          //     onPossessionPayment: 0,
+          //     monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+          //   },
+          // },
         ],
       },
     ]);
@@ -617,7 +617,7 @@ export default function AddProject() {
                                 </label>
                                 <input
                                   id="name"
-                                  type="text"
+                                  type="number"
                                   name="squareFoot"
                                   className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>

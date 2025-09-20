@@ -82,17 +82,21 @@ export default function CustomerAccount() {
     try {
       const requestBody = {
         id: id,
+        filteredBy: "",
+        page,
+        size: pageSize,
+        sortBy: "id",
+        sortDir: "asc",
       };
-
       const response = await httpService.post(
         "/customerAccount/getByCustomerId",
         requestBody
       );
 
-      console.log("response :: ",response);
+      let responseArray = response?.data?.content;
 
+      console.log("responseArray :: ",responseArray);
       
-      let responseArray = [response?.data]
       setCustomerAccountList(responseArray || []);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -129,6 +133,9 @@ export default function CustomerAccount() {
         requestBody
       );
 
+      console.log("response?.data?.content :: ",response?.data?.content);
+      
+
       setCustomerAccountList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
@@ -162,13 +169,12 @@ export default function CustomerAccount() {
     { header: "Project Name", field: "project.name" },
     { header: "Unit Serial No", field: "unit.serialNo" },
     { header: "Floor No", field: "unit.floorNo" },
-    { header: "Duration (Months)", field: "durationInMonths" },
+    { header: "Payment Type", field: "unit.paymentPlanType" },
     { header: "Customer Amount", field: "totalAmount" },
   ];
 
   const handleViewDetails = async (account) => {
     try {
-
       let paymentRequest = {
         id: account?.unit?.id,
         paymentScheduleType: "CUSTOMER",
@@ -177,6 +183,7 @@ export default function CustomerAccount() {
         `/paymentSchedule/getByUnit`,
         paymentRequest
       );
+
 
       const monthWisePaymentList =
         responsePayment?.data?.monthWisePaymentList?.map((month) => {

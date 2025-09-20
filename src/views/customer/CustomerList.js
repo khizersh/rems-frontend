@@ -118,6 +118,9 @@ export default function CustomerList() {
         dataList = response?.data?.content;
       }
 
+      console.log("response:: ",response);
+      
+
       setCustomerList(dataList || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
@@ -149,12 +152,20 @@ export default function CustomerList() {
     { header: "Name", field: "name" },
     { header: "Country", field: "country" },
     { header: "City", field: "city" },
-    { header: "Project", field: "projectName" },
-    { header: "Floor", field: "floorNo" },
-    { header: "Unit", field: "unitSerialNo" },
+    { header: "Units Count", field: "unitCount" },
+    { header: "Contact", field: "contactNo" },
   ];
 
-  const handleView = (customer) => {
+  const handleView = async (customer) => {
+    const unitDetailsList = [];
+    try {
+      const response = await httpService.get(
+        `/customer/getUnitListDetailsByCustomerId/${customer.customerId}`
+      );
+
+      unitDetailsList = response.data;
+    } catch (err) {}
+
     const formattedCustomer = {
       "Basic Details": {
         Name: customer.name,
@@ -169,10 +180,8 @@ export default function CustomerList() {
         "Relationship With Kin": customer.relationShipWithKin,
       },
       "Property Details": {
-        "Project Name": customer.projectName,
-        "Floor No": customer.floorNo,
-        "Unit Serial No": customer.unitSerialNo,
-        "Organization Id": customer.organizationId,
+        "Total Unit": customer.unitCount,
+        "Unit Details": unitDetailsList,
       },
       "Location Details": {
         Country: customer.country,
@@ -217,79 +226,78 @@ export default function CustomerList() {
 
   const handleCustomerAccount = async (customer) => {
     try {
-      const requestBody = {
-        customerId: customer.customerId,
-        unitId: customer.unitId,
-      };
 
-      const response = await httpService.post(
-        `/customerAccount/getByCustomerIdAndUnitId`,
-        requestBody
-      );
-      const data = response.data;
+      history.push(`/dashboard/customer-account?cId=${customer.customerId}`)
+      
+      // const requestBody = {
+      //   customerId: customer.customerId
+      // };
 
-      let paymentRequest = {
-        id: customer.unitId,
-        paymentScheduleType: "CUSTOMER",
-      };
-      const responsePayment = await httpService.post(
-        `/paymentSchedule/getByUnit`,
-        paymentRequest
-      );
+      // const response = await httpService.post(
+      //   `/customerAccount/getByCustomerId`,
+      //   requestBody
+      // );
+      // const data = response?.data.content;
 
-      console.log("responsePayment.data? :: ", responsePayment.data);
+      // let paymentRequest = {
+      //   id: customer.unitId,
+      //   paymentScheduleType: "CUSTOMER",
+      // };
+      // const responsePayment = await httpService.post(
+      //   `/paymentSchedule/getByUnit`,
+      //   paymentRequest
+      // );
 
-      const monthWisePaymentList =
-        responsePayment?.data?.monthWisePaymentList?.map((month) => {
-          return {
-            "From Month": month.fromMonth,
-            "To Month": month.toMonth,
-            "Monthly Amount": month.amount,
-          };
-        });
+      // const monthWisePaymentList =
+      //   responsePayment?.data?.monthWisePaymentList?.map((month) => {
+      //     return {
+      //       "From Month": month.fromMonth,
+      //       "To Month": month.toMonth,
+      //       "Monthly Amount": month.amount,
+      //     };
+      //   });
 
-      const formattedCustomerAccount = {
-        "Unit Details": {
-          "Serial No": data?.unit?.serialNo,
-          "Square Foot": data?.unit?.squareFoot,
-          "Room Count": data?.unit?.roomCount,
-          "Bathroom Count": data?.unit?.bathroomCount,
-          Amount: data?.unit?.amount,
-          "Additional Amount": data?.unit?.additionalAmount,
-          "Total Amount":
-            Number(data?.unit?.additionalAmount) + Number(data?.unit?.amount),
-          "Unit Type": data?.unit?.unitType,
-          Booked: data?.unit?.booked,
-        },
-        "Customer Account Agreement": {
-          "Payment Structure": {
-            "Duration In Months": responsePayment.data?.durationInMonths,
-            "Actual Amount": responsePayment.data?.actualAmount,
-            "Miscellaneous Amount": responsePayment.data?.miscellaneousAmount,
-            "Total Amount": responsePayment.data?.totalAmount,
-          },
+      // const formattedCustomerAccount = {
+      //   "Unit Details": {
+      //     "Serial No": data?.unit?.serialNo,
+      //     "Square Foot": data?.unit?.squareFoot,
+      //     "Room Count": data?.unit?.roomCount,
+      //     "Bathroom Count": data?.unit?.bathroomCount,
+      //     Amount: data?.unit?.amount,
+      //     "Additional Amount": data?.unit?.additionalAmount,
+      //     "Total Amount":
+      //       Number(data?.unit?.additionalAmount) + Number(data?.unit?.amount),
+      //     "Unit Type": data?.unit?.unitType,
+      //     Booked: data?.unit?.booked,
+      //   },
+      //   "Customer Account Agreement": {
+      //     "Payment Structure": {
+      //       "Duration In Months": responsePayment.data?.durationInMonths,
+      //       "Actual Amount": responsePayment.data?.actualAmount,
+      //       "Miscellaneous Amount": responsePayment.data?.miscellaneousAmount,
+      //       "Total Amount": responsePayment.data?.totalAmount,
+      //     },
 
-          "Payment Breakdown": {
-            "Down Payment": responsePayment.data?.downPayment,
-            "Quarterly Payment": responsePayment.data?.quarterlyPayment,
-            "Half Yearly": responsePayment.data?.halfYearlyPayment,
-            Yearly: responsePayment.data?.yearlyPayment,
-            "On Possession Amount": responsePayment.data?.onPossessionPayment,
-          },
-          "Monthly Payments": monthWisePaymentList,
-        },
-        "Audit Info": {
-          "Created By": data?.createdBy,
-          "Updated By": data?.updatedBy,
-          "Created Date": data?.createdDate,
-          "Updated Date": data?.updatedDate,
-        },
-      };
+      //     "Payment Breakdown": {
+      //       "Down Payment": responsePayment.data?.downPayment,
+      //       "Quarterly Payment": responsePayment.data?.quarterlyPayment,
+      //       "Half Yearly": responsePayment.data?.halfYearlyPayment,
+      //       Yearly: responsePayment.data?.yearlyPayment,
+      //       "On Possession Amount": responsePayment.data?.onPossessionPayment,
+      //     },
+      //     "Monthly Payments": monthWisePaymentList,
+      //   },
+      //   "Audit Info": {
+      //     "Created By": data?.createdBy,
+      //     "Updated By": data?.updatedBy,
+      //     "Created Date": data?.createdDate,
+      //     "Updated Date": data?.updatedDate,
+      //   },
+      // };
 
-      console.log("formattedCustomerAccount :: ", formattedCustomerAccount);
 
-      setSelectedCustomerAccount(formattedCustomerAccount);
-      toggleModalAccount();
+      // setSelectedCustomerAccount(formattedCustomerAccount);
+      // toggleModalAccount();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     }
@@ -317,12 +325,12 @@ export default function CustomerList() {
       className: "text-green-600",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
+    // {
+    //   icon: FaTrashAlt,
+    //   onClick: handleDelete,
+    //   title: "Delete",
+    //   className: "text-red-600",
+    // },
   ];
 
   const toggleModal = () => {

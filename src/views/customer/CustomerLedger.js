@@ -103,7 +103,6 @@ export default function CustomerLedger() {
         ? selectedCustomerAccount
         : customerAccountId;
 
-      console.log("accountId :: ", accountId);
 
       setLoading(true);
 
@@ -179,6 +178,7 @@ export default function CustomerLedger() {
     setSelectedPayment(customerPayment);
     toggleModal();
   };
+
   const handleDetailModal = (data) => {
     const name = customerAccountList.find(
       (custom) => custom.accountId == selectedCustomerAccount
@@ -421,7 +421,7 @@ export default function CustomerLedger() {
               <option value="">Select Account</option>
               {customerAccountList.map((account) => (
                 <option key={account.accountId} value={account.accountId}>
-                  {account.customerName}
+                  {account.customerName} - {account.unitSerial}
                 </option>
               ))}
             </select>

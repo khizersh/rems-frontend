@@ -639,7 +639,7 @@ export default function ProjectUpdate() {
                                 </label>
                                 <input
                                   id="name"
-                                  type="text"
+                                  type="number"
                                   name="squareFoot"
                                   className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>

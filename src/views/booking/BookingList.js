@@ -168,10 +168,10 @@ export default function BookingList() {
 
     const win = window.open("", "_blank");
     const printContent = generateBookingHtml(formattedData);
-
     win.document.write(printContent);
     win.document.close();
     win.focus();
+    setTimeout(() => win.print(), 500); // slight delay to render
   };
 
   const hanldeCustomerAccount = (customer) => {

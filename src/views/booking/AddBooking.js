@@ -13,6 +13,7 @@ export default function AddBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
     useContext(MainContext);
   const [customerList, setCustomerList] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState("");
   const [paymentSchedule, setPaymentSchedule] = useState({
     durationInMonths: 0,
@@ -38,11 +39,16 @@ export default function AddBooking() {
   const [floor, setFloor] = useState("-");
   const [unit, setUnit] = useState("-");
   const [totalAmount, setTotalAmount] = useState("-");
+  const [unitList, setUnitList] = useState([]);
+  const [filterProject, setFilterProject] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [filterFloor, setFilterFloor] = useState("");
+  const [floorOptions, setFloorOptions] = useState([]);
   const [booking, setBooking] = useState({
-    customerId: 0,
-    unitId: 0,
-    floorId: 0,
-    projectId: 0,
+    customerId: null,
+    unitId: null,
+    floorId: null,
+    projectId: null,
     organizationId: 0,
     paymentSchedule: {},
     createdDate: new Date().toISOString().slice(0, 16),
@@ -51,6 +57,7 @@ export default function AddBooking() {
 
   useEffect(() => {
     fetchCustomers(search);
+    fetchProjects();
   }, []);
 
   const resetState = () => {
@@ -164,15 +171,13 @@ export default function AddBooking() {
 
   const onChangeCustomer = (customer) => {
     if (customer) {
-      fetchPaymentScheduleByUnitId(customer.unitId);
-      fetchUnitDetailsByUnitId(customer.unitId);
       setSelectedCustomer(customer);
     }
   };
 
   const onChangeCreatedDate = (e) => {
-    setBooking({...booking , createdDate : e.target.value})
-  }
+    setBooking({ ...booking, createdDate: e.target.value });
+  };
 
   const createBooking = async (e) => {
     e.preventDefault();
@@ -184,10 +189,15 @@ export default function AddBooking() {
     paymentSchedule.totalAmount =
       paymentSchedule.actualAmount + paymentSchedule.miscellaneousAmount;
     updatedBooking.customerId = selectedCustomer.customerId;
-    updatedBooking.unitId = selectedCustomer.unitId;
+    updatedBooking.unitId = selectedUnit;
+    updatedBooking.projectId = filterProject;
+    updatedBooking.floorId = filterFloor;
     updatedBooking.organizationId = organization.organizationId;
     delete paymentSchedule.id;
     updatedBooking.paymentSchedule = paymentSchedule;
+
+    console.log("updatedBooking :: ", updatedBooking);
+
 
     setLoading(true);
     try {
@@ -199,6 +209,67 @@ export default function AddBooking() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // product, floor , unit
+
+  const fetchProjects = async () => {
+    try {
+      const sidebarData =
+        JSON.parse(localStorage.getItem("organization")) || null;
+      if (sidebarData) {
+        const response = await httpService.get(
+          `/project/getAllProjectByOrg/${sidebarData.organizationId}`
+        );
+        setProjects(response.data || []);
+      }
+    } catch (err) {
+      notifyError("Failed to load projects", 4000);
+    }
+  };
+
+  const fetchFloors = async (projectId) => {
+    try {
+      const response = await httpService.get(
+        `/floor/getAllFloorsByProject/${projectId}`
+      );
+      setFloorOptions(response.data || []);
+    } catch (err) {
+      notifyError("Failed to load floors", 4000);
+    }
+  };
+  const fetchUnits = async (floorId) => {
+    try {
+      const response = await httpService.get(
+        `/unit/getIdSerialByFloorId/${floorId}`
+      );
+      setUnitList(response.data || []);
+    } catch (err) {
+      notifyError("Failed to load floors", 4000);
+    }
+  };
+
+  const changeSelectedProjected = (projectId) => {
+    if (projectId) {
+      setFilterProject(projectId);
+      fetchFloors(projectId);
+    }
+  };
+
+  const changeSelectedFloor = (floorId) => {
+    if (floorId) {
+      setFilterFloor(floorId);
+      fetchUnits(floorId);
+    }
+  };
+
+  const changeSelectedUnit = (unitId) => {
+    if (unitId) {
+      fetchPaymentScheduleByUnitId(unitId);
+      fetchUnitDetailsByUnitId(unitId);
+    }
+
+    setSelectedUnit(unitId);
   };
 
   return (
@@ -218,9 +289,9 @@ export default function AddBooking() {
                 Basic Details
               </h6>
               <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4 md:px-0">
+                <div className="w-full lg:w-12/12 px-4 md:px-0">
                   <div className="flex flex-wrap">
-                    <div className="w-full lg:w-6/12 px-4 md:px-0">
+                    <div className="w-full lg:w-4/12 px-4 md:px-0">
                       <div className="relative w-full mb-3">
                         <div className="w-72">
                           <DebounceSearch
@@ -233,7 +304,68 @@ export default function AddBooking() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full lg:w-6/12 px-4 md:px-0">
+                    <div className="w-full lg:w-4/12 px-4 md:px-0">
+                      <div className="relative w-full mb-3">
+                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                          Select Project
+                        </label>
+                        <select
+                          value={filterProject}
+                          onChange={(e) =>
+                            changeSelectedProjected(e.target.value)
+                          }
+                          className="border rounded-lg px-3 py-2 w-full"
+                        >
+                          <option value="">All Projects</option>
+                          {projects.map((project) => (
+                            <option key={project.id} value={project.id}>
+                              {project.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="w-full lg:w-4/12 px-4 md:px-0">
+                      <div className="relative w-full mb-3">
+                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                          Select Floor
+                        </label>
+                        <select
+                          value={filterFloor}
+                          onChange={(e) => changeSelectedFloor(e.target.value)}
+                          className="border rounded-lg px-3 py-2 w-full"
+                        >
+                          <option value="">All Floors</option>
+                          {floorOptions.map((floor) => (
+                            <option key={floor.id} value={floor.id}>
+                              {floor.floorNo}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="w-full lg:w-4/12 px-4 md:px-0">
+                      <div className="relative w-full mb-3">
+                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                          Select Unit
+                        </label>
+                        <select
+                          value={selectedUnit}
+                          onChange={(e) => changeSelectedUnit(e.target.value)}
+                          className="border rounded-lg px-3 py-2 w-full"
+                        >
+                          <option value="">All Units</option>
+                          {unitList.map((unit) => (
+                            <option key={unit.id} value={unit.id}>
+                              {unit.serialNo}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="w-full lg:w-4/12 px-4 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
                           className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -258,7 +390,7 @@ export default function AddBooking() {
                       </div>
                     </div>
                     {/* Created Date */}
-                    <div className="w-full lg:w-6/12 px-4 mb-3">
+                    <div className="w-full lg:w-4/12 px-4 mb-3">
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Created Date
                       </label>
@@ -272,7 +404,7 @@ export default function AddBooking() {
                     </div>
                   </div>
                 </div>
-                <div className="w-full lg:w-6/12 px-4 md:px-0">
+                {/* <div className="w-full lg:w-12/12 px-4 md:px-0">
                   <div className="relative w-full mb-3">
                     <p className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                       Unit Information
@@ -314,7 +446,7 @@ export default function AddBooking() {
                       </table>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -548,7 +680,7 @@ export default function AddBooking() {
                               <div className="mt-6 text-left pt-4">
                                 {mIndex + 1} -
                               </div>
-                              <div className="w-full lg:w-2/12 ">
+                              <div className="w-full lg:w-3/12 ">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -568,7 +700,7 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
-                              <div className="w-full lg:w-2/12 px-2 md:px-0">
+                              <div className="w-full lg:w-3/12 px-2 md:px-0">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -588,7 +720,7 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
-                              <div className="w-full lg:w-2/12">
+                              <div className="w-full lg:w-3/12">
                                 <div className="relative w-full mb-3">
                                   <label
                                     className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -608,24 +740,7 @@ export default function AddBooking() {
                                   />
                                 </div>
                               </div>
-                              <div className="w-full lg:w-2/12">
-                                <div className="relative w-full mb-3">
-                                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                                    Created Date
-                                  </label>
-                                  <input
-                                    type="datetime-local"
-                                    name="createdDate"
-                                    value={monthly.createdDate}
-                                    onChange={(e) =>
-                                      changeMonthlyPaymentFields(mIndex, e)
-                                    }
-                                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
+                              <div className="mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
                                 <button
                                   type="button"
                                   onClick={() => removeMonthWisePayment(mIndex)}

@@ -49,22 +49,13 @@ export default function CustomerPayment() {
       {
         amount: 0,
         paymentType: "CASH",
+        chequeNo: null,
+        chequeDate: null,
+        customerPaymentReason: null,
         createdDate: new Date().toISOString().slice(0, 16),
       },
     ],
-    organizationAccountDetails: [
-      // {
-      //   organizationAcctId: null,
-      //   transactionType: "CREDIT",
-      //   amount: 0,
-      //   comments: "",
-      //   customerId: null,
-      //   customerPaymentId: null,
-      //   customerPaymentDetailId: null,
-      //   customerAccountId: null,
-      //   createdDate: new Date().toISOString().slice(0, 16),
-      // },
-    ],
+    organizationAccountDetails: [],
   });
   const [customerAccountList, setCustomerAccountList] = useState([]);
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
@@ -105,9 +96,8 @@ export default function CustomerPayment() {
         request
       );
 
+      console.log("response :: ", response);
 
-      console.log("response :: ",response);
-      
       setCustomerAccountList(response.data || []);
     } catch (err) {
       // notifyError(err.message, err.data, 4000);
@@ -369,6 +359,8 @@ export default function CustomerPayment() {
               <th>Paid Date</th>
               <th>Type</th>
               <th>Payment Method</th>
+              <th>Cheque No</th>
+              <th>Cheque Date</th>
               <th>Receipt Amount</th>
             </tr>
           </thead>
@@ -379,8 +371,12 @@ export default function CustomerPayment() {
                 <tr>
                   <td>${ind + 1}</td>
                   <td>${detail.createdDate.split("T")[0]}</td>
-                  <td>INSTALLMENT</td>
+                  <td>${detail.customerPaymentReason}</td>
                   <td>${detail.paymentType}</td>
+                  <td>${detail.chequeNo ? detail.chequeNo : "-"}</td>
+                  <td>${
+                    detail.chequeDate ? detail.chequeDate.split("T")[0] : "-"
+                  }</td>
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;
@@ -484,7 +480,6 @@ export default function CustomerPayment() {
       payInstallment.organizationAccountDetails = orgAccountList;
       payInstallment.customerAccountId = filterId;
 
-
       const response = await httpService.post(
         `/customerPayment/payInstallment`,
         payInstallment
@@ -492,10 +487,10 @@ export default function CustomerPayment() {
 
       notifySuccess(response.responseMessage, 4000);
       await fetchCustomerPayments();
+      // toggleModal();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
-      toggleModal();
       setLoading(false);
     }
   };
@@ -558,6 +553,9 @@ export default function CustomerPayment() {
       {
         amount: 0,
         paymentType: "CASH",
+        chequeNo: null,
+        chequeDate: null,
+        customerPaymentReason: null,
         createdDate: new Date().toISOString().slice(0, 16),
       },
     ];
@@ -566,6 +564,7 @@ export default function CustomerPayment() {
       customerPaymentDetails: updatedInstallmentDetail,
     });
   };
+
   const onAddAccountRow = () => {
     const updatedAccountDetail = [
       ...payInstallment.organizationAccountDetails,
@@ -644,8 +643,6 @@ export default function CustomerPayment() {
           createdAt: data.payment?.createdDate || "-",
           customerPaymentDetails: [customerPaymentDetail],
         };
-
-        console.log("formatedData :: ", formatedData);
 
         const win = window.open("", "_blank");
         const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string

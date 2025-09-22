@@ -316,7 +316,7 @@ ul {
  */
 
 .modal-width {
-  width: 77%; /* default for mobile */
+  width: 90%; /* default for desktop */
 }
 
 @media (max-width: 799px) {

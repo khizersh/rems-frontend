@@ -165,13 +165,14 @@ export default function CustomerLedger() {
     { header: "Payment Date", field: "updatedDate" },
     {
       header: "Type",
-      field: "type",
+      field: "customerPaymentReason",
       render: (value) => {
-        return <span>Installment</span>;
+        return <span>{value}</span>;
       },
     },
     { header: "Payment Mode", field: "paymentType" },
-    { header: "Paid Amount", field: "amount" },
+    { header: "Cheque No", field: "chequeNo" },
+    { header: "Cheque Date", field: "chequeDate" },
   ];
 
   const handlePaymentModal = (customerPayment) => {
@@ -309,6 +310,8 @@ export default function CustomerLedger() {
               <th>Paid Date</th>
               <th>Type</th>
               <th>Payment Method</th>
+              <th>Cheque No</th>
+              <th>Cheque Date</th>
               <th>Receipt Amount</th>
             </tr>
           </thead>
@@ -319,8 +322,10 @@ export default function CustomerLedger() {
                 <tr>
                   <td>${ind + 1}</td>
                   <td>${detail.createdDate.split("T")[0]}</td>
-                  <td>INSTALLMENT</td>
+                  <td>${detail.customerPaymentReason}</td>
                   <td>${detail.paymentType}</td>
+                  <td>${detail.chequeNo ? detail.chequeNo : "-" }</td>
+                  <td>${detail.chequeDate ? detail.chequeDate.split("T")[0] : "-"}</td>
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;

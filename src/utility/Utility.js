@@ -1,7 +1,12 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
 export const unitTypes = ["APARTMENT", "SHOP"];
+export const paymentReasons = ["INSTALLMENT", "BOOKING", "DEVELOPMENT", "ADJUSTMENT"];
+export const CHEQUE = "CHEQUE";
+export const CASH = "CASH";
+export const PAY_ORDER = "PAY_ORDER";
+export const CUSTOM = "CUSTOM";
 export const PAYMENT_PLANS_TYPE = ["INSTALLMENT", "ONE_TIME_PAYMENT"];
-export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CUSTOM"];
+export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE" , "CUSTOM"];
 export const MONTH_LABELS = [
   "January",
   "February",

@@ -181,8 +181,8 @@ export default function BookingList() {
     history.push(`/dashboard/customer-account/?cId=${customer.customerId}`);
   };
 
-  const handleEdit = (floor) => {
-    console.log("Edit Floor:", floor);
+  const handleEdit = (booking) => {
+    history.push(`/dashboard/update-booking/${booking.id}`);
   };
 
   const handleDelete = (floor) => {

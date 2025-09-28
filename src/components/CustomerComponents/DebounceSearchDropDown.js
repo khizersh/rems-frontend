@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 
 const DebouncedSearchDropdown = ({
   setSearch,
+  search,
   setData,
   dataList = [],
   placeholder = "Search...",
   delay = 3000,
-  label= ""
+  label = "",
+  defaultSelection = "",
+  noChange = false
 }) => {
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -29,7 +32,13 @@ const DebouncedSearchDropdown = ({
     }, delay);
 
     return () => clearTimeout(handler);
-  }, [query, delay, setSearch]);
+  }, [query, delay, search]);
+
+  useEffect(() => {
+    if (defaultSelection) {
+      setQuery(defaultSelection);
+    }
+  }, [defaultSelection]);
 
   const handleSelect = (item) => {
     setQuery(item.name);
@@ -61,7 +70,7 @@ const DebouncedSearchDropdown = ({
           {dataList.map((item, index) => (
             <li
               key={index}
-              onClick={() => handleSelect(item)}
+              onClick={() => !noChange && handleSelect(item)}
               className="px-3 py-2 text-blueGray-500 text-sm hover:bg-blue-100 cursor-pointer transition-all duration-150"
             >
               {item.name}

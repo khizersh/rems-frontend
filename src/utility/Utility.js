@@ -1,12 +1,17 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
 export const unitTypes = ["APARTMENT", "SHOP"];
-export const paymentReasons = ["INSTALLMENT", "BOOKING", "DEVELOPMENT", "ADJUSTMENT"];
+export const paymentReasons = [
+  "INSTALLMENT",
+  "BOOKING",
+  "DEVELOPMENT",
+  "ADJUSTMENT",
+];
 export const CHEQUE = "CHEQUE";
 export const CASH = "CASH";
 export const PAY_ORDER = "PAY_ORDER";
 export const CUSTOM = "CUSTOM";
 export const PAYMENT_PLANS_TYPE = ["INSTALLMENT", "ONE_TIME_PAYMENT"];
-export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE" , "CUSTOM"];
+export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
 export const MONTH_LABELS = [
   "January",
   "February",
@@ -207,3 +212,20 @@ export function generateBookingHtml(data) {
 }
 
 export const TRANSACTION_TYPES = ["CREDIT", "DEBIT", "DEBIT_CREDIT"];
+
+export function formatPaymentSchedule(scheduleData) {
+  if (!scheduleData?.monthWisePaymentList?.length) return [];
+
+  return [...scheduleData.monthWisePaymentList]
+    .sort((a, b) => a.fromMonth - b.fromMonth) // ✅ sort by starting month
+    .map((data) => {
+      const totalMonths = data.toMonth - data.fromMonth + 1;
+      const totalAmount = totalMonths * data.amount;
+
+      return {
+        description: `Monthly Installment For ${data.fromMonth} - ${data.toMonth} Month x ${data.amount}`,
+        amount: totalAmount,
+      };
+    });
+}
+

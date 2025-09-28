@@ -11,10 +11,13 @@ import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js";
-import PaymentModal from "./component/PaymentModal.js";
+import PaymentModalAdd from "./component/PaymentModalAdd.js";
+import PaymentModalFetch from "./component/PaymentModalFetch.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
-import { getOrdinal } from "../../utility/Utility.js";
+import { formatPaymentSchedule, getOrdinal } from "../../utility/Utility.js";
+import PaymentSchedule from "components/PaymentSchedule/PaymentSchedule.js";
+import Card from "views/analytics/Card.js";
 
 export default function CustomerPayment() {
   const {
@@ -22,19 +25,21 @@ export default function CustomerPayment() {
     setLoading,
     notifyError,
     notifySuccess,
+    notifyWarning,
     backdrop,
     setBackdrop,
   } = useContext(MainContext);
   const location = useLocation();
   const { customerAccountId } = useParams();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isFormModalOpenFetch, setIsFormModalOpenFetch] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [customerAccountFilterId, setCustomerAccountFilterId] = useState(""); // The ID of the selected project or floor
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [filteredId, setFilteredId] = useState("");
+  const [selectedPaymentFetch, setSelectedPaymentFetch] = useState(null);
   const [filterProject, setFilterProject] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -58,12 +63,14 @@ export default function CustomerPayment() {
     organizationAccountDetails: [],
   });
   const [customerAccountList, setCustomerAccountList] = useState([]);
+  const [customerAccount, setCustomerAccount] = useState(null);
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const [customerPaymentList, setCustomerPaymentList] = useState([]);
+  const [scheduleBreakdown, setScheduleBreakdown] = useState([]);
   const pageSize = 10;
 
   useEffect(() => {
-    fetchCustomerPayments();
+    fetchCustomerPaymentsAndScheduleAndCustomerAccount();
   }, [selectedCustomerAccount, page]);
 
   useEffect(() => {
@@ -96,8 +103,6 @@ export default function CustomerPayment() {
         request
       );
 
-      console.log("response :: ", response);
-
       setCustomerAccountList(response.data || []);
     } catch (err) {
       // notifyError(err.message, err.data, 4000);
@@ -106,16 +111,96 @@ export default function CustomerPayment() {
     }
   };
 
-  const fetchCustomerPayments = async () => {
+  const fetchPaymentSchedule = async (accountId) => {
     try {
-      if (!customerAccountId && !selectedCustomerAccount) {
-        return;
+      setLoading(true);
+      let paymentRequest = {
+        id: accountId,
+        paymentScheduleType: "CUSTOMER",
+      };
+      const responsePayment = await httpService.post(
+        `/paymentSchedule/getByCustomerAccount`,
+        paymentRequest
+      );
+
+      const scheduleData = responsePayment?.data;
+      const obj = [];
+      var remaining = scheduleData.totalAmount;
+      if (scheduleData.downPayment > 0) {
+        remaining -= scheduleData.downPayment;
+        obj.push({
+          description: "Down Payment / Booking",
+          amount: scheduleData.downPayment,
+          remaining: remaining,
+        });
+      }
+      if (scheduleData.monthWisePaymentList?.length > 0) {
+        const array = formatPaymentSchedule(scheduleData);
+
+        array.map((formattedMonthly) => {
+          obj.push({
+            ...formattedMonthly,
+            remaining: (remaining -= formattedMonthly.amount),
+          });
+        });
+
+        if (scheduleData.quarterlyPayment > 0) {
+          const totalAmount = querterlyCount * scheduleData.quarterlyPayment;
+          remaining -= totalAmount;
+          const querterlyCount = Math.floor(scheduleData.durationInMonths / 3);
+
+          if (querterlyCount > 0)
+            obj.push({
+              description: `Quarterly Payment / Booking ( ${scheduleData.quarterlyPayment} x ${querterlyCount} )`,
+              amount: totalAmount,
+              remaining: remaining,
+            });
+        }
+
+        if (scheduleData.halfYearlyPayment > 0) {
+          const halfYearlyCount = Math.floor(scheduleData.durationInMonths / 6);
+          const totalAmount = halfYearlyCount * scheduleData.halfYearlyPayment;
+          remaining -= totalAmount;
+
+          if (halfYearlyCount > 0)
+            obj.push({
+              description: `Half Yearly Payment / Booking ( ${scheduleData.halfYearlyPayment} x ${halfYearlyCount} )`,
+              amount: totalAmount,
+              remaining: remaining,
+            });
+        }
+
+        if (scheduleData.yearlyPayment > 0) {
+          const yearlyCount = Math.floor(scheduleData.durationInMonths / 12);
+          const totalAmount = yearlyCount * scheduleData.yearlyPayment;
+          remaining -= totalAmount;
+          if (yearlyCount > 0)
+            obj.push({
+              description: `Half Yearly Payment / Booking ( ${scheduleData.yearlyPayment} x ${yearlyCount} )`,
+              amount: totalAmount,
+              remaining: remaining,
+            });
+        }
+
+        if (scheduleData.onPossessionPayment > 0) {
+          remaining -= scheduleData.onPossessionPayment;
+          obj.push({
+            description: "On Possession",
+            amount: scheduleData.onPossessionPayment,
+            remaining: remaining,
+          });
+        }
       }
 
-      let accountId = selectedCustomerAccount
-        ? selectedCustomerAccount
-        : customerAccountId;
+      setScheduleBreakdown(obj);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchCustomerPaymentList = async (accountId) => {
+    try {
       setLoading(true);
       const requestBody = {
         id: accountId,
@@ -133,8 +218,40 @@ export default function CustomerPayment() {
       setCustomerPaymentList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCustomerPaymentsAndScheduleAndCustomerAccount = async () => {
+    try {
+      if (!customerAccountId && !selectedCustomerAccount) {
+        return;
+      }
+
+      let accountId = selectedCustomerAccount
+        ? selectedCustomerAccount
+        : customerAccountId;
+
+      setLoading(true);
+      fetchCustomerPaymentList(accountId);
+      fetchPaymentSchedule(accountId);
+      fetchCustomerAccount(accountId);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
+    } finally {
+    }
+  };
+
+  const fetchCustomerAccount = async (accountId) => {
+    try {
+      setLoading(true);
+      const response = await httpService.get(
+        `/customerAccount/getById/${accountId}`
+      );
+      setCustomerAccount(response?.data);
+    } catch (error) {
     } finally {
       setLoading(false);
     }
@@ -157,7 +274,6 @@ export default function CustomerPayment() {
 
   const changeSelectedProjected = (projectId) => {
     if (projectId) {
-      setFilteredId(projectId);
       setFilterProject(projectId);
       fetchCustomerAccountList(projectId, "project");
     }
@@ -177,7 +293,6 @@ export default function CustomerPayment() {
   const tableColumns = [
     { header: "Amount", field: "amount" },
     { header: "Received Amount", field: "receivedAmount" },
-    { header: "Payment Type", field: "paymentType" },
     {
       header: "State",
       field: "paymentStatus",
@@ -194,10 +309,14 @@ export default function CustomerPayment() {
     },
   ];
 
-  const handlePaymentModal = (customerPayment) => {
-    setSelectedPayment(customerPayment);
+  // PAYMENT CHANGE WORKING HERE
+  const handlePaymentModalAdd = () => {
+    if (customerAccount == null) {
+      return notifyWarning("Please select Account!");
+    }
     toggleModal();
   };
+
   const handleDetailModal = (data) => {
     const name = customerAccountList.find(
       (custom) => custom.accountId == selectedCustomerAccount
@@ -223,8 +342,6 @@ export default function CustomerPayment() {
     setSelectedPayment(formattedPaymentInfo);
     toggleModalDetail();
   };
-
-  const handleEdit = (customerPayment) => {};
 
   const handlePrintSlip = async (customerPayment) => {
     const customer = customerAccountList.find(
@@ -403,7 +520,22 @@ export default function CustomerPayment() {
   `;
   };
 
-  const handleDelete = (customerPayment) => {};
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsFormModalOpen(!isFormModalOpen);
+    onResetForm();
+    onResetFormDetail();
+  };
+
+  const toggleModalFetch = (payment) => {
+    console.log("clicked payment :: ", payment);
+
+    setSelectedPaymentFetch(payment);
+    setBackdrop(!backdrop);
+    setIsFormModalOpenFetch(!isFormModalOpenFetch);
+    onResetForm();
+    onResetFormDetail();
+  };
 
   const actions = [
     {
@@ -413,36 +545,22 @@ export default function CustomerPayment() {
       className: "text-green-600",
     },
     {
-      icon: BsFillSave2Fill,
-      onClick: handlePaymentModal,
-      title: "Payment",
-      className: "text-green-600",
-    },
-    {
       icon: MdPrint,
       onClick: handlePrintSlip,
       title: "Print Slip",
       className: "yellow",
     },
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
+      icon: FaMoneyBillTrendUp,
+      onClick: toggleModalFetch,
+      title: "View Payments",
+      className: "yellow",
     },
   ];
 
   const toggleModalDetail = () => {
     setBackdrop(!backdrop);
     setIsModalOpen(!isModalOpen);
-  };
-
-  const toggleModal = () => {
-    setBackdrop(!backdrop);
-    setIsFormModalOpen(!isFormModalOpen);
-    onResetForm();
-    onResetFormDetail();
   };
 
   const handleSubmit = async () => {
@@ -466,11 +584,15 @@ export default function CustomerPayment() {
         (customer) => customer.accountId == filterId
       );
 
+      let accountId = selectedCustomerAccount
+        ? selectedCustomerAccount
+        : customerAccountId;
+
       const orgAccountList = payInstallment.organizationAccountDetails?.map(
         (orgAccount) => {
           return {
             ...orgAccount,
-            customerAccountId: selectedPayment.customerAccountId,
+            customerAccountId: accountId,
             customerPaymentId: selectedPayment.id,
             customerId: customerObj?.customerId,
           };
@@ -486,8 +608,8 @@ export default function CustomerPayment() {
       );
 
       notifySuccess(response.responseMessage, 4000);
-      await fetchCustomerPayments();
-      // toggleModal();
+      await fetchCustomerPaymentsAndScheduleAndCustomerAccount();
+      toggleModal();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -662,22 +784,48 @@ export default function CustomerPayment() {
         data={selectedPayment}
         title="Customer Details"
       />
-      <PaymentModal
-        selectedPayment={selectedPayment}
-        isOpen={isFormModalOpen}
-        onClose={toggleModal}
-        formTitle="Installment Payment Form"
-        fields={payInstallment}
-        onChangeForm={onChangeForm}
-        onChangeFormDetail={onChangeFormDetail}
-        onChangeAccountDetail={onChangeAccountDetail}
-        onAddDetailRow={onAddDetailRow}
-        onAddAccountRow={onAddAccountRow}
-        onRemoveDetailRow={onRemoveDetailRow}
-        onRemoveAccountRow={onRemoveAccountRow}
-        onPrintDetail={onPrintDetail}
-        onSubmit={handleSubmit}
-      />
+      {customerAccount != null ? (
+        <PaymentModalAdd
+          selectedPayment={customerAccount}
+          isOpen={isFormModalOpen}
+          onClose={toggleModal}
+          formTitle="Installment Payment Form"
+          fields={payInstallment}
+          onChangeForm={onChangeForm}
+          onChangeFormDetail={onChangeFormDetail}
+          onChangeAccountDetail={onChangeAccountDetail}
+          onAddDetailRow={onAddDetailRow}
+          onAddAccountRow={onAddAccountRow}
+          onRemoveDetailRow={onRemoveDetailRow}
+          onRemoveAccountRow={onRemoveAccountRow}
+          onPrintDetail={onPrintDetail}
+          onSubmit={handleSubmit}
+        />
+      ) : (
+        <></>
+      )}
+
+      {selectedPaymentFetch != null ? (
+        <PaymentModalFetch
+          selectedPayment={selectedPaymentFetch}
+          isOpen={isFormModalOpenFetch}
+          onClose={toggleModalFetch}
+          formTitle="Installment Payment Form"
+          fields={payInstallment}
+          onChangeForm={onChangeForm}
+          onChangeFormDetail={onChangeFormDetail}
+          onChangeAccountDetail={onChangeAccountDetail}
+          onAddDetailRow={onAddDetailRow}
+          onAddAccountRow={onAddAccountRow}
+          onRemoveDetailRow={onRemoveDetailRow}
+          onRemoveAccountRow={onRemoveAccountRow}
+          onPrintDetail={onPrintDetail}
+          onSubmit={handleSubmit}
+        />
+      ) : (
+        <></>
+      )}
+
       <div className="container mx-auto p-4">
         <div className="flex flex-wrap py-3 md:justify-content-between">
           <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
@@ -714,11 +862,88 @@ export default function CustomerPayment() {
           </div>
         </div>
       </div>
+      {console.log("customerAccount :: ", customerAccount)}
 
       {/* Dynamic Table */}
       <div className="container mx-auto p-4">
+        {/* Month-wise Table */}
+        <div className="schedule-table-section">
+          <h2>📆 Payment Schedule Breakdown</h2>
+          <table className="schedule-table">
+            <thead>
+              <tr>
+                <th>S No.</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Balance Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scheduleBreakdown.length > 0 ? (
+                <>
+                  {scheduleBreakdown.map((breakdown, index) => (
+                    <tr>
+                      <td>{index + 1}</td>
+                      <td>{breakdown.description}</td>
+                      <td>{parseFloat(breakdown.amount).toLocaleString()}</td>
+                      <td>
+                        {parseFloat(breakdown.remaining).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              ) : (
+                <></>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-5">
+        <div className="flex flex-wrap justify-between">
+          <div className="lg:w-3/12 pr-3">
+            <Card
+              props={{
+                statSubtitle: "Total Amount",
+                statTitle: parseFloat(
+                  customerAccount?.totalAmount
+                ).toLocaleString(),
+                statIconName: "far fa-chart-bar",
+                statIconColor: "bg-red-500",
+              }}
+            />
+          </div>
+          <div className="lg:w-3/12 pl-3">
+            <Card
+              props={{
+                statSubtitle: "Total Paid Amount",
+                statTitle: parseFloat(
+                  customerAccount?.totalPaidAmount
+                ).toLocaleString(),
+                statIconName: "far fa-chart-bar",
+                statIconColor: "bg-red-500",
+              }}
+            />
+          </div>
+          <div className="lg:w-3/12 pl-3">
+            <Card
+              props={{
+                statSubtitle: "Total Balance Amount",
+                statTitle: parseFloat(
+                  customerAccount?.totalBalanceAmount
+                ).toLocaleString(),
+                statIconName: "far fa-chart-bar",
+                statIconColor: "bg-red-500",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto p-4">
         <DynamicTableComponent
-          fetchDataFunction={fetchCustomerPayments}
+          fetchDataFunction={fetchCustomerPaymentsAndScheduleAndCustomerAccount}
           setPage={setPage}
           page={page}
           data={customerPaymentList}
@@ -729,6 +954,12 @@ export default function CustomerPayment() {
           loading={loading}
           actions={actions}
           title={customerName ? customerName + " - Payments" : ""}
+          addButton={{
+            icon: BsFillSave2Fill,
+            onClick: handlePaymentModalAdd,
+            title: "Payment",
+            className: "text-green-600",
+          }}
         />
       </div>
     </>

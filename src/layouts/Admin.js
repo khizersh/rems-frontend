@@ -45,6 +45,9 @@ import ProjectAnalytics from "views/analytics/ProjectAnalytics";
 import RevenueAnalytics from "views/analytics/RevenueAnalytics";
 import AddExpenseType from "views/expense/AddExpenseType";
 import ExpenseTypeList from "views/expense/ExpenseTypeList";
+import UpdateBooking from "views/booking/UpdateBooking";
+import CustomerSchedule from "views/customer/CustomerSchedule";
+import AddUnit from "views/projects/components/AddUnit";
 
 export default function Admin() {
   return (
@@ -81,15 +84,18 @@ export default function Admin() {
               <Route path="/dashboard/update-project/:projectId" exact component={ProjectUpdate} />
               <Route path="/dashboard/floor/:projectId" exact component={FloorList} />
               <Route path="/dashboard/unit/:floorId" exact component={UnitList} />
+              {/* <Route path="/dashboard/add-unit/:floorId" exact component={AddUnit} /> */}
               <Route path="/dashboard/add-project" exact component={ProjectAdd} />
               <Route path="/dashboard/customers" exact component={CustomerList} />
               <Route path="/dashboard/add-customers" exact component={AddCustomer} />
               <Route path="/dashboard/update-customer/:customerId" exact component={UpdateCustomer} />
               <Route path="/dashboard/customer-account" exact component={CustomerAccount} />
               <Route path="/dashboard/customer-ledger" exact component={CustomerLedger} />
+              <Route path="/dashboard/customer-schedule/:customerAccountId" exact component={CustomerSchedule} />
               <Route path="/dashboard/customer-payment/:customerAccountId" exact component={CustomerPayment} />
               <Route path="/dashboard/booking" exact component={BookingList} />
               <Route path="/dashboard/add-booking" exact component={AddBooking} />
+              <Route path="/dashboard/update-booking/:bookingId" exact component={UpdateBooking} />
               <Route path="/dashboard/map" exact component={Maps} />
               <Route path="/dashboard/settings" exact component={Settings} />
               <Route path="/dashboard/tables" exact component={Tables} />

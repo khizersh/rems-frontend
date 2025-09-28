@@ -8,8 +8,9 @@ import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDr
 import { getOrdinal } from "utility/Utility.js";
 import { generateBookingHtml } from "utility/Utility.js";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min.js";
 
-export default function AddBooking() {
+export default function UpdateBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
     useContext(MainContext);
   const [customerList, setCustomerList] = useState([]);
@@ -19,6 +20,7 @@ export default function AddBooking() {
     durationInMonths: 0,
     actualAmount: 0,
     miscellaneousAmount: 0,
+    developmentAmount: 0,
     totalAmount: 0,
     downPayment: 0,
     quarterlyPayment: 0,
@@ -34,6 +36,7 @@ export default function AddBooking() {
       },
     ],
   });
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [project, setProject] = useState("-");
   const [floor, setFloor] = useState("-");
@@ -54,10 +57,12 @@ export default function AddBooking() {
     createdDate: new Date().toISOString().slice(0, 16),
     updatedDate: null,
   });
+  const { bookingId } = useParams();
 
   useEffect(() => {
     fetchCustomers(search);
     fetchProjects();
+    bookingDetails();
   }, []);
 
   const resetState = () => {
@@ -65,7 +70,6 @@ export default function AddBooking() {
       durationInMonths: 0,
       actualAmount: 0,
       miscellaneousAmount: 0,
-      developmentAmount: 0,
       totalAmount: 0,
       downPayment: 0,
       paymentPlanType: "",
@@ -138,7 +142,7 @@ export default function AddBooking() {
     try {
       let request = {
         id: id,
-        paymentScheduleType: "BUILDER",
+        paymentScheduleType: "CUSTOMER",
       };
       const response = await httpService.post(
         `/paymentSchedule/getByUnit`,
@@ -176,8 +180,6 @@ export default function AddBooking() {
   };
 
   const onChangeCustomer = (customer) => {
-    console.log("customer :: ", customer);
-    
     if (customer) {
       setSelectedCustomer(customer);
     }
@@ -185,6 +187,35 @@ export default function AddBooking() {
 
   const onChangeCreatedDate = (e) => {
     setBooking({ ...booking, createdDate: e.target.value });
+  };
+
+  const bookingDetails = async () => {
+    try {
+      const response = await httpService.get(
+        `/booking/getDetailById/${bookingId}`
+      );
+
+      const unit = response?.data?.unit;
+      const customer = response?.data?.customer;
+
+      console.log("unit :: ", unit);
+      console.log("customer :: ", customer);
+
+      changeSelectedUnit(unit?.id);
+      setFilterProject(customer?.projectId);
+      setFilterFloor(customer?.floorId);
+      fetchFloors(customer?.projectId);
+      fetchUnits(customer?.floorId);
+      setSelectedCustomer({
+        customerId: customer.customerId,
+        name: customer.name,
+      });
+
+      // onChangeCustomer({
+      //   customerId: customer.customerId,
+      //   name: customer.name,
+      // });
+    } catch (error) {}
   };
 
   const createBooking = async (e) => {
@@ -200,12 +231,14 @@ export default function AddBooking() {
     updatedBooking.projectId = filterProject;
     updatedBooking.floorId = filterFloor;
     updatedBooking.organizationId = organization.organizationId;
-    delete paymentSchedule.id;
     updatedBooking.paymentSchedule = paymentSchedule;
+
+    console.log("updatedBooking :: ",updatedBooking);
+    
 
     setLoading(true);
     try {
-      const response = await httpService.post(`/booking/add`, updatedBooking);
+      const response = await httpService.post(`/booking/update`, updatedBooking);
       notifySuccess(response.responseMessage, 4000);
       resetState();
     } catch (err) {
@@ -245,8 +278,11 @@ export default function AddBooking() {
   const fetchUnits = async (floorId) => {
     try {
       const response = await httpService.get(
-        `/unit/getIdSerialByFloorId/${floorId}`
+        `/unit/getAllIdSerialByFloorId/${floorId}`
       );
+
+      console.log("response :: ", response);
+
       setUnitList(response.data || []);
     } catch (err) {
       notifyError("Failed to load floors", 4000);
@@ -261,6 +297,8 @@ export default function AddBooking() {
   };
 
   const changeSelectedFloor = (floorId) => {
+    console.log("floorId :: ", floorId);
+
     if (floorId) {
       setFilterFloor(floorId);
       fetchUnits(floorId);
@@ -270,7 +308,7 @@ export default function AddBooking() {
   const changeSelectedUnit = (unitId) => {
     if (unitId) {
       fetchPaymentScheduleByUnitId(unitId);
-      fetchUnitDetailsByUnitId(unitId);
+      // fetchUnitDetailsByUnitId(unitId);
     }
 
     setSelectedUnit(unitId);
@@ -310,6 +348,8 @@ export default function AddBooking() {
                             placeholder="Search customers..."
                             label="Select Customer"
                             delay={1500}
+                            defaultSelection={selectedCustomer?.name}
+                            noChange={true}
                           />
                         </div>
                       </div>
@@ -321,9 +361,6 @@ export default function AddBooking() {
                         </label>
                         <select
                           value={filterProject}
-                          onChange={(e) =>
-                            changeSelectedProjected(e.target.value)
-                          }
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Projects</option>
@@ -343,7 +380,6 @@ export default function AddBooking() {
                         </label>
                         <select
                           value={filterFloor}
-                          onChange={(e) => changeSelectedFloor(e.target.value)}
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Floors</option>
@@ -363,7 +399,6 @@ export default function AddBooking() {
                         </label>
                         <select
                           value={selectedUnit}
-                          onChange={(e) => changeSelectedUnit(e.target.value)}
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Units</option>
@@ -523,7 +558,7 @@ export default function AddBooking() {
                         </label>
                         <input
                           id="miscellaneousAmount"
-                          type="text"
+                          type="number"
                           name="miscellaneousAmount"
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
@@ -532,7 +567,8 @@ export default function AddBooking() {
                       </div>
                     </div>
 
-                    {/* Development Amount */}
+
+                            {/* Development Amount */}
                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
@@ -543,7 +579,7 @@ export default function AddBooking() {
                         </label>
                         <input
                           id="developmentAmount"
-                          type="text"
+                          type="number"
                           name="developmentAmount"
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
@@ -569,7 +605,8 @@ export default function AddBooking() {
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           value={
                             Number(paymentSchedule.actualAmount) +
-                            Number(paymentSchedule.miscellaneousAmount)
+                            Number(paymentSchedule.miscellaneousAmount) + 
+                            Number(paymentSchedule.developmentAmount) 
                           }
                         />
                       </div>

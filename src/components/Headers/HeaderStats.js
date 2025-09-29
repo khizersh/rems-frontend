@@ -37,8 +37,8 @@ export default function HeaderStats() {
   const [stats, setStats] = useState({
     project: {
       title: "Project",
-      value: "36,456",
-      percentage: "34",
+      value: "0",
+      percentage: "0",
       tenure: "30 last days",
       onChange: (value) => {
         setStats((prevState) => ({

@@ -1,12 +1,9 @@
-import React, { Component, useState } from "react";
+import React from "react";
 import {
   FaAngleDoubleLeft,
   FaAngleLeft,
   FaAngleRight,
   FaAngleDoubleRight,
-  FaEye,
-  FaPen,
-  FaTrashAlt,
 } from "react-icons/fa";
 import "../../assets/styles/projects/project.css";
 import Tippy from "@tippyjs/react";
@@ -28,7 +25,7 @@ export default function DynamicTableComponent({
   totalPages = 0,
   totalElements = 0,
   loading = false,
-  actions = {},
+  actions = [],
   title,
   onChangeDate,
   startDate,
@@ -36,9 +33,6 @@ export default function DynamicTableComponent({
   changeTransactionType,
   selectTransactionType,
 }) {
-  // const [dateRange, setDateRange] = useState([null, null]);
-  // const [startDate, endDate] = dateRange;
-
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
@@ -82,7 +76,7 @@ export default function DynamicTableComponent({
                   {col.header}
                 </th>
               ))}
-              {Object.keys(actions).length > 0 && (
+              {actions.length > 0 && (
                 <th className="px-6 py-3 text-xs font-semibold text-left">
                   Actions
                 </th>
@@ -111,20 +105,31 @@ export default function DynamicTableComponent({
                   } project-table-rows`}
                 >
                   <td className="px-6 py-4">{page * pageSize + index + 1}</td>
-                  {columns.map((col, i) => (
-                    <td key={i} className="px-6 py-4">
-                      {col.render
-                        ? col.render(getNestedValue(item, col.field), item)
-                        : getNestedValue(item, col.field)}
-                    </td>
-                  ))}
+                  {columns.map((col, i) => {
+                    const rawValue = getNestedValue(item, col.field);
+                    let displayValue = rawValue;
+
+                    // ✅ Auto-format amounts if header contains "amount"
+                    if (col.header?.toLowerCase().includes("amount")) {
+                      const num = parseFloat(rawValue);
+                      displayValue = isNaN(num) ? "-" : num.toLocaleString();
+                    }
+
+                    return (
+                      <td key={i} className="px-6 py-4">
+                        {col.render
+                          ? col.render(displayValue, item)
+                          : displayValue}
+                      </td>
+                    );
+                  })}
 
                   {actions.length > 0 && (
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
-                        {actions.map((action, index) => {
+                        {actions.map((action, idx) => {
                           const IconComponent = action.icon;
-                          const tooltipId = `tooltip-${index}`;
+                          const tooltipId = `tooltip-${idx}`;
                           return (
                             <div key={tooltipId} className="relative">
                               <Tippy
@@ -133,7 +138,6 @@ export default function DynamicTableComponent({
                                 content={action.title}
                               >
                                 <button
-                                  key={tooltipId}
                                   onClick={() => action.onClick(item)}
                                   className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
                                 >

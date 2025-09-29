@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import "../../assets/styles/custom/custom.css"
+import "../../assets/styles/custom/custom.css";
 
 export default function CardStats({
   statSubtitle,
@@ -13,7 +13,7 @@ export default function CardStats({
   statIconColor,
   dataList,
   filterValue,
-  onChange
+  onChange,
 }) {
   return (
     <>
@@ -25,7 +25,7 @@ export default function CardStats({
                 {statSubtitle}
               </h5>
               <span className="font-semibold text-xl text-blueGray-700">
-                {statTitle}
+                {parseFloat(statTitle).toLocaleString()}
               </span>
             </div>
             <div className="relative w-auto pl-4 flex-initial">
@@ -40,14 +40,17 @@ export default function CardStats({
             </div>
           </div>
           <p className="flex flex-wrap justify-between text-sm text-blueGray-400 mt-4">
-            <p className={statPercentColor + " mr-2"} style={{marginTop :"11px"}}> 
+            <p
+              className={statPercentColor + " mr-2"}
+              style={{ marginTop: "11px" }}
+            >
               <i
                 className={
                   statArrow === "up"
                     ? "fas fa-arrow-up"
                     : statArrow === "down"
-                      ? "fas fa-arrow-down"
-                      : ""
+                    ? "fas fa-arrow-down"
+                    : ""
                 }
               ></i>{" "}
               {statPercent}%
@@ -58,14 +61,15 @@ export default function CardStats({
                 onChange={(e) => onChange(e.target.value)}
                 className="stats-selectbox  px-1 "
               >
-                {dataList && dataList.length > 0 && dataList.map((data) => (
-                  <option key={data.value} value={data.value}>
-                    {data.title}
-                  </option>
-                ))}
+                {dataList &&
+                  dataList.length > 0 &&
+                  dataList.map((data) => (
+                    <option key={data.value} value={data.value}>
+                      {data.title}
+                    </option>
+                  ))}
               </select>
             </p>
-
           </p>
         </div>
       </div>

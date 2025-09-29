@@ -862,8 +862,6 @@ export default function CustomerPayment() {
           </div>
         </div>
       </div>
-      {console.log("customerAccount :: ", customerAccount)}
-
       {/* Dynamic Table */}
       <div className="container mx-auto p-4">
         {/* Month-wise Table */}
@@ -958,7 +956,7 @@ export default function CustomerPayment() {
             icon: BsFillSave2Fill,
             onClick: handlePaymentModalAdd,
             title: "Payment",
-            className: "text-green-600",
+            className: "bg-emerald-500",
           }}
         />
       </div>

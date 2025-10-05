@@ -1,11 +1,10 @@
 import { MainContext } from "context/MainContext";
 import React, { useContext, useState } from "react";
 import httpService from "utility/httpService";
-
+import { RiFolderReceivedFill } from "react-icons/ri";
 
 const AddOrganizationComponent = () => {
-
-     const { notifySuccess  , notifyError} = useContext(MainContext);
+  const { notifySuccess, notifyError } = useContext(MainContext);
 
   const [formData, setFormData] = useState({
     organizationId: "",
@@ -43,7 +42,10 @@ const AddOrganizationComponent = () => {
 
       console.log("requestBody :: ", requestBody);
 
-      const response = await httpService.post("/organizationAccount/createAccount", requestBody);
+      const response = await httpService.post(
+        "/organizationAccount/createAccount",
+        requestBody
+      );
 
       if (response.data) {
         setFormData({
@@ -124,8 +126,13 @@ const AddOrganizationComponent = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+              className="px-4 mt-4 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
             >
+              <RiFolderReceivedFill
+                className="w-5 h-5 inline-block "
+                style={{ paddingBottom: "3px", paddingRight: "5px" }}
+              />
+
               {loading ? "Submitting..." : "Add Account"}
             </button>
             {responseMessage && (

@@ -27,6 +27,7 @@ const PaymentModal = ({
     chequeDate: null,
     customerPaymentReason: null,
     createdDate: new Date().toISOString().slice(0, 16),
+    organizationAccountDetails : []
   });
 
   const [page, setPage] = useState(0);
@@ -49,14 +50,11 @@ const PaymentModal = ({
     }
   };
 
-
-
   useEffect(() => {
     if (selectedPayment?.id) {
       fetchPaymentDetails();
     }
   }, [selectedPayment?.id]);
-
 
   if (!isOpen) return null;
 
@@ -88,7 +86,6 @@ const PaymentModal = ({
       },
     },
   ];
-
 
   const pageSize = 10;
 

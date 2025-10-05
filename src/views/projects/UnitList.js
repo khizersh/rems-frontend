@@ -796,10 +796,11 @@ export default function UnitList() {
         loading={loading}
         title="Unit Details"
         actions={actions}
-        addButton={{
+        firstButton={{
           title: "Add Unit",
           onClick: toggleAdd,
           icon: HiMiniBuildingStorefront,
+          className: "bg-emerald-500",
         }}
       />
     </div>

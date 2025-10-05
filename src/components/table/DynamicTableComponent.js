@@ -26,7 +26,8 @@ export default function DynamicTableComponent({
   loading = false,
   actions = [],
   title,
-  addButton = null,
+  firstButton = null,
+  secondButton = null,
 }) {
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
@@ -34,20 +35,36 @@ export default function DynamicTableComponent({
       <div className="px-4 py-3 border-b flex justify-between items-center">
         <h3 className="font-semibold text-base text-gray-700">{title}</h3>
         <div>
-          {addButton && (
+          {firstButton && (
             <button
-              onClick={addButton.onClick}
-              className={`${addButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
+              onClick={firstButton.onClick}
+              className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
             >
-              {addButton.icon && (
-                <addButton.icon
+              {firstButton.icon && (
+                <firstButton.icon
                   className="w-5 h-5 inline-block"
                   style={{ paddingBottom: "3px", paddingRight: "5px" }}
                 />
               )}
-              {addButton.title}
+              {firstButton.title}
             </button>
           )}
+
+          {secondButton && (
+            <button
+              onClick={secondButton.onClick}
+              className={`${secondButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
+            >
+              {secondButton.icon && (
+                <secondButton.icon
+                  className="w-5 h-5 inline-block"
+                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                />
+              )}
+              {secondButton.title}
+            </button>
+          )}
+
           <button
             onClick={fetchDataFunction}
             className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded "
@@ -66,7 +83,9 @@ export default function DynamicTableComponent({
         <table className="w-full bg-transparent border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-6 py-3 text-xs font-semibold text-left">S.No</th>
+              <th className="px-6 py-3 text-xs font-semibold text-left">
+                S.No
+              </th>
               {columns.map((col, idx) => (
                 <th
                   key={idx}
@@ -99,22 +118,36 @@ export default function DynamicTableComponent({
               data.map((item, index) => (
                 <tr
                   key={index}
-                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} project-table-rows`}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } project-table-rows`}
                 >
                   <td className="px-6 py-4">{page * pageSize + index + 1}</td>
+
                   {columns.map((col, i) => {
                     const rawValue = getNestedValue(item, col.field);
                     let displayValue = rawValue;
 
-                    // Auto-format amounts if header contains "amount"
+                    // ✅ Format amount fields
                     if (col.header?.toLowerCase().includes("amount")) {
                       const num = parseFloat(rawValue);
                       displayValue = isNaN(num) ? "-" : num.toLocaleString();
                     }
 
+                    // ✅ Format date fields
+                    if (
+                      col.header?.toLowerCase().includes("date") &&
+                      typeof rawValue === "string" &&
+                      rawValue.includes("T")
+                    ) {
+                      displayValue = rawValue.split("T")[0];
+                    }
+
                     return (
                       <td key={i} className="px-6 py-4">
-                        {col.render ? col.render(displayValue, item) : displayValue}
+                        {col.render
+                          ? col.render(displayValue, item)
+                          : displayValue}
                       </td>
                     );
                   })}

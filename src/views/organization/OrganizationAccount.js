@@ -8,14 +8,16 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { RiFolderReceivedFill } from "react-icons/ri";
+import PaymentModalFundTransfer from "views/customer/component/FundTransferModal.js";
 
 export default function OrganizationAccount() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =
     useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenFt, setIsModalOpenFt] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
 
-  const { floorId } = useParams();
   const history = useHistory();
 
   const [accountList, setAccountList] = useState([]);
@@ -78,7 +80,7 @@ export default function OrganizationAccount() {
     toggleModal();
   };
 
-  const handleEdit = (floor) => {
+  const handleTransferFunds = (floor) => {
     console.log("Edit Floor:", floor);
     // Implement edit functionality
   };
@@ -96,6 +98,11 @@ export default function OrganizationAccount() {
     history.push(`/dashboard/organization-account-detail/${data.id}`);
   };
 
+  const toggleModalFt = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpenFt(!isModalOpenFt);
+  };
+
   const actions = [
     {
       icon: FaEye,
@@ -109,13 +116,6 @@ export default function OrganizationAccount() {
       title: "View Account Detail",
       className: "text-green-600",
     },
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
   ];
 
   const toggleModal = () => {
@@ -123,8 +123,23 @@ export default function OrganizationAccount() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const onClickAdd = () => {
+    history.push("/dashboard/add-organization-account");
+  };
+
+  const refreshTransferModal = () => {
+    fetchAccountList();
+    toggleModalFt();
+  };
+
   return (
     <div className="container mx-auto p-4">
+      <PaymentModalFundTransfer
+        isOpen={isModalOpenFt}
+        onClose={toggleModalFt}
+        formTitle="Fund Transfer Form"
+        refresh={refreshTransferModal}
+      />
       <DynamicDetailsModal
         isOpen={isModalOpen}
         onClose={toggleModal}
@@ -143,6 +158,18 @@ export default function OrganizationAccount() {
         loading={loading}
         title="Organization Account"
         actions={actions}
+        firstButton={{
+          onClick: onClickAdd,
+          className: "bg-emerald-500",
+          title: "Add Account",
+          icon: RiFolderReceivedFill,
+        }}
+        secondButton={{
+          onClick: toggleModalFt,
+          className: "bg-emerald-500",
+          title: "Transfer Funds",
+          icon: RiFolderReceivedFill,
+        }}
       />
     </div>
   );

@@ -30,9 +30,6 @@ export default function AddCustomer() {
     createdDate: "",
     updatedDate: null,
   });
-  const [filterProject, setFilterProject] = useState("");
-  const [filterFloor, setFilterFloor] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState(null);
 
   const resetState = () => {
     setCustomer({
@@ -62,7 +59,9 @@ export default function AddCustomer() {
   const fetchCustomerDetail = async () => {
     try {
       const response = await httpService.get(`/customer/${customerId}`);
-      setCustomer(response.data || []);
+      console.log("response :: ", response);
+
+      setCustomer(response.data || {});
     } catch (err) {
       notifyError("Failed to load projects", 4000);
     }
@@ -73,7 +72,7 @@ export default function AddCustomer() {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
-  const createCustomer = async (e) => {
+  const updateCustomer = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -107,7 +106,7 @@ export default function AddCustomer() {
         </div>
       </div>
       <div className="bg-white flex flex-wrap  py-3 mb-5">
-        <form onSubmit={createCustomer}>
+        <form onSubmit={updateCustomer}>
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5">
             <div className="w-full lg:w-12/12 px-4 mt-2">
               <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
@@ -127,6 +126,19 @@ export default function AddCustomer() {
                     onChange={changeCustomerFields}
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter name"
+                  />
+                </div>
+                <div className="w-full lg:w-6/12 px-4 mb-3">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={customer.email}
+                    onChange={changeCustomerFields}
+                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    placeholder="Enter email"
                   />
                 </div>
 

@@ -103,15 +103,7 @@ export default function OrganizationAccountDetail() {
       onClick: handleView,
       title: "View Detail",
       className: "text-green-600",
-    },
-
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
+    }
   ];
 
   const toggleModal = () => {

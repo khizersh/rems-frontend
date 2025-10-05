@@ -95,8 +95,8 @@ export default function CustomerAccount() {
 
       let responseArray = response?.data?.content;
 
-      console.log("responseArray :: ",responseArray);
-      
+      console.log("responseArray :: ", responseArray);
+
       setCustomerAccountList(responseArray || []);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -133,8 +133,7 @@ export default function CustomerAccount() {
         requestBody
       );
 
-      console.log("response?.data?.content :: ",response?.data?.content);
-      
+      console.log("response?.data?.content :: ", response?.data?.content);
 
       setCustomerAccountList(response?.data?.content || []);
       setTotalPages(response?.data?.totalPages || 0);
@@ -169,12 +168,15 @@ export default function CustomerAccount() {
     { header: "Project Name", field: "project.name" },
     { header: "Unit Serial No", field: "unit.serialNo" },
     { header: "Floor No", field: "unit.floorNo" },
-    { header: "Payment Type", field: "unit.paymentPlanType" },
-    { header: "Customer Amount", field: "totalAmount" },
+    { header: "Received Amount", field: "totalPaidAmount" },
+    { header: "Balance Amount", field: "totalBalanceAmount" },
+    { header: "Total Amount", field: "totalAmount" },
   ];
 
   const handleViewDetails = async (account) => {
     try {
+      console.log("account :: ", account);
+
       let paymentRequest = {
         id: account?.unit?.id,
         paymentScheduleType: "CUSTOMER",
@@ -183,7 +185,6 @@ export default function CustomerAccount() {
         `/paymentSchedule/getByUnit`,
         paymentRequest
       );
-
 
       const monthWisePaymentList =
         responsePayment?.data?.monthWisePaymentList?.map((month) => {
@@ -201,6 +202,7 @@ export default function CustomerAccount() {
             "Duration In Months": account.durationInMonths,
             "Actual Amount": account.actualAmount,
             "Miscellaneous Amount": account.miscellaneousAmount,
+            "Development Amount": account.developmentAmount,
             "Total Amount": account.totalAmount,
           },
 
@@ -208,11 +210,16 @@ export default function CustomerAccount() {
             "Down Payment": account.downPayment,
             "Quarterly Payment": account.quarterlyPayment,
             "Half Yearly": account.halfYearly,
-            Yearly: account.yearly,
+            Yearly: account.yearlyPayment,
             "On Possession Amount": account.onPosessionAmount,
           },
           "Monthly Payments": monthWisePaymentList,
         },
+        "Payment Details": {
+          "Total Paid Amount": account.totalPaidAmount,
+          "Total Remaining Amount": account.totalBalanceAmount,
+        },
+
         "Unit Details": {
           "Serial No": account.unit?.serialNo,
           "Square Foot": account.unit?.squareFoot,

@@ -154,10 +154,10 @@ export default function FloorList() {
   const onClickAddFloor = async () => {
     console.log("floor : ", floor);
 
-     setLoading(true);
+    setLoading(true);
     try {
       const response = await httpService.post(`/floor/addorUpdateFloor`, floor);
-      await fetchFloorList()
+      await fetchFloorList();
       notifySuccess(response.responseMessage, 4000);
       toggleAdd();
     } catch (err) {
@@ -165,7 +165,6 @@ export default function FloorList() {
     } finally {
       setLoading(false);
     }
-    
   };
 
   return (
@@ -237,10 +236,11 @@ export default function FloorList() {
         loading={loading}
         title="Floor Details"
         actions={actions}
-        addButton={{
+        firstButton={{
           title: "Add Floor",
           onClick: toggleAdd,
           icon: FaLayerGroup,
+          className: "bg-emerald-500",
         }}
       />
     </div>

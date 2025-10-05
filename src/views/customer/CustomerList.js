@@ -9,8 +9,14 @@ import { RiAccountPinBoxFill } from "react-icons/ri";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function CustomerList() {
-  const { loading, backdrop, setBackdrop, setLoading, notifyError } =
-    useContext(MainContext);
+  const {
+    loading,
+    backdrop,
+    setBackdrop,
+    setLoading,
+    notifyError,
+    notifySuccess,
+  } = useContext(MainContext);
   const location = useLocation();
 
   const history = useHistory();
@@ -118,8 +124,7 @@ export default function CustomerList() {
         dataList = response?.data?.content;
       }
 
-      console.log("response:: ",response);
-      
+      console.log("response:: ", response);
 
       setCustomerList(dataList || []);
       setTotalPages(response?.data?.totalPages || 0);
@@ -150,6 +155,7 @@ export default function CustomerList() {
 
   const tableColumns = [
     { header: "Name", field: "name" },
+    { header: "Email", field: "email" },
     { header: "Country", field: "country" },
     { header: "City", field: "city" },
     { header: "Units Count", field: "unitCount" },
@@ -200,23 +206,15 @@ export default function CustomerList() {
     toggleModal();
   };
 
-  const fetchPaymentScheduleByUnitId = async (id) => {
+  const handleSendEmail = async (customer) => {
     setLoading(true);
     try {
-      let request = {
-        id: id,
-        paymentScheduleType: "CUSTOMER",
-      };
       const response = await httpService.post(
-        `/paymentSchedule/getByUnit`,
-        request
+        `/customer/sendCredentialEmail`,
+        customer
       );
 
-      console.log("response payment:: ", response);
-
-      if (response.data) {
-        setPaymentSchedule(response.data || {});
-      }
+      notifySuccess(response?.data, 4000);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -226,9 +224,8 @@ export default function CustomerList() {
 
   const handleCustomerAccount = async (customer) => {
     try {
+      history.push(`/dashboard/customer-account?cId=${customer.customerId}`);
 
-      history.push(`/dashboard/customer-account?cId=${customer.customerId}`)
-      
       // const requestBody = {
       //   customerId: customer.customerId
       // };
@@ -295,7 +292,6 @@ export default function CustomerList() {
       //   },
       // };
 
-
       // setSelectedCustomerAccount(formattedCustomerAccount);
       // toggleModalAccount();
     } catch (err) {
@@ -305,10 +301,6 @@ export default function CustomerList() {
 
   const handleEdit = (customer) => {
     history.push(`/dashboard/update-customer/${customer.customerId}`);
-  };
-
-  const handleDelete = (floor) => {
-    console.log("Delete Floor:", floor);
   };
 
   const actions = [
@@ -325,12 +317,12 @@ export default function CustomerList() {
       className: "text-green-600",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
-    // {
-    //   icon: FaTrashAlt,
-    //   onClick: handleDelete,
-    //   title: "Delete",
-    //   className: "text-red-600",
-    // },
+    {
+      icon: FaTrashAlt,
+      onClick: handleSendEmail,
+      title: "Send Credential Email",
+      className: "text-green-600",
+    },
   ];
 
   const toggleModal = () => {

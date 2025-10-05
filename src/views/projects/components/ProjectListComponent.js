@@ -16,6 +16,8 @@ import {
 import "../../../assets/styles/projects/project.css";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { RxReload } from "react-icons/rx";
+import { BsBuildingFillAdd } from "react-icons/bs";
 
 export default function ProjectListComponent() {
   const history = useHistory();
@@ -123,6 +125,10 @@ export default function ProjectListComponent() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const addProject = () => {
+    history.push("/dashboard/add-project");
+  };
+
   return (
     <>
       <DynamicDetailsModal
@@ -137,12 +143,28 @@ export default function ProjectListComponent() {
             <h3 className="font-semibold text-base text-blueGray-700">
               Project List
             </h3>
-            <button
-              onClick={fetchProjects}
-              className="bg-indigo-500 text-white text-xs font-bold uppercase px-3 py-1 rounded"
-            >
-              Refresh
-            </button>
+            <div className="flex flex-wrap items-center justify-end">
+              <button
+                onClick={addProject}
+                className="bg-emerald-500 text-white text-xs font-bold uppercase mr-4 px-3 py-1 rounded"
+              >
+                <BsBuildingFillAdd
+                  className="w-5 h-5 inline-block "
+                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                />
+                Add Project
+              </button>
+              <button
+                onClick={fetchProjects}
+                className="bg-indigo-500 text-white text-xs font-bold uppercase px-3 py-1 rounded"
+              >
+                <RxReload
+                  className="w-5 h-5 inline-block"
+                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
 

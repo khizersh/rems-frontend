@@ -92,10 +92,11 @@ export default function ExpenseTypeList() {
           loading={loading}
           title="Expense Type"
           actions={actions}
-          addButton={{
+          firstButton={{
             title: "Add Type",
             onClick: addClick,
             icon: FaLayerGroup,
+            className: "bg-emerald-500",
           }}
         />
       </div>

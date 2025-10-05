@@ -6,7 +6,7 @@ import httpService from "utility/httpService";
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const { loading, setLoading, notifySuccess, notifyError, notifyWarning } =
+  const { loading, setLoading, notifySuccess, notifyError } =
     useContext(MainContext);
   const history = useHistory();
 
@@ -19,13 +19,13 @@ export default function Login() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setError("");
 
     try {
       const data = await httpService.post("/user/login", {
         username: formData.email,
         password: formData.password,
       });
-
 
       if (data?.data?.token) {
         localStorage.setItem("token", data.data.token);
@@ -42,12 +42,13 @@ export default function Login() {
             return side;
           }
         });
- 
-        if (data.data.r == "ur") history.push(homeurl?.url)
-        if (data.data.r == "ar") history.push("/dashboard");
+
+        if (data.data.r === "ur") history.push(homeurl?.url);
+        if (data.data.r === "ar") history.push("/dashboard");
       }
     } catch (err) {
-      notifyError(err.message, err.data, 4000);
+      notifyError(err.message || "Login failed", err.data, 4000);
+      setError("Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -59,13 +60,19 @@ export default function Login() {
         <div className="w-full lg:w-4/12 px-4">
           <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
             <div className="flex-auto px-4 lg:px-10 py-10 pt-0 my-6">
-              <form onSubmit={(e) => e.preventDefault()}>
+              {/* ✅ Form triggers handleSubmit on both Enter and button click */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}
+              >
                 <div className="relative w-full mb-3">
                   <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                     Email
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -90,12 +97,15 @@ export default function Login() {
                   />
                 </div>
 
-                {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+                {error && (
+                  <p className="text-red-500 text-sm mb-3 text-center">
+                    {error}
+                  </p>
+                )}
 
                 <div className="text-center mt-6">
                   <button
-                    type="button"
-                    onClick={handleSubmit}
+                    type="submit" // ✅ Works with Enter key as well
                     className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
                     disabled={loading}
                   >

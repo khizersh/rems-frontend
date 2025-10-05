@@ -13,10 +13,13 @@ import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js";
 import PaymentModalAdd from "./component/PaymentModalAdd.js";
 import PaymentModalFetch from "./component/PaymentModalFetch.js";
+import PaymentModalPostAccount from "./component/PaymentModalPostAccount.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
 import { formatPaymentSchedule, getOrdinal } from "../../utility/Utility.js";
 import PaymentSchedule from "components/PaymentSchedule/PaymentSchedule.js";
+import { MdAccountBalance } from "react-icons/md";
+
 import Card from "views/analytics/Card.js";
 
 export default function CustomerPayment() {
@@ -33,6 +36,8 @@ export default function CustomerPayment() {
   const { customerAccountId } = useParams();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isFormModalOpenFetch, setIsFormModalOpenFetch] = useState(false);
+  const [isFormModalOpenPostAccount, setIsFormModalOpenPostAccount] =
+    useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [customerAccountFilterId, setCustomerAccountFilterId] = useState(""); // The ID of the selected project or floor
@@ -40,6 +45,7 @@ export default function CustomerPayment() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [selectedPaymentFetch, setSelectedPaymentFetch] = useState(null);
+  const [selectedPaymentPostAccount, setSelectedPostAccount] = useState(null);
   const [filterProject, setFilterProject] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -60,6 +66,16 @@ export default function CustomerPayment() {
         createdDate: new Date().toISOString().slice(0, 16),
       },
     ],
+    organizationAccountDetails: [],
+  });
+
+  const [postAccountRequest, setPostAccountRequest] = useState({
+    id: 0,
+    receivedAmount: 0,
+    addedAmount: 0,
+    paymentType: "CASH",
+    serialNo: 0,
+    customerAccountId: null,
     organizationAccountDetails: [],
   });
   const [customerAccountList, setCustomerAccountList] = useState([]);
@@ -190,6 +206,14 @@ export default function CustomerPayment() {
             remaining: remaining,
           });
         }
+        if (scheduleData.developmentAmount > 0) {
+          remaining -= scheduleData.developmentAmount;
+          obj.push({
+            description: "Development Charges",
+            amount: scheduleData.onPossessionPayment,
+            remaining: remaining,
+          });
+        }
       }
 
       setScheduleBreakdown(obj);
@@ -291,8 +315,7 @@ export default function CustomerPayment() {
   };
 
   const tableColumns = [
-    { header: "Amount", field: "amount" },
-    { header: "Received Amount", field: "receivedAmount" },
+    { header: "Received Amount", field: "amount" },
     {
       header: "State",
       field: "paymentStatus",
@@ -307,6 +330,22 @@ export default function CustomerPayment() {
         return <span className={`${baseClass} text-gray-600`}>{value}</span>;
       },
     },
+    {
+      header: "Posted To Account",
+      field: "paymentAddedToAccount",
+      render: (value) => {
+        const baseClass = "font-semibold uppercase";
+        if (value === true)
+          return (
+            <span className={`${baseClass} text-center text-green-600`}>
+              Yes
+            </span>
+          );
+        if (value === false)
+          return <span className={`${baseClass} text-red-600`}>N0</span>;
+      },
+    },
+    { header: "Date", field: "createdDate" },
   ];
 
   // PAYMENT CHANGE WORKING HERE
@@ -528,13 +567,52 @@ export default function CustomerPayment() {
   };
 
   const toggleModalFetch = (payment) => {
-    console.log("clicked payment :: ", payment);
-
     setSelectedPaymentFetch(payment);
     setBackdrop(!backdrop);
     setIsFormModalOpenFetch(!isFormModalOpenFetch);
     onResetForm();
     onResetFormDetail();
+  };
+
+  const toggleModalPostAccount = (payment) => {
+    if (payment?.paymentAddedToAccount === true)
+      return notifyError("Already Posted To Account!", 4000);
+
+    setSelectedPostAccount(payment);
+    setBackdrop(!backdrop);
+    setIsFormModalOpenPostAccount(!isFormModalOpenPostAccount);
+    onResetForm();
+    onResetFormDetail();
+  };
+
+  const OnDelete = async (payment) => {
+    try {
+      if (payment?.paymentAddedToAccount === true)
+        return notifyError(
+          "Can't be deleted!",
+          "Already posted to account",
+          4000
+        );
+
+      setLoading(true);
+
+      const confirmed = window.confirm(
+        "Are you sure you want to delete This Payment?"
+      );
+      if (!confirmed) return;
+
+      const response = await httpService.post(
+        "/customerPayment/deleteUnPostedPayment",
+        payment
+      );
+
+      await fetchCustomerPaymentsAndScheduleAndCustomerAccount();
+      await notifySuccess(response?.data, 4000);
+    } catch (error) {
+      notifyError(error.err, "", 4000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const actions = [
@@ -548,13 +626,25 @@ export default function CustomerPayment() {
       icon: MdPrint,
       onClick: handlePrintSlip,
       title: "Print Slip",
-      className: "yellow",
+      className: "text-green-600",
     },
     {
       icon: FaMoneyBillTrendUp,
       onClick: toggleModalFetch,
       title: "View Payments",
-      className: "yellow",
+      className: "text-blue",
+    },
+    {
+      icon: BsFillSave2Fill,
+      onClick: toggleModalPostAccount,
+      title: "Post In Account",
+      className: "text-blue",
+    },
+    {
+      icon: FaTrashAlt,
+      onClick: OnDelete,
+      title: "Delete",
+      className: "text-red-500",
     },
   ];
 
@@ -610,6 +700,48 @@ export default function CustomerPayment() {
       notifySuccess(response.responseMessage, 4000);
       await fetchCustomerPaymentsAndScheduleAndCustomerAccount();
       toggleModal();
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostAccount = async () => {
+    payInstallment.id = selectedPaymentPostAccount.id;
+    setLoading(true);
+    try {
+      let filterId = selectedCustomerAccount || customerAccountId;
+      let customerObj = customerAccountList.find(
+        (customer) => customer.accountId == filterId
+      );
+
+      let accountId = selectedCustomerAccount
+        ? selectedCustomerAccount
+        : customerAccountId;
+
+      const orgAccountList = payInstallment.organizationAccountDetails?.map(
+        (orgAccount) => {
+          return {
+            ...orgAccount,
+            customerAccountId: accountId,
+            customerPaymentId: selectedPayment.id,
+            customerId: customerObj?.customerId,
+          };
+        }
+      );
+
+      payInstallment.organizationAccountDetails = orgAccountList;
+      payInstallment.customerAccountId = filterId;
+
+      const response = await httpService.post(
+        `/customerPayment/addPaymentToOrgAccount`,
+        payInstallment
+      );
+
+      notifySuccess(response.responseMessage, 4000);
+      await fetchCustomerPaymentsAndScheduleAndCustomerAccount();
+      toggleModalPostAccount();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -805,12 +937,33 @@ export default function CustomerPayment() {
         <></>
       )}
 
+      {selectedPaymentPostAccount != null ? (
+        <PaymentModalPostAccount
+          selectedPayment={selectedPaymentPostAccount}
+          isOpen={isFormModalOpenPostAccount}
+          onClose={toggleModalPostAccount}
+          formTitle="Post In Account Form"
+          fields={payInstallment}
+          onChangeForm={onChangeForm}
+          onChangeFormDetail={onChangeFormDetail}
+          onChangeAccountDetail={onChangeAccountDetail}
+          onAddDetailRow={onAddDetailRow}
+          onAddAccountRow={onAddAccountRow}
+          onRemoveDetailRow={onRemoveDetailRow}
+          onRemoveAccountRow={onRemoveAccountRow}
+          onPrintDetail={onPrintDetail}
+          onSubmit={handlePostAccount}
+        />
+      ) : (
+        <></>
+      )}
+
       {selectedPaymentFetch != null ? (
         <PaymentModalFetch
           selectedPayment={selectedPaymentFetch}
           isOpen={isFormModalOpenFetch}
           onClose={toggleModalFetch}
-          formTitle="Installment Payment Form"
+          formTitle="Installment Payment Detail"
           fields={payInstallment}
           onChangeForm={onChangeForm}
           onChangeFormDetail={onChangeFormDetail}
@@ -952,7 +1105,7 @@ export default function CustomerPayment() {
           loading={loading}
           actions={actions}
           title={customerName ? customerName + " - Payments" : ""}
-          addButton={{
+          firstButton={{
             icon: BsFillSave2Fill,
             onClick: handlePaymentModalAdd,
             title: "Payment",

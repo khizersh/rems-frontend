@@ -12,6 +12,7 @@ export const PAY_ORDER = "PAY_ORDER";
 export const CUSTOM = "CUSTOM";
 export const PAYMENT_PLANS_TYPE = ["INSTALLMENT", "ONE_TIME_PAYMENT"];
 export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
+export const EXPENSE_TYPE = ["CONSTRUCTION", "MISCELLANEOUS"];
 export const MONTH_LABELS = [
   "January",
   "February",

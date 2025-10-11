@@ -2,6 +2,7 @@ import { MainContext } from "context/MainContext";
 import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
+import { EXPENSE_TYPE } from "utility/Utility";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
@@ -15,6 +16,7 @@ const AddExpense = () => {
     expenseTypeId: "",
     organizationId: "",
     projectId: "",
+    expenseType: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,6 @@ const AddExpense = () => {
     }));
   };
 
-  // Auto-calculate totalAmount
   useEffect(() => {
     const paid = parseFloat(formData.amountPaid) || 0;
     const credit = parseFloat(formData.creditAmount) || 0;
@@ -90,12 +91,14 @@ const AddExpense = () => {
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
 
-      const response = await httpService.post(
-        "/expense/addExpense",
-        requestBody
-      );
+      console.log("requestBody :: ", requestBody);
 
-      notifySuccess(response.responseMessage, 4000);
+      // const response = await httpService.post(
+      //   "/expense/addExpense",
+      //   requestBody
+      // );
+
+      // notifySuccess(response.responseMessage, 4000);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -149,46 +152,100 @@ const AddExpense = () => {
         </h6>
       </div>
 
-      <form onSubmit={handleSubmit} className="py-4 bg-white rounded-12 shadow-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="py-4 bg-white rounded-12 shadow-lg"
+      >
         <div className="flex flex-wrap bg-white">
-          <div className="w-full lg:w-6/12 px-4 mb-3 border-right-grey">
-            <div className="px-4 mb-5">
-              <h2>Expense Detail</h2>
-            </div>
-            <div className="flex flex-wrap bg-white">
-              {selectFields.map(({ label, name, options }) => (
-                <div key={name} className="w-full lg:w-6/12 px-4 mb-3">
-                  <SelectField
-                    label={label}
-                    name={name}
-                    value={formData[name]}
-                    onChange={handleChange}
-                    options={options}
-                  />
-                </div>
-              ))}
+          <div className="w-full lg:w-12/12">
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-3/12 "></div>
+              <div className="w-full lg:w-6/12 ">
+                {" "}
+                <SelectField
+                  label={"Select Expense Type"}
+                  name={"expenseType"}
+                  value={formData["expenseType"]}
+                  onChange={handleChange}
+                  options={EXPENSE_TYPE.map((type) => {
+                    return {
+                      id: type,
+                      name: type,
+                    };
+                  })}
+                />
+              </div>
+              <div className="w-full lg:w-3/12 "></div>
             </div>
           </div>
+          {formData.expenseType == "CONSTRUCTION" ? (
+            <>
+              <div className="w-full lg:w-6/12 px-4 mb-3 border-right-grey">
+                <div className="px-4 mb-5">
+                  <h2>Expense Detail</h2>
+                </div>
 
-          <div className="w-full lg:w-6/12 px-4 mb-3">
-            <div className="px-4 mb-5">
-              <h2>Payment Detail</h2>
-            </div>
-            <div className="flex flex-wrap bg-white">
-              {inputFields.map(({ label, name, type, readOnly }) => (
-                <div key={name} className="w-full lg:w-4/12 px-4 mb-3">
-                  <InputField
-                    label={label}
-                    name={name}
-                    value={formData[name]}
+                <div className="flex flex-wrap bg-white">
+                  {selectFields.map(({ label, name, options }) => (
+                    <div key={name} className="w-full lg:w-6/12 px-4 mb-3">
+                      <SelectField
+                        label={label}
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        options={options}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="px-4 mb-5">
+                  <h2>Payment Detail</h2>
+                </div>
+                <div className="flex flex-wrap bg-white">
+                  {inputFields.map(({ label, name, type, readOnly }) => (
+                    <div key={name} className="w-full lg:w-4/12 px-4 mb-3">
+                      <InputField
+                        label={label}
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        type={type}
+                        readOnly={readOnly}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            formData.expenseType == "MISCELLANEOUS" && (
+              <>
+                {" "}
+                <div className="w-full lg:w-6/12 px-4 mt-3 border-right-grey">
+                  <SelectField
+                    label={"Select Account"}
+                    name={"organizationAccountId"}
+                    value={formData["organizationAccountId"]}
                     onChange={handleChange}
-                    type={type}
-                    readOnly={readOnly}
+                    options={dropdowns.accounts}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="w-full lg:w-6/12 px-4 mt-3 border-right-grey">
+                  <InputField
+                    label={"Amount"}
+                    name={"amountPaid"}
+                    value={formData["amountPaid"]}
+                    onChange={handleChange}
+                    type={"number"}
+                    readOnly={false}
+                  />
+                </div>
+              </>
+            )
+          )}
 
           <div className="w-full lg:w-12/12 px-4 text-right">
             <button

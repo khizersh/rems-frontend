@@ -33,13 +33,14 @@ export default function ProjectListComponent() {
   const [size, setSize] = useState(0);
 
   const pageSize = 10;
-  const organizationId = 1;
 
   const fetchProjects = async () => {
+    const organization =
+      JSON.parse(localStorage.getItem("organization")) || null;
     setLoading(true);
     try {
       const requestBody = {
-        organizationId,
+        organizationId: organization.organizationId,
         page,
         size: pageSize,
         sortBy: "createdDate",

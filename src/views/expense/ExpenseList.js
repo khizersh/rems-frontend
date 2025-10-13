@@ -9,6 +9,9 @@ import {
 import { FaDownload, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
+import { TbFileExport } from "react-icons/tb";
+import "../../assets/styles/responsive.css"
+import { BiSolidDetail } from "react-icons/bi";
 
 export default function ExpenseList() {
   const {
@@ -190,10 +193,11 @@ export default function ExpenseList() {
   };
 
   const tableColumns = [
-    { header: "Expense Title", field: "expenseTitle" },
-    { header: "vendorName", field: "vendorName" },
-    { header: "projectName", field: "projectName" },
-    { header: "orgAccountTitle", field: "orgAccountTitle" },
+    { header: "Title", field: "expenseTitle" },
+    { header: "Vendor ", field: "vendorName" },
+    { header: "Project", field: "projectName" },
+    { header: "Account", field: "orgAccountTitle" },
+    { header: "Comment", field: "comments" },
     {
       header: "State",
       field: "paymentStatus",
@@ -208,9 +212,9 @@ export default function ExpenseList() {
         return <span className={`${baseClass} text-gray-600`}>{value}</span>;
       },
     },
-    { header: "amountPaid", field: "amountPaid" },
-    { header: "creditAmount", field: "creditAmount" },
-    { header: "Total Amount", field: "totalAmount" },
+    { header: "Paid", field: "amountPaid" },
+    { header: "Credit", field: "creditAmount" },
+    { header: "Total", field: "totalAmount" },
   ];
 
   const handleView = (data) => {
@@ -221,6 +225,7 @@ export default function ExpenseList() {
         "Total Amount": data?.totalAmount,
         "Expense Title": data?.expenseTitle,
         "Project Name": data?.projectName,
+        "Comments": data?.comments,
       },
       "Vendor & Organization Account": {
         "Vendor Name": data?.vendorName,
@@ -258,13 +263,13 @@ export default function ExpenseList() {
       icon: FaEye,
       onClick: handleView,
       title: "View Detail",
-      className: "text-green-600",
+      className: "text-grey-detail",
     },
     {
-      icon: FaEye,
+      icon: BiSolidDetail,
       onClick: handleViewExpenseDetail,
       title: "View Payment Detail",
-      className: "text-green-600",
+      className: "text-blue-600",
     },
     {
       icon: FaDownload,
@@ -281,6 +286,9 @@ export default function ExpenseList() {
   const togglePaymentModal = () => {
     setBackdrop(!backdrop);
     setIsPaymentModalOpen(!isPaymentModalOpen);
+  };
+  const handleAddExpense = () => {
+    history.push("/dashboard/add-expense");
   };
 
   return (
@@ -305,7 +313,7 @@ export default function ExpenseList() {
 
               <div className="grid grid-cols-12 gap-4 payback-form">
                 <div className="flex flex-wrap bg-white">
-                  <div className="w-full lg:w-4/12 px-4 mb-3">
+                  <div className="w-full lg:w-4/12 px-2 mb-2">
                     <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                       Amount
                     </label>
@@ -318,7 +326,7 @@ export default function ExpenseList() {
                       placeholder="Enter amount"
                     />
                   </div>
-                  <div className="lg:w-4/12 ">
+                  <div className="w-full lg:w-4/12 px-2 mb-2">
                     <label className="block text-sm font-medium mb-1 ">
                       Select Account
                     </label>
@@ -336,11 +344,11 @@ export default function ExpenseList() {
                       ))}
                     </select>
                   </div>
-                  <div className="w-full lg:w-4/12 px-4 mb-3">
+                  <div className="w-full lg:w-4/12 px-2 text-right">
                     <button
                       type="submit"
                       onClick={handleSubmit}
-                      className="mt-7 ml-4 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                      className="mt-7  bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
                     >
                       <FaDownload
                         className="w-5 h-5 inline-block "
@@ -360,8 +368,8 @@ export default function ExpenseList() {
 
       <div className="container mx-auto p-4">
         <div className="w-full mb-6 ">
-          <div className="flex flex-wrap  py-3">
-            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
+          <div className="flex flex-wrap  py-3 justify-between">
+            <div className=" bg-white  shadow-lg p-5 rounded  w-47">
               <label className="block text-sm font-medium mb-1 ">
                 Select Project
               </label>
@@ -379,7 +387,7 @@ export default function ExpenseList() {
               </select>
             </div>
 
-            <div className=" bg-white  shadow-lg p-5 rounded lg:w-4/12 mx-4">
+            <div className=" bg-white  shadow-lg p-5 rounded w-47 ">
               <label className="block text-sm font-medium mb-1">
                 Select Vendor
               </label>
@@ -412,6 +420,12 @@ export default function ExpenseList() {
           loading={loading}
           title="Expense List"
           actions={actions}
+          firstButton={{
+            title: "Add Expense",
+            onClick: handleAddExpense,
+            icon: TbFileExport,
+            className: "bg-emerald-500",
+          }}
         />
       </div>
     </>

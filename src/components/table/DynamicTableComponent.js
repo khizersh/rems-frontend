@@ -9,6 +9,7 @@ import "../../assets/styles/projects/project.css";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { RxReload } from "react-icons/rx";
+import "../../assets/styles/responsive.css"
 
 // Utility to resolve nested fields like "customer.name"
 const getNestedValue = (obj, path) =>
@@ -79,7 +80,7 @@ export default function DynamicTableComponent({
       </div>
 
       {/* Table */}
-      <div className="block w-full overflow-x-auto">
+      <div className="block w-full overflow-x-auto min-half-screen">
         <table className="w-full bg-transparent border-collapse">
           <thead className="bg-gray-100">
             <tr>
@@ -129,7 +130,8 @@ export default function DynamicTableComponent({
                     let displayValue = rawValue;
 
                     // ✅ Format amount fields
-                    if (col.header?.toLowerCase().includes("amount")) {
+                    if (col.header?.toLowerCase().includes("amount") || col.header?.toLowerCase().includes("balance")) {
+
                       const num = parseFloat(rawValue);
                       displayValue = isNaN(num) ? "-" : num.toLocaleString();
                     }
@@ -141,6 +143,10 @@ export default function DynamicTableComponent({
                       rawValue.includes("T")
                     ) {
                       displayValue = rawValue.split("T")[0];
+                    }
+
+                    if(displayValue == null || displayValue == "" || displayValue == undefined){
+                      displayValue = "—";
                     }
 
                     return (

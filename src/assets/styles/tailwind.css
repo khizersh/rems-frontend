@@ -320,10 +320,7 @@ ul {
 }
 
 @media (max-width: 799px) {
-  .modal-width {
-    width: 70%;
-  }
-
+ 
   .sidebar-logo {
     width: 140px;
   }
@@ -1601,7 +1598,7 @@ select {
 }
 
 .text-sm {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   line-height: 1.25rem;
 }
 
@@ -2546,6 +2543,11 @@ select {
 .text-blueGray-700 {
   --tw-text-opacity: 1;
   color: rgba(51, 65, 85, var(--tw-text-opacity));
+}
+
+.text-grey-detail {
+  --tw-bg-opacity: 1;
+  color: rgba(150, 160, 170, var(--tw-bg-opacity));
 }
 
 .text-blueGray-800 {

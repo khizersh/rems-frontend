@@ -18,19 +18,17 @@
 .text-green-600 {
   color: #16a34a; /* Tailwind's green-600 */
   font-weight: 600;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
 }
 
 .text-blue-600 {
   color: #2563eb; /* Tailwind's blue-600 */
   font-weight: 600;
-  text-transform: uppercase;
 }
 
 .text-red-600 {
   color: #dc2626; /* Tailwind's red-600 */
   font-weight: 600;
-  text-transform: uppercase;
 }
 
 .text-gray-600 {

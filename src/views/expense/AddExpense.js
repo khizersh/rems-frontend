@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
+import { comment } from "postcss";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
@@ -11,12 +12,13 @@ const AddExpense = () => {
     amountPaid: 0,
     creditAmount: 0,
     totalAmount: "",
-    vendorAccountId: "",
+    vendorAccountId: 0,
     organizationAccountId: "",
-    expenseTypeId: "",
+    expenseTypeId: 0,
     organizationId: "",
-    projectId: "",
-    expenseType: "",
+    projectId: 0,
+    expenseType: "MISCELLANEOUS",
+    comments: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,21 @@ const AddExpense = () => {
     accounts: [],
     expenseTypes: [],
   });
+
+  const resetForm = () => {
+    setFormData({
+      amountPaid: 0,
+      creditAmount: 0,
+      totalAmount: "",
+      vendorAccountId: 0,
+      organizationAccountId: "",
+      expenseTypeId: 0,
+      organizationId: "",
+      projectId: 0,
+      expenseType: "",
+      comments: "",
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,6 +69,7 @@ const AddExpense = () => {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
 
+      setLoading(true);
       const [projects, vendors, accounts, expenseTypes] = await Promise.all([
         httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
         httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
@@ -69,8 +87,10 @@ const AddExpense = () => {
         accounts: accounts.data || [],
         expenseTypes: expenseTypes.data || [],
       });
+      setLoading(false);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
+      setLoading(false);
     }
   };
 
@@ -91,18 +111,17 @@ const AddExpense = () => {
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
 
-      console.log("requestBody :: ", requestBody);
-
-      // const response = await httpService.post(
-      //   "/expense/addExpense",
-      //   requestBody
-      // );
-
-      // notifySuccess(response.responseMessage, 4000);
+      const response = await httpService.post(
+        "/expense/addExpense",
+        requestBody
+      );
+      setLoading(false);
+      await notifySuccess(response.responseMessage, 4000);
+      resetForm();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
-    } finally {
       setLoading(false);
+    } finally {
     }
   };
 
@@ -157,10 +176,10 @@ const AddExpense = () => {
         className="py-4 bg-white rounded-12 shadow-lg"
       >
         <div className="flex flex-wrap bg-white">
-          <div className="w-full lg:w-12/12">
+          <div className="w-full lg:w-12/12 mb-8">
             <div className="flex flex-wrap">
               <div className="w-full lg:w-3/12 "></div>
-              <div className="w-full lg:w-6/12 ">
+              <div className="w-full lg:w-6/12 px-5">
                 {" "}
                 <SelectField
                   label={"Select Expense Type"}
@@ -240,6 +259,16 @@ const AddExpense = () => {
                     value={formData["amountPaid"]}
                     onChange={handleChange}
                     type={"number"}
+                    readOnly={false}
+                  />
+                </div>
+                <div className="w-full lg:w-12/12 px-4 mt-3 border-right-grey">
+                  <InputField
+                    label={"Comments"}
+                    name={"comments"}
+                    value={formData["comments"]}
+                    onChange={handleChange}
+                    type={"text"}
                     readOnly={false}
                   />
                 </div>

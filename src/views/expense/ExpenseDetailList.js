@@ -7,6 +7,7 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaDownload } from "react-icons/fa6";
+import "../../assets/styles/responsive.css";
 
 import { FaEye, FaPen, FaTrashAlt, FaUserPlus } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
@@ -14,8 +15,14 @@ import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js"
 import { RxCross2 } from "react-icons/rx";
 
 export default function ExpenseDetailList() {
-  const { loading, setLoading, notifyError,notifySuccess, backdrop, setBackdrop } =
-    useContext(MainContext);
+  const {
+    loading,
+    setLoading,
+    notifyError,
+    notifySuccess,
+    backdrop,
+    setBackdrop,
+  } = useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const history = useHistory();
@@ -154,7 +161,7 @@ export default function ExpenseDetailList() {
 
               <div className="grid grid-cols-12 gap-4 payback-form">
                 <div className="flex flex-wrap bg-white">
-                  <div className="w-full lg:w-4/12 px-4 mb-3">
+                  <div className="w-full lg:w-4/12 px-2 mb-2">
                     <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                       Amount
                     </label>
@@ -167,7 +174,7 @@ export default function ExpenseDetailList() {
                       placeholder="Enter amount"
                     />
                   </div>
-                  <div className="lg:w-4/12 ">
+                  <div className="w-full lg:w-4/12 px-2 mb-2">
                     <label className="block text-sm font-medium mb-1 ">
                       Select Account
                     </label>
@@ -185,11 +192,11 @@ export default function ExpenseDetailList() {
                       ))}
                     </select>
                   </div>
-                  <div className="w-full lg:w-4/12 px-4 mb-3">
+                  <div className="w-full lg:w-4/12 px-2 text-right">
                     <button
                       type="submit"
                       onClick={handleSubmit}
-                      className="mt-7 ml-4 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                      className="mt-7  bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
                     >
                       <FaDownload
                         className="w-5 h-5 inline-block "
@@ -207,7 +214,7 @@ export default function ExpenseDetailList() {
         <></>
       )}
       <div className="container mx-auto p-4">
-        <div className="w-full  ">
+        <div className="w-full desktop-show">
           <div className="flex flex-wrap  justify-between ">
             <div className="bg-white  shadow-lg rounded p-5">
               <text className="text-green-600">Total Paid</text>:{" "}
@@ -223,34 +230,43 @@ export default function ExpenseDetailList() {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap  justify-end mb-5">
-          <button>
-            <button
-              type="submit"
-              onClick={toggleModal}
-              className="px-4 mt-4 ml-4 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-            >
-              <FaDownload
-                className="w-5 h-5 inline-block "
-                style={{ paddingBottom: "3px", paddingRight: "5px" }}
-              />
-              Payment
-            </button>
-          </button>
+        <div className="w-full mobile-show">
+          <div className="flex flex-wrap justify-between mb-5">
+            <div className="bg-white  shadow-lg rounded p-3">
+              <text className="text-green-600 text-sm">Total Paid</text>:{" "}
+              <p>{selectedExpense?.amountPaid}</p>
+            </div>
+            <div className="bg-white  shadow-lg rounded p-3">
+              <text className="text-red-600 text-sm">Total Credit</text>:{" "}
+              <p>{selectedExpense?.creditAmount}</p>
+            </div>
+          </div>
+          <div className="bg-white  shadow-lg rounded p-3">
+            <text className="text-blue-600 text-sm">Total Amount</text>:{" "}
+            <p>{selectedExpense?.totalAmount}</p>
+          </div>
         </div>
-        <DynamicTableComponent
-          fetchDataFunction={fetchExpenseList}
-          setPage={setPage}
-          page={page}
-          data={expenseList}
-          columns={tableColumns}
-          pageSize={pageSize}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          loading={loading}
-          title="Expense Detail"
-          actions={actions}
-        />
+        <div className="mt-7">
+          <DynamicTableComponent
+            fetchDataFunction={fetchExpenseList}
+            setPage={setPage}
+            page={page}
+            data={expenseList}
+            columns={tableColumns}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            loading={loading}
+            title="Expense Detail"
+            actions={actions}
+            secondButton={{
+              onClick: toggleModal,
+              className: "bg-emerald-500",
+              title: "Pay back",
+              icon: FaDownload,
+            }}
+          />
+        </div>
       </div>
     </>
   );

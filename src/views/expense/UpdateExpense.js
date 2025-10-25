@@ -3,10 +3,13 @@ import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
+import { useHistory, useParams } from "react-router-dom/cjs/react-router-dom.min";
+import { IoArrowBackCircleOutline, IoArrowBackOutline } from "react-icons/io5";
 
-const AddExpense = () => {
+
+const UpdateExpense = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
-
+  const { expenseId } = useParams();
   const [formData, setFormData] = useState({
     amountPaid: 0,
     creditAmount: 0,
@@ -93,6 +96,23 @@ const AddExpense = () => {
     }
   };
 
+  const fetchExpense = async (expenseId) => {
+    try {
+      setLoading(true);
+
+      const response = await httpService.get(
+        `/expense/geExpenseById/${expenseId}`
+      );
+
+      setFormData(response?.data);
+
+      setLoading(false);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -111,7 +131,7 @@ const AddExpense = () => {
       };
 
       const response = await httpService.post(
-        "/expense/addExpense",
+        "/expense/updateExpense",
         requestBody
       );
       setLoading(false);
@@ -124,9 +144,10 @@ const AddExpense = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDropdownData();
-  }, []);
+  useEffect(async () => {
+    await fetchDropdownData();
+    if (expenseId) await fetchExpense(expenseId);
+  }, [expenseId]);
 
   const selectFields = [
     {
@@ -162,11 +183,25 @@ const AddExpense = () => {
     },
   ];
 
+  const history = useHistory();
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
-      <div className="mb-0 px-6 py-6">
+      <div className="mb-0 py-6">
         <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-          Add Expense
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{
+                  paddingBottom: "3px",
+                  paddingRight: "7px",
+                  marginBottom: "3px",
+                }}
+              />
+            </button>
+          </span>
+          Update Expense
         </h6>
       </div>
 
@@ -285,7 +320,7 @@ const AddExpense = () => {
                 className="w-5 h-5 inline-block "
                 style={{ paddingBottom: "3px", paddingRight: "5px" }}
               />
-              {loading ? "Submitting..." : "Add Expense"}
+              {loading ? "Submitting..." : "Update Expense"}
             </button>
             {responseMessage && (
               <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>
@@ -341,4 +376,4 @@ const SelectField = ({ label, name, value, onChange, options }) => (
   </div>
 );
 
-export default AddExpense;
+export default UpdateExpense;

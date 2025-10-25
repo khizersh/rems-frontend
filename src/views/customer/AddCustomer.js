@@ -3,6 +3,8 @@ import { MainContext } from "context/MainContext";
 import httpService from "../../utility/httpService.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function AddCustomer() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -151,6 +153,8 @@ export default function AddCustomer() {
     }
   };
 
+  const history = useHistory();
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -160,6 +164,19 @@ export default function AddCustomer() {
       <div className="mb-0 px-4 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+            <span>
+              <button className="">
+                <IoArrowBackOutline
+                  onClick={() => history.goBack()}
+                  className="back-button-icon inline-block back-button"
+                  style={{
+                    paddingBottom: "3px",
+                    paddingRight: "7px",
+                    marginBottom: "3px",
+                  }}
+                />
+              </button>
+            </span>
             Add Customer
           </h6>
         </div>
@@ -198,7 +215,7 @@ export default function AddCustomer() {
             ))}
           </select>
         </div> */}
-{/* 
+        {/* 
         <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 lg:mt-5">
           <label className="block text-sm font-medium mb-1">Select Unit</label>
           <select

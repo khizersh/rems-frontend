@@ -13,6 +13,10 @@ th {
   line-height: 1.6;
 }
 
+button:hover {
+  transform: translateY(-1px);
+}
+
 .mobile-show {
   display: none;
 }
@@ -21,8 +25,36 @@ th {
 }
 
 .min-half-screen {
-  height: 40vh;
+  min-height: 40vh;
   overflow-y: visible;
+}
+
+.back-button-icon {
+  width: 2.25rem;
+  height: 1.25rem;
+}
+
+
+.back-button {
+  color: #374151; /* gray-700 */
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+.back-button:hover {
+  color: #111827; /* gray-900 */
+  transform: translateY(-1px);
+}
+
+.back-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ===========================
@@ -69,7 +101,7 @@ th {
   span,
   a,
   label {
-    font-size: 0.6rem;
+    font-size: 0.9rem;
   }
 
   .p-2 {
@@ -81,7 +113,7 @@ th {
   }
 
   .project-table-rows td {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   select,
@@ -94,12 +126,17 @@ th {
   }
 
   .text-sm {
-    font-size: 0.75rem;
-    line-height: 1rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
   }
   .text-xs {
-    font-size: 0.6rem;
-    line-height: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 0.8rem;
+  }
+
+  .fontxs {
+    font-size: 0.8rem;
+    line-height: 0.8rem;
   }
 
   .p-5 {
@@ -153,6 +190,10 @@ th {
   .desktop-show {
     display: none;
   }
+
+  .table-icon {
+    font-size: 1.15rem;
+  }
 }
 
 /* 📱 Small mobile (≤575px) */
@@ -173,7 +214,11 @@ th {
   span,
   a,
   label {
-    font-size: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .table-icon {
+    font-size: 1.15rem;
   }
 
   .desktop-show {

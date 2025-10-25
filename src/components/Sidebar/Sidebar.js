@@ -1,15 +1,18 @@
 /* eslint-disable */
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import NotificationDropdown from "components/Dropdowns/NotificationDropdown.js";
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
 import horizontalLogo from "../../assets/img/logo/hor-logo.png";
+import { MainContext } from "context/MainContext";
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = useState("hidden");
   const location = useLocation();
   const [sidebarList, setSidebarList] = useState([]);
+
+  const { setBackdrop } = useContext(MainContext);
 
   useEffect(() => {
     const sidebarData = JSON.parse(localStorage.getItem("sidebar")) || [];
@@ -21,16 +24,20 @@ export default function Sidebar() {
     setCollapseShow("hidden");
   }, [location]);
 
+  const onClick = (classes) => {
+    // setBackdrop(true);
+    setCollapseShow(classes);
+  };
+
   return (
     <>
       <nav className="md:left-0 md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow-xl bg-white flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
         <div className="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-wrap items-center justify-between w-full mx-auto">
-          
           {/* Toggler */}
           <button
             className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
             type="button"
-            onClick={() => setCollapseShow("bg-white m-2 py-3 px-6")}
+            onClick={() => onClick("bg-white m-2 py-3 px-6")}
           >
             <i className="fas fa-bars"></i>
           </button>
@@ -39,7 +46,7 @@ export default function Sidebar() {
           <Link
             className="md:block text-left text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold"
             to="/"
-            onClick={() => setCollapseShow("hidden")}
+            onClick={() => onClick("hidden")}
           >
             <img src={horizontalLogo} className="sidebar-logo" />
           </Link>
@@ -68,16 +75,16 @@ export default function Sidebar() {
                   <Link
                     className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
                     to="/"
-                    onClick={() => setCollapseShow("hidden")}
+                    onClick={() => onClick("hidden")}
                   >
-                    Notus React
+                    <img src={horizontalLogo} className="sidebar-logo" />
                   </Link>
                 </div>
                 <div className="w-6/12 flex justify-end">
                   <button
                     type="button"
                     className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
-                    onClick={() => setCollapseShow("hidden")}
+                    onClick={() => onClick("hidden")}
                   >
                     <i className="fas fa-times"></i>
                   </button>
@@ -91,7 +98,7 @@ export default function Sidebar() {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="border-0 px-3 py-2 h-12 border border-solid border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-base leading-snug shadow-none outline-none focus:outline-none w-full font-normal"
+                  className="border-0 px-3 py-2 h-12 border border-solid border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm leading-snug shadow-none outline-none focus:outline-none w-full font-normal"
                 />
               </div>
             </form>
@@ -105,15 +112,15 @@ export default function Sidebar() {
                 const isActive = location.pathname === sidebar.url;
 
                 return (
-                  <li className="items-center" key={sidebar.id}>
+                  <li className="items-center mt-2" key={sidebar.id}>
                     <Link
-                      className={`text-xs uppercase py-3 font-bold block ${
+                      className={`text-sm uppercase py-3 font-bold block ${
                         isActive
                           ? "text-lightBlue-500 hover:text-lightBlue-600"
                           : "text-blueGray-700 hover:text-blueGray-500"
                       }`}
                       to={sidebar.url}
-                      onClick={() => setCollapseShow("hidden")}
+                      onClick={() => onClick("hidden")}
                     >
                       <i
                         className={`mr-2 text-sm ${
@@ -132,13 +139,13 @@ export default function Sidebar() {
                           return (
                             <li key={child.id} className="items-center">
                               <Link
-                                className={`text-xs py-2 block ${
+                                className={`text-sm py-2 block ${
                                   isChildActive
                                     ? "text-lightBlue-400 hover:text-lightBlue-500"
                                     : "text-blueGray-500 hover:text-blueGray-700"
                                 }`}
                                 to={child.url}
-                                onClick={() => setCollapseShow("hidden")}
+                                onClick={() => onClick("hidden")}
                               >
                                 <i
                                   className={`mr-2 text-sm ${

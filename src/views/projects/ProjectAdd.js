@@ -8,6 +8,8 @@ import { BsBuildingFillAdd } from "react-icons/bs";
 import { MainContext } from "context/MainContext";
 import httpService from "utility/httpService";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function AddProject() {
   const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
@@ -15,27 +17,27 @@ export default function AddProject() {
     // {
     //   floor: 0,
     //   unitList: [
-        // {
-        //   serialNo: "",
-        //   amount: 0,
-        //   squareFoot: 0,
-        //   roomCount: 0,
-        //   bathroomCount: 0,
-        //   unitType: "APARTMENT",
-        //   paymentPlanType: "ONE-TIME-PAYMENT",
-        //   paymentSchedule: {
-        //     durationInMonths: 0,
-        //     actualAmount: 0,
-        //     miscellaneousAmount: 0,
-        //     totalAmount: 0,
-        //     downPayment: 0,
-        //     quarterlyPayment: 0,
-        //     halfYearlyPayment: 0,
-        //     yearlyPayment: 0,
-        //     onPossessionPayment: 0,
-        //     monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
-        //   },
-        // },
+    // {
+    //   serialNo: "",
+    //   amount: 0,
+    //   squareFoot: 0,
+    //   roomCount: 0,
+    //   bathroomCount: 0,
+    //   unitType: "APARTMENT",
+    //   paymentPlanType: "ONE-TIME-PAYMENT",
+    //   paymentSchedule: {
+    //     durationInMonths: 0,
+    //     actualAmount: 0,
+    //     miscellaneousAmount: 0,
+    //     totalAmount: 0,
+    //     downPayment: 0,
+    //     quarterlyPayment: 0,
+    //     halfYearlyPayment: 0,
+    //     yearlyPayment: 0,
+    //     onPossessionPayment: 0,
+    //     monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+    //   },
+    // },
     //   ],
     // },
   ]);
@@ -278,11 +280,22 @@ export default function AddProject() {
     }
   };
 
+    const history = useHistory();
+
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 bg-blueGray-50 mt-12">
       <div className="mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+            <span>
+              <button className="">
+                <IoArrowBackOutline
+                  onClick={() => history.goBack()}
+                  className="back-button-icon inline-block back-button"
+                  style={{ paddingBottom: "3px", paddingRight: "7px" , marginBottom : "3px"}}
+                />
+              </button>
+            </span>
             Create Project
           </h6>
         </div>

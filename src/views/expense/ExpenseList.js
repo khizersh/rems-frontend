@@ -6,11 +6,11 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaDownload, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaDownload, FaEdit, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import { TbFileExport } from "react-icons/tb";
-import "../../assets/styles/responsive.css"
+import "../../assets/styles/responsive.css";
 import { BiSolidDetail } from "react-icons/bi";
 
 export default function ExpenseList() {
@@ -225,7 +225,7 @@ export default function ExpenseList() {
         "Total Amount": data?.totalAmount,
         "Expense Title": data?.expenseTitle,
         "Project Name": data?.projectName,
-        "Comments": data?.comments,
+        Comments: data?.comments,
       },
       "Vendor & Organization Account": {
         "Vendor Name": data?.vendorName,
@@ -242,14 +242,30 @@ export default function ExpenseList() {
     toggleModal();
   };
 
-  const handleEdit = (floor) => {
+  const handlePayback = (floor) => {
     setSelectedExpense(floor);
     togglePaymentModal();
   };
 
-  const handleDelete = (floor) => {
-    console.log("Delete Floor:", floor);
-    // Implement delete logic
+  const handleEdit = (data) => {
+    history.push(`/dashboard/expense-update/${data?.id}`);
+  };
+  const handleDelete = async (data) => {
+    try {
+      const confirmed = window.confirm("Are you sure to Delete this expense?");
+      if (!confirmed) return;
+
+      setLoading(true);
+      const response = await httpService.get(`/expense/deleteById/${data?.id}`);
+      notifySuccess(response.responseMessage, 3000);
+
+      await fetchExpenseList();
+
+      setLoading(false);
+    } catch (error) {
+      notifyError(error.message, 3000);
+      setLoading(false);
+    }
   };
   const handleViewExpenseDetail = (data) => {
     if (!data) {
@@ -273,9 +289,21 @@ export default function ExpenseList() {
     },
     {
       icon: FaDownload,
+      onClick: handlePayback,
+      title: "Pay Back",
+      className: "text-green-600",
+    },
+    {
+      icon: FaPen,
       onClick: handleEdit,
       title: "Pay Back",
       className: "text-green-600",
+    },
+    {
+      icon: FaTrashAlt,
+      onClick: handleDelete,
+      title: "Delete",
+      className: "text-red-600",
     },
   ];
 

@@ -8,6 +8,7 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { RiFolderReceivedFill } from "react-icons/ri";
 
 export default function VendorAccount() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =
@@ -97,7 +98,6 @@ export default function VendorAccount() {
     // Implement delete logic
   };
   const handleViewAccountDetail = (data) => {
-
     if (!data) {
       return notifyError("Invalid Account!", 4000);
     }
@@ -131,6 +131,10 @@ export default function VendorAccount() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleAddAccount = () => {
+    history.push("/dashboard/add-vendor-account");
+  };
+
   return (
     <div className="container mx-auto p-4">
       <DynamicDetailsModal
@@ -151,6 +155,12 @@ export default function VendorAccount() {
         loading={loading}
         title="Vendor Account"
         actions={actions}
+        firstButton={{
+          title: "Add Account",
+          onClick: handleAddAccount,
+          icon: RiFolderReceivedFill,
+          className: "bg-emerald-500",
+        }}
       />
     </div>
   );

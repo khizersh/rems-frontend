@@ -18,6 +18,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxReload } from "react-icons/rx";
 import { BsBuildingFillAdd } from "react-icons/bs";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function ProjectListComponent() {
   const history = useHistory();
@@ -142,6 +143,15 @@ export default function ProjectListComponent() {
         <div className="rounded-t mb-0 px-4 py-3 border-0">
           <div className="flex flex-wrap items-center justify-between">
             <h3 className="font-semibold text-base text-blueGray-700">
+              <span>
+                <button className="">
+                  <IoArrowBackOutline
+                    onClick={() => history.goBack()}
+                    className="back-button-icon inline-block back-button"
+                    style={{ paddingBottom: "3px", paddingRight: "7px" }}
+                  />
+                </button>
+              </span>
               Project List
             </h3>
             <div className="flex flex-wrap items-center justify-end">

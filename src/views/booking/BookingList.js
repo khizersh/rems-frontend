@@ -198,12 +198,6 @@ export default function BookingList() {
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
-    },
-    {
       icon: MdPrint,
       onClick: onClickPrintBooking,
       title: "Print Slip",

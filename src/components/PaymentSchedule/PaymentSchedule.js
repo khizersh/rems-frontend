@@ -317,11 +317,9 @@ const PaymentSchedule = ({ accountId }) => {
           <div class="schedule-terms">
             <h2>📜 Important Notes & Terms</h2>
             <ul>
-              <li>Point one</li>
-              <li>Point two</li>
-              <li>Point three</li>
-              <li>Point four</li>
-              <li>Point five</li>
+              <li>Development charges, if any, may be demanded at any time during the schedule.</li>
+              <li>Installments must be paid on or before the 10th of every month.</li>
+              <li>Any changes or revisions in the schedule must be approved in writing by the management.</li>
             </ul>
           </div>
 

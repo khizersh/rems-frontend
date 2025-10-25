@@ -9,7 +9,9 @@ import "../../assets/styles/projects/project.css";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { RxReload } from "react-icons/rx";
-import "../../assets/styles/responsive.css"
+import "../../assets/styles/responsive.css";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom";
 
 // Utility to resolve nested fields like "customer.name"
 const getNestedValue = (obj, path) =>
@@ -30,11 +32,23 @@ export default function DynamicTableComponent({
   firstButton = null,
   secondButton = null,
 }) {
+  const history = useHistory();
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
-        <h3 className="font-semibold text-base text-gray-700">{title}</h3>
+        <h3 className="font-semibold text-base text-gray-700">
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{ paddingBottom: "3px", paddingRight: "7px" }}
+              />
+            </button>
+          </span>
+          {title}
+        </h3>
         <div>
           {firstButton && (
             <button
@@ -130,8 +144,10 @@ export default function DynamicTableComponent({
                     let displayValue = rawValue;
 
                     // ✅ Format amount fields
-                    if (col.header?.toLowerCase().includes("amount") || col.header?.toLowerCase().includes("balance")) {
-
+                    if (
+                      col.header?.toLowerCase().includes("amount") ||
+                      col.header?.toLowerCase().includes("balance")
+                    ) {
                       const num = parseFloat(rawValue);
                       displayValue = isNaN(num) ? "-" : num.toLocaleString();
                     }
@@ -145,7 +161,11 @@ export default function DynamicTableComponent({
                       displayValue = rawValue.split("T")[0];
                     }
 
-                    if(displayValue == null || displayValue == "" || displayValue == undefined){
+                    if (
+                      displayValue == null ||
+                      displayValue == "" ||
+                      displayValue == undefined
+                    ) {
                       displayValue = "—";
                     }
 
@@ -174,7 +194,7 @@ export default function DynamicTableComponent({
                                 onClick={() => action.onClick(item)}
                                 className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
                               >
-                                <IconComponent />
+                                <IconComponent className="table-icon" />
                               </button>
                             </Tippy>
                           );
@@ -190,7 +210,7 @@ export default function DynamicTableComponent({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-6 py-4 text-sm">
+      <div className="flex items-center justify-between px-6 py-4 text-xs">
         <div className="text-gray-600">
           Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
           <span className="font-medium">
@@ -219,7 +239,7 @@ export default function DynamicTableComponent({
             <button
               key={idx}
               onClick={() => setPage(idx)}
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
+              className={`px-3 py-1 text-sm fontxs font-medium rounded-full ${
                 idx === page
                   ? "bg-indigo-500 text-white border-indigo-500"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"

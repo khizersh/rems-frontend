@@ -48,6 +48,7 @@ import ExpenseTypeList from "views/expense/ExpenseTypeList";
 import UpdateBooking from "views/booking/UpdateBooking";
 import CustomerSchedule from "views/customer/CustomerSchedule";
 import AddUnit from "views/projects/components/AddUnit";
+import UpdateExpense from "views/expense/UpdateExpense";
 
 export default function Admin() {
   return (
@@ -75,6 +76,7 @@ export default function Admin() {
               <Route path="/dashboard/expense-list" exact component={ExpenseList} />
               <Route path="/dashboard/expense-type-list" exact component={ExpenseTypeList} />
               <Route path="/dashboard/expense-type-add" exact component={AddExpenseType} />
+              <Route path="/dashboard/expense-update/:expenseId" exact component={UpdateExpense} />
               <Route path="/dashboard/add-expense" exact component={AddExpense} />
               <Route path="/dashboard/expense-detail/:expenseId" exact component={ExpenseDetailList} />
               <Route path="/dashboard/vendor-account" exact component={VendorAccount} />

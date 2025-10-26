@@ -201,8 +201,8 @@ export default function RevenueAnalytics() {
         accountDetailRequest.organizationId = organization.organizationId;
 
         if (!accountDetailRequest.startDate || !accountDetailRequest.endDate) {
-          accountDetailRequest.startDate = getFormattedDateNDaysAgo(0);
-          accountDetailRequest.endDate = getFormattedDateNDaysAgo(7);
+          accountDetailRequest.startDate = getFormattedDateNDaysAgo(7);
+          accountDetailRequest.endDate = getFormattedDateNDaysAgo(0);
         }
 
         const response = await httpService.post(

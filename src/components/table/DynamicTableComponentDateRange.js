@@ -11,6 +11,8 @@ import "tippy.js/dist/tippy.css";
 import { RxReload } from "react-icons/rx";
 import DateRangePicker from "components/CustomerComponents/DateRangePicker";
 import { TRANSACTION_TYPES } from "utility/Utility";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const getNestedValue = (obj, path) =>
   path.split(".").reduce((acc, part) => (acc ? acc[part] : ""), obj);
@@ -33,35 +35,63 @@ export default function DynamicTableComponent({
   changeTransactionType,
   selectTransactionType,
 }) {
+  const history = useHistory();
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
       <div className="px-4 py-3 border-b flex justify-between items-center">
-        <h3 className="font-semibold text-base text-gray-700">{title}</h3>
+        <h3 className="font-semibold text-base text-gray-700">
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{ paddingBottom: "3px", paddingRight: "7px" }}
+              />
+            </button>
+          </span>
+          {title}
+        </h3>
         <div className="flex flex-wrap justify-between">
-          <div>
-            <select
-              value={selectTransactionType}
-              onChange={(e) => changeTransactionType(e.target.value)}
-              className="accountList rounded mr-2"
-            >
-              {TRANSACTION_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
+          {selectTransactionType != null ? (
+            <div>
+              <select
+                value={selectTransactionType}
+                onChange={(e) => changeTransactionType(e.target.value)}
+                className="accountList rounded mr-2"
+              >
+                {TRANSACTION_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <></>
+          )}
+
           <DateRangePicker
             startDate={startDate}
             endDate={endDate}
             onChange={(update) => onChangeDate(update)}
           />
+
+          <button
+            onClick={() => fetchDataFunction(null)}
+            className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded ml-3"
+          >
+            <RxReload
+              className="w-5 h-5 inline-block"
+              style={{ paddingBottom: "3px", paddingRight: "5px" }}
+            />
+            Refresh
+          </button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="block w-full overflow-x-auto">
+      <div className="block w-full overflow-x-auto min-half-screen">
         <table className="w-full bg-transparent border-collapse">
           <thead className="bg-gray-100">
             <tr>
@@ -105,14 +135,35 @@ export default function DynamicTableComponent({
                   } project-table-rows`}
                 >
                   <td className="px-6 py-4">{page * pageSize + index + 1}</td>
+
                   {columns.map((col, i) => {
                     const rawValue = getNestedValue(item, col.field);
                     let displayValue = rawValue;
 
-                    // ✅ Auto-format amounts if header contains "amount"
-                    if (col.header?.toLowerCase().includes("amount")) {
+                    // ✅ Format amount fields
+                    if (
+                      col.header?.toLowerCase().includes("amount") ||
+                      col.header?.toLowerCase().includes("balance")
+                    ) {
                       const num = parseFloat(rawValue);
                       displayValue = isNaN(num) ? "-" : num.toLocaleString();
+                    }
+
+                    // ✅ Format date fields
+                    if (
+                      col.header?.toLowerCase().includes("date") &&
+                      typeof rawValue === "string" &&
+                      rawValue.includes("T")
+                    ) {
+                      displayValue = rawValue.split("T")[0];
+                    }
+
+                    if (
+                      displayValue == null ||
+                      displayValue == "" ||
+                      displayValue == undefined
+                    ) {
+                      displayValue = "—";
                     }
 
                     return (
@@ -129,22 +180,20 @@ export default function DynamicTableComponent({
                       <div className="flex gap-4 items-center">
                         {actions.map((action, idx) => {
                           const IconComponent = action.icon;
-                          const tooltipId = `tooltip-${idx}`;
                           return (
-                            <div key={tooltipId} className="relative">
-                              <Tippy
-                                placement="top"
-                                theme="custom"
-                                content={action.title}
+                            <Tippy
+                              key={idx}
+                              placement="top"
+                              theme="custom"
+                              content={action.title}
+                            >
+                              <button
+                                onClick={() => action.onClick(item)}
+                                className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
                               >
-                                <button
-                                  onClick={() => action.onClick(item)}
-                                  className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
-                                >
-                                  <IconComponent />
-                                </button>
-                              </Tippy>
-                            </div>
+                                <IconComponent className="table-icon" />
+                              </button>
+                            </Tippy>
                           );
                         })}
                       </div>

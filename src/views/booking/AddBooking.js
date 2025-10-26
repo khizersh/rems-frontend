@@ -8,6 +8,8 @@ import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDr
 import { getOrdinal } from "utility/Utility.js";
 import { generateBookingHtml } from "utility/Utility.js";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function AddBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -177,7 +179,7 @@ export default function AddBooking() {
 
   const onChangeCustomer = (customer) => {
     console.log("customer :: ", customer);
-    
+
     if (customer) {
       setSelectedCustomer(customer);
     }
@@ -280,11 +282,22 @@ export default function AddBooking() {
     fetchCustomers(value);
   };
 
+  const history = useHistory();
+
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className=" mb-0 px-6 py-6">
+      <div className=" mb-0  py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+            <span>
+              <button className="">
+                <IoArrowBackOutline
+                  onClick={() => history.goBack()}
+                  className="back-button-icon inline-block back-button"
+                  style={{ paddingBottom: "3px", paddingRight: "7px" }}
+                />
+              </button>
+            </span>
             Create Booking
           </h6>
         </div>

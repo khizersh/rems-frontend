@@ -68,7 +68,7 @@ const AddVendorComponent = () => {
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className="mb-0 px-6 py-6">
+      <div className="mb-0 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
             <span>
@@ -89,7 +89,7 @@ const AddVendorComponent = () => {
         </div>
       </div>
 
-      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-4">
+      <div className="rounded-12 flex-auto px-4 bg-white shadow-md py-6 mt-4">
         <form onSubmit={handleSubmit}>
           <div className="flex flex-wrap bg-white">
             <div className="w-full lg:w-6/12 px-4 mb-3">

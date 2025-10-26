@@ -179,7 +179,7 @@ export default function ProjectListComponent() {
           </div>
         </div>
 
-        <div className="block w-full overflow-x-auto">
+        <div className="block w-full overflow-x-auto min-half-screen">
           <table className="items-center w-full bg-transparent border-collapse">
             <thead className="bg-gray-100">
               <tr>

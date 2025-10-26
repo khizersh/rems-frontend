@@ -5,10 +5,12 @@ import DynamicTableComponent from "../../components/table/DynamicTableComponent.
 import {
   useParams,
   useLocation,
+  useHistory,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { getOrdinal } from "../../utility/Utility.js";
 import Tippy from "@tippyjs/react";
 import { MdPrint } from "react-icons/md";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function CustomerLedger() {
   const {
@@ -102,7 +104,6 @@ export default function CustomerLedger() {
       let accountId = selectedCustomerAccount
         ? selectedCustomerAccount
         : customerAccountId;
-
 
       setLoading(true);
 
@@ -324,8 +325,10 @@ export default function CustomerLedger() {
                   <td>${detail.createdDate.split("T")[0]}</td>
                   <td>${detail.customerPaymentReason}</td>
                   <td>${detail.paymentType}</td>
-                  <td>${detail.chequeNo ? detail.chequeNo : "-" }</td>
-                  <td>${detail.chequeDate ? detail.chequeDate.split("T")[0] : "-"}</td>
+                  <td>${detail.chequeNo ? detail.chequeNo : "-"}</td>
+                  <td>${
+                    detail.chequeDate ? detail.chequeDate.split("T")[0] : "-"
+                  }</td>
                   <td>${parseFloat(detail.amount).toLocaleString()}</td>
                 </tr>
               `;
@@ -393,11 +396,12 @@ export default function CustomerLedger() {
   const getNestedValue = (obj, path) =>
     path.split(".").reduce((acc, part) => (acc ? acc[part] : ""), obj);
 
+  const history = useHistory();
+
   return (
     <>
       <div className="container mx-auto ">
         <div className="flex flex-wrap py-3 px-4 md:justify-content-between">
-
           <div className="bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
             <label className="block text-sm font-medium mb-1">Project</label>
             <select
@@ -431,7 +435,6 @@ export default function CustomerLedger() {
               ))}
             </select>
           </div>
-
         </div>
       </div>
       <div className="container mx-auto mt-4">
@@ -499,6 +502,15 @@ export default function CustomerLedger() {
           <div className="px-4 py-3 border-b flex justify-between items-center">
             <div>
               <h3 className="font-semibold text-base text-gray-700">
+                <span>
+                  <button className="">
+                    <IoArrowBackOutline
+                      onClick={() => history.goBack()}
+                      className="back-button-icon inline-block back-button"
+                      style={{ paddingBottom: "3px", paddingRight: "7px" }}
+                    />
+                  </button>
+                </span>
                 {customerName ? customerName + " - Payments" : ""}
               </h3>
             </div>
@@ -509,14 +521,14 @@ export default function CustomerLedger() {
               >
                 <MdPrint
                   className="w-5 h-5 inline-block "
-                  style={{ paddingBottom: "0px", paddingRight: "5px"  }}
+                  style={{ paddingBottom: "0px", paddingRight: "5px" }}
                 />
                 Print
               </button>
               <button
                 onClick={fetchCustomerPayments}
                 className="bg-indigo-500 text-white text-xs font-bold px-3 rounded"
-                style={{paddingTop : "5px" , paddingBottom : "7px"}}
+                style={{ paddingTop: "5px", paddingBottom: "7px" }}
               >
                 Refresh
               </button>

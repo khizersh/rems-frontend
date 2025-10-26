@@ -49,6 +49,7 @@ import UpdateBooking from "views/booking/UpdateBooking";
 import CustomerSchedule from "views/customer/CustomerSchedule";
 import AddUnit from "views/projects/components/AddUnit";
 import UpdateExpense from "views/expense/UpdateExpense";
+import TransactionSummary from "views/transactionsummary/TransactionSummary";
 
 export default function Admin() {
   return (
@@ -66,6 +67,7 @@ export default function Admin() {
             <Switch>
               <Route path="/dashboard" exact component={Dashboard} />
               <Route path="/dashboard/project-analysis/:projectId" exact component={ProjectAnalytics} />
+              <Route path="/dashboard/transaction-summary" exact component={TransactionSummary} />
               <Route path="/dashboard/revenue-analysis" exact component={RevenueAnalytics} />
               <Route path="/dashboard/organization" exact component={OrganizationHome} />
               <Route path="/dashboard/organization-account" exact component={OrganizationAccount} />

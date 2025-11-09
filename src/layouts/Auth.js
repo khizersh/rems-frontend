@@ -12,6 +12,7 @@ import Login from "views/auth/Login.js";
 import Register from "views/auth/Register.js";
 import { MainProvider } from "context/MainContext";
 import NotificationContainer from "components/Notification/NotificationContainer";
+import ResetPasswordLanding from "views/auth/ResetPassword";
 
 export default function Auth() {
   return (
@@ -33,6 +34,7 @@ export default function Auth() {
             <Switch>
               <Route path="/auth/login" exact component={Login} />
               <Route path="/auth/register" exact component={Register} />
+              <Route path="/auth/reset-password" exact component={ResetPasswordLanding} />
               <Redirect from="/auth" to="/auth/login" />
             </Switch>
             <FooterSmall absolute />

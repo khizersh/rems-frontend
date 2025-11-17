@@ -86,8 +86,15 @@ export default function AddBooking() {
     setLoading(true);
     try {
       let request = {
+        orgId: "",
         name: search || "",
       };
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
+      if (organization) {
+        request.orgId = organization.organizationId;
+      }
+
       const response = await httpService.post(`/customer/search`, request);
 
       let customerList = response?.data;
@@ -135,8 +142,6 @@ export default function AddBooking() {
 
     schedule.unitCost = unitCost;
     schedule.customerCost = customerCost;
-
-    console.log("schedule :: ", schedule);
 
     setPaymentSchedule(schedule);
   };

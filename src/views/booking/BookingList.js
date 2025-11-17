@@ -142,7 +142,16 @@ export default function BookingList() {
     const unit = response?.data?.unit;
     const customer = response?.data?.customer;
 
+    let orgName = "";
+    const organization =
+      JSON.parse(localStorage.getItem("organization")) || null;
+    if (organization) {
+      orgName = organization.name;
+    }
+
     const formattedData = {
+      orgName: orgName,
+      projectName: data?.project,
       bookingNo: data?.id,
       customerNo: data?.customerId,
       serial: data?.unitSerial,
@@ -171,7 +180,7 @@ export default function BookingList() {
     win.document.write(printContent);
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 500); // slight delay to render
+    setTimeout(() => win.print(), 500);
   };
 
   const hanldeCustomerAccount = (customer) => {

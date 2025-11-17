@@ -122,8 +122,8 @@ export function generateBookingHtml(data) {
   <body>
     <div class="form-container">
       <div class="top-bar">
-        <h2>VISION BUILDERS & MARKETING</h2>
-        <p class="subtitle">DANISH GAH RESIDENCY</p>
+        <h2>${data.orgName}</h2>
+        <p class="subtitle">${data.projectName}</p>
         <div class="sub-heading">APPLICATION FORM</div>
       </div>
 

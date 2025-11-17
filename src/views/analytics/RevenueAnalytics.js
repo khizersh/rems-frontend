@@ -246,22 +246,22 @@ export default function RevenueAnalytics() {
         if (value === "CREDIT")
           return (
             <span>
-              <i className="fas fa-arrow-up text-emerald-500 mr-1"></i>
+              <i className="fas fa-arrow-up text-red-500 mr-1"></i>
               {value}
             </span>
           );
         if (value === "DEBIT")
           return (
             <span>
-              <i className="fas fa-arrow-down text-red-500 mr-1"></i>
+              <i className="fas fa-arrow-down text-emerald-500 mr-1"></i>
               {value}
             </span>
           );
         else
           return (
             <span>
-              <i className="fas fa-arrow-up text-emerald-500 mr-4"></i>
-              <i className="fas fa-arrow-down text-red-500 mr-4"></i>
+              <i className="fas fa-arrow-up text-red-500 mr-4"></i>
+              <i className="fas fa-arrow-down text-emerald-500 mr-4"></i>
               {value}
             </span>
           );

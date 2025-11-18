@@ -87,7 +87,6 @@ export default function RevenueAnalytics() {
       let endingDate = update[1]?.toLocaleDateString().split("/");
       endingDate = endingDate[1] + "-" + endingDate[0] + "-" + endingDate[2];
 
-      
       setSaleChartRequest({
         ...saleChartRequest,
         startDate: startingDate,
@@ -282,8 +281,7 @@ export default function RevenueAnalytics() {
         saleChartRequest.endDate = getFormattedDateNDaysAgo(0);
       }
 
-      console.log("saleChartRequest :: ",saleChartRequest);
-      
+      console.log("saleChartRequest :: ", saleChartRequest);
 
       const response = await httpService.post(
         `/revenue-analytics/getOrgSalesByDate`,
@@ -364,7 +362,9 @@ export default function RevenueAnalytics() {
                           "text-white p-3 text-center inline-flex items-center justify-center w-8 h-8 shadow-lg rounded-full bg-red-500 fas fa-dollar-sign"
                         }
                       ></i>
-                      <p className="d-inline ml-2">{accountBalance}</p>
+                      <p className="d-inline ml-2">
+                        {parseFloat(accountBalance).toLocaleString()}
+                      </p>
                     </div>
                     <div className="w-30P w-50P">
                       <select
@@ -400,19 +400,20 @@ export default function RevenueAnalytics() {
                       <p className="text-blueGray-400 uppercase font-bold text-xs">
                         Total Expense:{" "}
                         <text className="text-green-600">
-                          {expenseDetail?.totalAmount}
+                          { expenseDetail?.totalAmount ? parseFloat(expenseDetail?.totalAmount).toLocaleString() : "-"}
                         </text>{" "}
                       </p>
                       <p className="text-blueGray-400 uppercase font-bold text-xs">
                         Paid Amount:{" "}
                         <text className="text-green-600">
-                          {expenseDetail?.amountPaid}
+                           { expenseDetail?.amountPaid ? parseFloat(expenseDetail?.amountPaid).toLocaleString() : "-"}
                         </text>{" "}
                       </p>
                       <p className="text-blueGray-400 uppercase font-bold text-xs">
                         Credit Amount:{" "}
                         <text className="text-green-600">
-                          {expenseDetail?.creditAmount}
+                          { expenseDetail?.creditAmount ? parseFloat(expenseDetail?.creditAmount).toLocaleString() : "-"}
+                        
                         </text>{" "}
                       </p>
                       {/* <i className={"text-white p-3 text-center inline-flex items-center justify-center w-8 h-8 shadow-lg rounded-full bg-red-500 fas fa-dollar-sign"}></i>

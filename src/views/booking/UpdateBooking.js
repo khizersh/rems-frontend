@@ -198,9 +198,6 @@ export default function UpdateBooking() {
       const unit = response?.data?.unit;
       const customer = response?.data?.customer;
 
-      console.log("unit :: ", unit);
-      console.log("customer :: ", customer);
-
       changeSelectedUnit(unit?.id);
       setFilterProject(customer?.projectId);
       setFilterFloor(customer?.floorId);
@@ -323,7 +320,7 @@ export default function UpdateBooking() {
       <div className=" mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            Create Booking
+            Update Booking
           </h6>
         </div>
       </div>

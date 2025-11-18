@@ -132,10 +132,14 @@ export default function AddCustomer() {
     e.preventDefault();
     setLoading(true);
     try {
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || {};
       customer.floorId = filterFloor;
       customer.projectId = filterProject;
       customer.unitId = selectedUnit;
       customer.updatedDate = customer.createdDate;
+      customer.organizationId = organization?.organizationId;
+
 
       const response = await httpService.post(
         `/customer/addCustomer`,

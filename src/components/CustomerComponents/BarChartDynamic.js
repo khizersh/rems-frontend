@@ -4,7 +4,7 @@ import { MONTH_LABELS } from "utility/Utility";
 
 export default function BarChartDynamic({
   chartData = null,
-  title = "Total Orders",
+  title = "Total Bookings",
   subtitle = "Performance",
 }) {
   const chartRef = useRef(null);

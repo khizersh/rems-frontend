@@ -224,7 +224,6 @@ export default function ProjectAnalytics() {
   ];
 
   const hanldeCustomerAccount = (customer) => {
-    console.log("customer :: ", customer);
     if (!customer) {
       return notifyError("Invalid Customer!", 4000);
     }

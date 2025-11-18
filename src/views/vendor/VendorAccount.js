@@ -73,7 +73,7 @@ export default function VendorAccount() {
         "Account Title": data?.name,
         "Total Amount Paid": data?.totalAmountPaid,
         "Total Credit Amount": data?.totalCreditAmount,
-        "Total Balance Amount": data?.totalBalanceAmount,
+        // "Total Balance Amount": data?.totalBalanceAmount,
         "Total Amount": data?.totalAmount,
       },
       "Audit Info": {

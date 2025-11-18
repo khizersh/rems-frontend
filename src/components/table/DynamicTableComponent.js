@@ -161,10 +161,12 @@ export default function DynamicTableComponent({
                       displayValue = rawValue.split("T")[0];
                     }
 
+                  
+
                     if (
-                      displayValue == null ||
-                      displayValue == "" ||
-                      displayValue == undefined
+                      displayValue === null ||
+                      displayValue === "" ||
+                      displayValue === undefined
                     ) {
                       displayValue = "—";
                     }

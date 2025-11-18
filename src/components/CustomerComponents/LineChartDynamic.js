@@ -5,7 +5,7 @@ import DateRangePicker from "./DateRangePicker";
 
 export default function LineChartDynamic({
   chartData = null,
-  title = "Total Orders",
+  title = "Total Bookings",
   subtitle = "Performance",
   onChangeDate,
   startDate,

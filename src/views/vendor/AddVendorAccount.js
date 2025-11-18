@@ -121,7 +121,7 @@ const AddVendorComponent = () => {
               />
             </div>
 
-            <div className="w-full lg:w-6/12 px-4 mb-3">
+            {/* <div className="w-full lg:w-6/12 px-4 mb-3">
               <InputField
                 type="number"
                 label="Total Balance Amount"
@@ -129,7 +129,7 @@ const AddVendorComponent = () => {
                 value={formData.totalBalanceAmount}
                 onChange={handleChange}
               />
-            </div>
+            </div> */}
             <div className="w-full lg:w-6/12 px-4 mb-3">
               <InputField
                 label="Total Amount"

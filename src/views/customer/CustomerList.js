@@ -116,7 +116,17 @@ export default function CustomerList() {
       var response = null;
       var dataList = [];
 
-      if (cid) {
+      if (cid && typeof cid == "object") {
+        const queryParams = new URLSearchParams(location.search);
+        const querycid = queryParams.get("cId");
+        if (querycid) {
+          response = await httpService.get(`/customer/${querycid}`);
+          dataList = [response?.data];
+        } else {
+          response = await httpService.post(`/customer/getByIds`, requestBody);
+          dataList = response?.data?.content;
+        }
+      } else if (cid && typeof cid == "string") {
         response = await httpService.get(`/customer/${cid}`);
         dataList = [response?.data];
       } else {
@@ -124,7 +134,6 @@ export default function CustomerList() {
         dataList = response?.data?.content;
       }
 
-      console.log("response:: ", response);
 
       setCustomerList(dataList || []);
       setTotalPages(response?.data?.totalPages || 0);

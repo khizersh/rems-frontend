@@ -824,7 +824,7 @@ export default function CustomerPayment() {
       ...payInstallment.organizationAccountDetails,
       {
         organizationAcctId: 0,
-        transactionType: "CREDIT",
+        transactionType: "DEBIT",
         amount: 0,
         comments: "",
         customerId: 0,

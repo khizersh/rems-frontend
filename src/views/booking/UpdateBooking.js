@@ -28,6 +28,9 @@ export default function UpdateBooking() {
     yearlyPayment: 0,
     onPossessionPayment: 0,
     paymentPlanType: "",
+    unitCost: 0,
+    customerCost: 0,
+    monthWiseTotal: 0,
     monthWisePaymentList: [
       {
         fromMonth: 0,
@@ -102,14 +105,51 @@ export default function UpdateBooking() {
   };
 
   const changePaymentScheduleFields = (e) => {
-    const updatedSchedule = { ...paymentSchedule };
-    updatedSchedule[e.target.name] = e.target.value;
-    setPaymentSchedule(updatedSchedule);
+    const schedule = { ...paymentSchedule };
+    schedule[e.target.name] = e.target.value;
+
+    // Parse all numeric values safely
+    const actualAmount = parseFloat(schedule?.actualAmount) || 0;
+    const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
+    const miscellaneousAmount = parseFloat(schedule?.miscellaneousAmount) || 0;
+    const downPayment = parseFloat(schedule?.downPayment) || 0;
+    const quarterlyPayment = parseFloat(schedule?.quarterlyPayment) || 0;
+    const halfYearlyPayment = parseFloat(schedule?.halfYearlyPayment) || 0;
+    const yearlyPayment = parseFloat(schedule?.yearlyPayment) || 0;
+    const onPossessionPayment = parseFloat(schedule?.onPossessionPayment) || 0;
+
+    const durationInMonths = schedule.durationInMonths;
+    const quarterlyPeriods = Math.floor(durationInMonths / 3);
+    const halfYearlyPeriods = Math.floor(durationInMonths / 6);
+    const yearlyPeriods = Math.floor(durationInMonths / 12);
+
+    // Calculate totals
+    const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
+
+    const customerCost =
+      downPayment +
+      (quarterlyPeriods > 0 ? quarterlyPayment * quarterlyPeriods : 0) +
+      (halfYearlyPeriods > 0 ? halfYearlyPayment * halfYearlyPeriods : 0) +
+      (yearlyPeriods > 0 ? yearlyPayment * yearlyPeriods : 0) +
+      onPossessionPayment;
+
+    // Update schedule
+
+    schedule.unitCost = unitCost;
+    schedule.customerCost = customerCost;
+
+    setPaymentSchedule(schedule);
   };
+
   const changeMonthlyPaymentFields = (monthlyIndex, e) => {
     const updatedPaymentSchedule = { ...paymentSchedule };
     updatedPaymentSchedule.monthWisePaymentList[monthlyIndex][e.target.name] =
       e.target.value;
+
+    let monthWiseTotal = calculateMonthlyPaymentSum(updatedPaymentSchedule);
+
+    updatedPaymentSchedule.monthWiseTotal = monthWiseTotal;
+
     setPaymentSchedule(updatedPaymentSchedule);
   };
 
@@ -149,16 +189,93 @@ export default function UpdateBooking() {
         request
       );
 
-      console.log("response :: ", response);
+      const schedule = response.data;
 
-      if (response.data) {
-        setPaymentSchedule(response.data || {});
+      // Parse all numeric values safely
+      const actualAmount = parseFloat(schedule?.actualAmount) || 0;
+      const miscellaneousAmount =
+        parseFloat(schedule?.miscellaneousAmount) || 0;
+      const downPayment = parseFloat(schedule?.downPayment) || 0;
+      const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
+      const quarterlyPayment = parseFloat(schedule?.quarterlyPayment) || 0;
+      const halfYearlyPayment = parseFloat(schedule?.halfYearlyPayment) || 0;
+      const yearlyPayment = parseFloat(schedule?.yearlyPayment) || 0;
+      const onPossessionPayment =
+        parseFloat(schedule?.onPossessionPayment) || 0;
+
+      const durationInMonths = parseInt(schedule?.durationInMonths) || 0;
+
+      // Calculate periods
+      const quarterlyPeriods = Math.floor(durationInMonths / 3);
+      const halfYearlyPeriods = Math.floor(durationInMonths / 6);
+      const yearlyPeriods = Math.floor(durationInMonths / 12);
+
+      // ✅ Calculate month-wise total
+      let monthWiseTotal = 0;
+
+      monthWiseTotal = calculateMonthlyPaymentSum(schedule);
+
+      // ✅ Totals
+      const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
+      const customerCost =
+        downPayment +
+        (quarterlyPeriods > 0 ? quarterlyPayment * quarterlyPeriods : 0) +
+        (halfYearlyPeriods > 0 ? halfYearlyPayment * halfYearlyPeriods : 0) +
+        (yearlyPeriods > 0 ? yearlyPayment * yearlyPeriods : 0) +
+        onPossessionPayment;
+
+      schedule.unitCost = unitCost;
+      schedule.customerCost = customerCost;
+      schedule.monthWiseTotal = monthWiseTotal;
+
+      console.log("response :: ", schedule);
+
+      if (schedule) {
+        setPaymentSchedule(schedule || {});
       }
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateMonthlyPaymentSum = (schedule) => {
+    if (!schedule || !Array.isArray(schedule.monthWisePaymentList)) return 0;
+
+    const duration = parseInt(schedule.durationInMonths) || 0;
+    if (duration <= 0) return 0;
+
+    let sum = 0;
+
+    for (const raw of schedule.monthWisePaymentList) {
+      // parse and sanitize input
+      let from = parseInt(raw.fromMonth) || 0;
+      let to = parseInt(raw.toMonth) || 0;
+      const amount = parseFloat(raw.amount) || 0;
+
+      // skip zero/invalid amount entries
+      if (amount === 0) continue;
+
+      // If from/to are swapped or invalid, fix them
+      if (from > to) {
+        const tmp = from;
+        from = to;
+        to = tmp;
+      }
+
+      // clamp to valid months range: [1, duration]
+      const start = Math.max(1, from);
+      const end = Math.min(duration, to);
+
+      // if the clamped range is invalid, skip
+      if (end < start) continue;
+
+      const monthsInRange = end - start + 1;
+      sum += monthsInRange * amount;
+    }
+
+    return sum;
   };
 
   const fetchUnitDetailsByUnitId = async (id) => {
@@ -230,12 +347,14 @@ export default function UpdateBooking() {
     updatedBooking.organizationId = organization.organizationId;
     updatedBooking.paymentSchedule = paymentSchedule;
 
-    console.log("updatedBooking :: ",updatedBooking);
-    
+    console.log("updatedBooking :: ", updatedBooking);
 
     setLoading(true);
     try {
-      const response = await httpService.post(`/booking/update`, updatedBooking);
+      const response = await httpService.post(
+        `/booking/update`,
+        updatedBooking
+      );
       notifySuccess(response.responseMessage, 4000);
       resetState();
     } catch (err) {
@@ -497,8 +616,11 @@ export default function UpdateBooking() {
             <div className=" flex flex-wrap">
               <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
                 {/* Payment Schedule Heading */}
-                <div className="mt-3 mb-3 text-blueGray-600 text-sm uppercase font-bold">
-                  Payment Schedule
+                <div className="mt-3 mb-8 text-blueGray-600 text-md uppercase font-bold">
+                  Unit Costing
+                  <text className="ml-3 text-green-600">
+                    ({parseFloat(paymentSchedule?.unitCost).toLocaleString()})
+                  </text>
                 </div>
 
                 <div className="flex flex-wrap">
@@ -564,8 +686,7 @@ export default function UpdateBooking() {
                       </div>
                     </div>
 
-
-                            {/* Development Amount */}
+                    {/* Development Amount */}
                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                       <div className="relative w-full mb-3">
                         <label
@@ -602,123 +723,140 @@ export default function UpdateBooking() {
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           value={
                             Number(paymentSchedule.actualAmount) +
-                            Number(paymentSchedule.miscellaneousAmount) + 
-                            Number(paymentSchedule.developmentAmount) 
+                            Number(paymentSchedule.miscellaneousAmount) +
+                            Number(paymentSchedule.developmentAmount)
                           }
                         />
                       </div>
                     </div>
                   </div>
-
-                  {/* Down Payment */}
-                  {paymentSchedule?.paymentPlanType == "INSTALLMENT" ? (
-                    <>
-                      <div className="w-full px-4 lg:w-6/12 md:px-0">
-                        <div className="relative w-full mb-3">
-                          <label
-                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                            htmlFor="downPayment"
-                          >
-                            Down Payment
-                          </label>
-                          <input
-                            id="downPayment"
-                            type="text"
-                            name="downPayment"
-                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => changePaymentScheduleFields(e)}
-                            value={paymentSchedule.downPayment}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Quarterly Payment */}
-                      <div className="w-full px-4 lg:w-6/12 md:px-0">
-                        <div className="relative w-full mb-3">
-                          <label
-                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                            htmlFor="quarterlyPayment"
-                          >
-                            Quarterly Payment
-                          </label>
-                          <input
-                            id="quarterlyPayment"
-                            type="text"
-                            name="quarterlyPayment"
-                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => changePaymentScheduleFields(e)}
-                            value={paymentSchedule.quarterlyPayment}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Half-Yearly Payment */}
-                      <div className="w-full px-4 lg:w-6/12 md:px-0">
-                        <div className="relative w-full mb-3">
-                          <label
-                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                            htmlFor="halfYearlyPayment"
-                          >
-                            Half-Yearly Payment
-                          </label>
-                          <input
-                            id="halfYearlyPayment"
-                            type="text"
-                            name="halfYearlyPayment"
-                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => changePaymentScheduleFields(e)}
-                            value={paymentSchedule.halfYearlyPayment}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="w-full px-4 lg:w-6/12 md:px-0">
-                        <div className="relative w-full mb-3">
-                          <label
-                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                            htmlFor="yearlyPayment"
-                          >
-                            Yearly Payment
-                          </label>
-                          <input
-                            id="yearlyPayment"
-                            type="text"
-                            name="yearlyPayment"
-                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => changePaymentScheduleFields(e)}
-                            value={paymentSchedule.yearlyPayment}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="w-full px-4 lg:w-6/12 md:px-0">
-                        <div className="relative w-full mb-3">
-                          <label
-                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                            htmlFor="onPossessionPayment"
-                          >
-                            On Possession Payment
-                          </label>
-                          <input
-                            id="onPossessionPayment"
-                            type="text"
-                            name="onPossessionPayment"
-                            className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                            onChange={(e) => changePaymentScheduleFields(e)}
-                            value={paymentSchedule.onPossessionPayment}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
                 </div>
               </div>
 
               {paymentSchedule?.paymentPlanType == "INSTALLMENT" ? (
                 <div className="w-full lg:w-6/12 ">
                   <div className="relative w-full">
+                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
+                      Customer Payment Schedule
+                      {(() => {
+                        const unitCost = paymentSchedule?.unitCost;
+                        const customerCost =
+                          paymentSchedule?.customerCost +
+                          paymentSchedule?.monthWiseTotal;
+
+                        const classColor =
+                          unitCost == customerCost
+                            ? "text-green-600"
+                            : unitCost > customerCost
+                            ? "text-blue-600"
+                            : "text-red-600";
+                        return (
+                          <text className={`ml-3 ${classColor}`}>
+                            ({parseFloat(customerCost).toLocaleString()})
+                          </text>
+                        );
+                      })()}
+                    </div>
+                    <div className="mt-6 flex flex-wrap">
+                      <>
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="downPayment"
+                            >
+                              Down Payment
+                            </label>
+                            <input
+                              id="downPayment"
+                              type="text"
+                              name="downPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.downPayment}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Quarterly Payment */}
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="quarterlyPayment"
+                            >
+                              Quarterly Payment
+                            </label>
+                            <input
+                              id="quarterlyPayment"
+                              type="text"
+                              name="quarterlyPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.quarterlyPayment}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Half-Yearly Payment */}
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="halfYearlyPayment"
+                            >
+                              Half-Yearly Payment
+                            </label>
+                            <input
+                              id="halfYearlyPayment"
+                              type="text"
+                              name="halfYearlyPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.halfYearlyPayment}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="yearlyPayment"
+                            >
+                              Yearly Payment
+                            </label>
+                            <input
+                              id="yearlyPayment"
+                              type="text"
+                              name="yearlyPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.yearlyPayment}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="onPossessionPayment"
+                            >
+                              On Possession Payment
+                            </label>
+                            <input
+                              id="onPossessionPayment"
+                              type="text"
+                              name="onPossessionPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.onPossessionPayment}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    </div>
                     <div>
                       <div className="px-4 mt-3 mb-3 rounded md:px-0">
                         <div className="flex justify-between">

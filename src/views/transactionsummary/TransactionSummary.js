@@ -39,7 +39,7 @@ export default function TransactionSummary() {
     startDate: null,
     endDate: null,
     filteredId: null,
-    transactionType: "CREDIT",
+    transactionType: "DEBIT",
     filteredBy: "all",
     page: 0,
     size: 10,
@@ -150,15 +150,15 @@ export default function TransactionSummary() {
         const baseClass = "font-semibold uppercase";
         if (value === "CREDIT")
           return (
-            <span className="text-green-600">
-              <i className="fas fa-arrow-up text-emerald-500 mr-1"></i>
+            <span className="text-red-600">
+              <i className="fas fa-arrow-up text-red-500 mr-1"></i>
               {value}
             </span>
           );
         if (value === "DEBIT")
           return (
-            <span className="text-red-600">
-              <i className="fas fa-arrow-down text-red-500 mr-1"></i>
+            <span className="text-green-600">
+              <i className="fas fa-arrow-down text-emerald-500 mr-1"></i>
               {value}
             </span>
           );

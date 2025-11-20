@@ -11,8 +11,14 @@ import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
 
 export default function VendorAccount() {
-  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
-    useContext(MainContext);
+  const {
+    loading,
+    setLoading,
+    notifySuccess,
+    notifyError,
+    backdrop,
+    setBackdrop,
+  } = useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
 
@@ -88,15 +94,32 @@ export default function VendorAccount() {
     toggleModal();
   };
 
-  const handleEdit = (floor) => {
-    console.log("Edit Floor:", floor);
-    // Implement edit functionality
+  const handleEdit = (data) => {
+    if (!data) {
+      return notifyError("Invalid Account!", 4000);
+    }
+    history.push(`/dashboard/update-vendor-account/${data.id}`);
   };
 
-  const handleDelete = (floor) => {
-    console.log("Delete Floor:", floor);
-    // Implement delete logic
+  const handleDelete = async (data) => {
+    try {
+      const confirmed = window.confirm("Are you sure to Delete this Vendor?");
+      if (!confirmed) return;
+
+      setLoading(true);
+      const response = await httpService.get(
+        `/vendorAccount/deleteById/${data?.id}`
+      );
+      notifySuccess(response.responseMessage, 3000);
+
+      await fetchVendorList();
+      setLoading(false);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+      setLoading(false);
+    }
   };
+
   const handleViewAccountDetail = (data) => {
     if (!data) {
       return notifyError("Invalid Account!", 4000);

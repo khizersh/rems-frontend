@@ -50,6 +50,7 @@ import CustomerSchedule from "views/customer/CustomerSchedule";
 import AddUnit from "views/projects/components/AddUnit";
 import UpdateExpense from "views/expense/UpdateExpense";
 import TransactionSummary from "views/transactionsummary/TransactionSummary";
+import UpdateVendorComponent from "views/vendor/UpdateVendorAccount";
 
 export default function Admin() {
   return (
@@ -83,6 +84,7 @@ export default function Admin() {
               <Route path="/dashboard/expense-detail/:expenseId" exact component={ExpenseDetailList} />
               <Route path="/dashboard/vendor-account" exact component={VendorAccount} />
               <Route path="/dashboard/add-vendor-account" exact component={AddVendorComponent} />
+              <Route path="/dashboard/update-vendor-account/:accountId" exact component={UpdateVendorComponent} />
               <Route path="/dashboard/projects" exact component={ProjectList} />
               <Route path="/dashboard/add-project" exact component={AddProject} />
               <Route path="/dashboard/update-project/:projectId" exact component={ProjectUpdate} />

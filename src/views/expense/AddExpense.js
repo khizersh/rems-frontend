@@ -18,6 +18,7 @@ const AddExpense = () => {
     projectId: 0,
     expenseType: "MISCELLANEOUS",
     comments: "",
+    createdDate: new Date().toISOString().slice(0, 16),
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,6 +42,7 @@ const AddExpense = () => {
       projectId: 0,
       expenseType: "",
       comments: "",
+      createdDate: new Date().toISOString().slice(0, 16),
     });
   };
 
@@ -160,6 +162,7 @@ const AddExpense = () => {
       type: "number",
       readOnly: true,
     },
+    // { label: "Created Date", name: "createdDate", type: "datetime-local" },
   ];
 
   return (
@@ -235,6 +238,17 @@ const AddExpense = () => {
                       />
                     </div>
                   ))}
+
+                  <div className="w-full lg:w-12/12 px-4 mb-3">
+                    <InputField
+                      label={"Created Date"}
+                      type="datetime-local"
+                      name="createdDate"
+                      value={formData["createdDate"]}
+                      onChange={handleChange}
+                      readOnly={false}
+                    />
+                  </div>
                 </div>
               </div>
             </>
@@ -242,7 +256,7 @@ const AddExpense = () => {
             formData.expenseType == "MISCELLANEOUS" && (
               <>
                 {" "}
-                <div className="w-full lg:w-6/12 px-4 mt-3 border-right-grey">
+                <div className="w-full lg:w-4/12 px-4 mt-3">
                   <SelectField
                     label={"Select Account"}
                     name={"organizationAccountId"}
@@ -251,7 +265,7 @@ const AddExpense = () => {
                     options={dropdowns.accounts}
                   />
                 </div>
-                <div className="w-full lg:w-6/12 px-4 mt-3 border-right-grey">
+                <div className="w-full lg:w-4/12 px-4 mt-3">
                   <InputField
                     label={"Amount"}
                     name={"amountPaid"}
@@ -261,7 +275,17 @@ const AddExpense = () => {
                     readOnly={false}
                   />
                 </div>
-                <div className="w-full lg:w-12/12 px-4 mt-3 border-right-grey">
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <InputField
+                    label={"Created Date"}
+                    type="datetime-local"
+                    name="createdDate"
+                    value={formData["createdDate"]}
+                    onChange={handleChange}
+                    readOnly={false}
+                  />
+                </div>
+                <div className="w-full lg:w-12/12 px-4 mt-3 ">
                   <InputField
                     label={"Comments"}
                     name={"comments"}

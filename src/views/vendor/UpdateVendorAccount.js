@@ -1,11 +1,16 @@
 import { MainContext } from "context/MainContext";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { IoArrowBackCircleOutline, IoArrowBackOutline } from "react-icons/io5";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import {
+  useHistory,
+  useParams,
+} from "react-router-dom/cjs/react-router-dom.min";
 import httpService from "utility/httpService";
 
-const AddVendorComponent = () => {
+const UpdateVendorComponent = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
+
+  const { accountId } = useParams();
 
   const [formData, setFormData] = useState({
     organizationId: "",
@@ -27,6 +32,23 @@ const AddVendorComponent = () => {
     }));
   };
 
+  useEffect(() => {
+    if (accountId) fetchDetailById(accountId);
+  }, []);
+
+  const fetchDetailById = async (id) => {
+    setLoading(true);
+
+    try {
+      const response = await httpService.get(`/vendorAccount/getById/${id}`);
+      setFormData(response?.data);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,24 +60,17 @@ const AddVendorComponent = () => {
       let requestBody = {
         ...formData,
         organizationId: Number(organization.organizationId),
-        totalAmount:
-          Number(formData.totalAmountPaid) + Number(formData.totalCreditAmount),
+        totalAmount: parseFloat(
+          Number(formData.totalAmountPaid) + Number(formData.totalCreditAmount)
+        ),
       };
 
       const response = await httpService.post(
-        "/vendorAccount/createAccount",
+        "/vendorAccount/updateAccount",
         requestBody
       );
 
       if (response.data) {
-        setFormData({
-          organizationId: "",
-          name: "",
-          totalAmountPaid: "",
-          totalCreditAmount: "",
-          totalBalanceAmount: "",
-          totalAmount: "",
-        });
         notifySuccess(response.responseMessage, 4000);
       }
     } catch (err) {
@@ -85,7 +100,7 @@ const AddVendorComponent = () => {
                 />
               </button>
             </span>
-            Add Vendor
+            Update Vendor
           </h6>
         </div>
       </div>
@@ -140,7 +155,7 @@ const AddVendorComponent = () => {
                 disabled={loading}
                 className="px-4 mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
               >
-                {loading ? "Submitting..." : "Add Account"}
+                {loading ? "Submitting..." : "Update Account"}
               </button>
               {responseMessage && (
                 <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>
@@ -168,4 +183,4 @@ const InputField = ({ label, name, value, onChange, type = "text" }) => (
   </div>
 );
 
-export default AddVendorComponent;
+export default UpdateVendorComponent;

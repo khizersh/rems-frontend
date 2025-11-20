@@ -35,7 +35,7 @@ export default function RevenueAnalytics() {
     organizationId: 1,
     startDate: null,
     endDate: null,
-    transactionType: "CREDIT",
+    transactionType: "DEBIT",
     page: 0,
     size: 10,
     sortBy: "created_date",

@@ -94,17 +94,16 @@ const PaymentSchedule = ({ accountId }) => {
           });
         }
 
-        if (scheduleData.developmentAmount > 0) {
-          remaining -= scheduleData.developmentAmount;
-          obj.push({
-            description: "Development Charges",
-            amount: scheduleData.developmentAmount,
-            remaining: remaining,
-          });
-        }
+        // if (scheduleData.developmentAmount > 0) {
+        //   remaining -= scheduleData.developmentAmount;
+        //   obj.push({
+        //     description: "Development Charges",
+        //     amount: scheduleData.developmentAmount,
+        //     remaining: remaining,
+        //   });
+        // }
       }
 
-      console.log("final array :: ", obj);
 
       setScheduleBreakdown(obj);
     } catch (error) {

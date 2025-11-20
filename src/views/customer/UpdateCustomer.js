@@ -288,7 +288,7 @@ export default function AddCustomer() {
                       className="w-5 h-5 inline-block "
                       style={{ paddingBottom: "3px", paddingRight: "5px" }}
                     />
-                    {loading ? "Saving..." : "Save Customer"}
+                    {loading ? "Saving..." : "Update Customer"}
                   </button>
                 </div>
               </div>

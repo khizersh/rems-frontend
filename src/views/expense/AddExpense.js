@@ -82,10 +82,17 @@ const AddExpense = () => {
         ),
       ]);
 
+      let accountList = accounts.data?.map((account) => {
+        return {
+          ...account,
+          name: account.name + " - " + account.bankName,
+        };
+      });
+
       setDropdowns({
         projects: projects.data || [],
         vendors: vendors.data || [],
-        accounts: accounts.data || [],
+        accounts: accountList || [],
         expenseTypes: expenseTypes.data || [],
       });
       setLoading(false);

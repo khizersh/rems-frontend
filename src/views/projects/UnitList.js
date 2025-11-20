@@ -627,7 +627,7 @@ export default function UnitList() {
                                 Number(
                                   unit.paymentSchedule.miscellaneousAmount
                                 ) +
-                                Number(unit.paymentSchedule.miscellaneousAmount)
+                                Number(unit.paymentSchedule.developmentAmount)
                               }
                             />
                           </div>

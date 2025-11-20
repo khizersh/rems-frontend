@@ -263,7 +263,7 @@ export default function ExpenseList() {
 
       setLoading(false);
     } catch (error) {
-      notifyError(error.message, 3000);
+      notifyError(error.message, error.data , 4000);
       setLoading(false);
     }
   };

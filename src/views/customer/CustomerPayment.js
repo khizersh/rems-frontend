@@ -140,8 +140,11 @@ export default function CustomerPayment() {
       );
 
       const scheduleData = responsePayment?.data;
+
       const obj = [];
       var remaining = scheduleData.totalAmount;
+
+      console.log("remaining  :: ", remaining);
       if (scheduleData.downPayment > 0) {
         remaining -= scheduleData.downPayment;
         obj.push({
@@ -206,14 +209,14 @@ export default function CustomerPayment() {
             remaining: remaining,
           });
         }
-        if (scheduleData.developmentAmount > 0) {
-          remaining -= scheduleData.developmentAmount;
-          obj.push({
-            description: "Development Charges",
-            amount: scheduleData.onPossessionPayment,
-            remaining: remaining,
-          });
-        }
+        // if (scheduleData.developmentAmount > 0) {
+        //   remaining -= scheduleData.developmentAmount;
+        //   obj.push({
+        //     description: "Development Charges",
+        //     amount: scheduleData.developmentAmount,
+        //     remaining: remaining,
+        //   });
+        // }
       }
 
       setScheduleBreakdown(obj);

@@ -3,6 +3,9 @@ import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { paymentTypes } from "utility/Utility";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
@@ -16,6 +19,9 @@ const AddExpense = () => {
     expenseTypeId: 0,
     organizationId: "",
     projectId: 0,
+    paymentType: "CASH",
+    paymentDocNo: "",
+    paymentDocDate: new Date().toISOString().slice(0, 16),
     expenseType: "MISCELLANEOUS",
     comments: "",
     createdDate: new Date().toISOString().slice(0, 16),
@@ -48,6 +54,7 @@ const AddExpense = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -123,8 +130,8 @@ const AddExpense = () => {
         "/expense/addExpense",
         requestBody
       );
-      setLoading(false);
       await notifySuccess(response.responseMessage, 4000);
+      setLoading(false);
       resetForm();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -172,10 +179,33 @@ const AddExpense = () => {
     // { label: "Created Date", name: "createdDate", type: "datetime-local" },
   ];
 
+  const history = useHistory();
+
+  const getPaymentTypes = () => {
+    const formattedType = paymentTypes.map((type) => {
+      return { id: type, name: type };
+    });
+
+    return formattedType;
+  };
+
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
-      <div className="mb-0 px-6 py-6">
+      <div className="mb-0 py-6">
         <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{
+                  paddingBottom: "3px",
+                  paddingRight: "7px",
+                  marginBottom: "3px",
+                }}
+              />
+            </button>
+          </span>
           Add Expense
         </h6>
       </div>
@@ -234,7 +264,7 @@ const AddExpense = () => {
                 </div>
                 <div className="flex flex-wrap bg-white">
                   {inputFields.map(({ label, name, type, readOnly }) => (
-                    <div key={name} className="w-full lg:w-4/12 px-4 mb-3">
+                    <div key={name} className="w-full lg:w-6/12 px-4 mb-3">
                       <InputField
                         label={label}
                         name={name}
@@ -245,6 +275,55 @@ const AddExpense = () => {
                       />
                     </div>
                   ))}
+                  <div className="w-full lg:w-6/12 px-4 mb-3">
+                    <SelectField
+                      label={"Payment Type"}
+                      name={"paymentType"}
+                      value={formData["paymentType"]}
+                      onChange={handleChange}
+                      options={getPaymentTypes()}
+                    />
+                  </div>
+
+                  {formData.paymentType == "CHEQUE" ||
+                  formData.paymentType == "PAY_ORDER" ? (
+                    <>
+                      <div className="w-full lg:w-6/12 px-4 mb-3">
+                        <InputField
+                          label={
+                            formData.paymentType == "CHEQUE"
+                              ? "Cheque No"
+                              : formData.paymentType == "PAY_ORDER"
+                              ? "Pay Order No"
+                              : ""
+                          }
+                          name={"paymentDocNo"}
+                          value={formData.paymentDocNo}
+                          onChange={handleChange}
+                          type={"text"}
+                          readOnly={false}
+                        />
+                      </div>
+                      <div className="w-full lg:w-6/12 px-4 mb-3">
+                        <InputField
+                          label={
+                            formData.paymentType == "CHEQUE"
+                              ? "Cheque Date"
+                              : formData.paymentType == "PAY_ORDER"
+                              ? "Pay Order Date"
+                              : ""
+                          }
+                          type="datetime-local"
+                          name="paymentDocDate"
+                          value={formData["paymentDocDate"]}
+                          onChange={handleChange}
+                          readOnly={false}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    ""
+                  )}
 
                   <div className="w-full lg:w-12/12 px-4 mb-3">
                     <InputField
@@ -282,6 +361,54 @@ const AddExpense = () => {
                     readOnly={false}
                   />
                 </div>
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label={"Payment Type"}
+                    name={"paymentType"}
+                    value={formData["paymentType"]}
+                    onChange={handleChange}
+                    options={getPaymentTypes()}
+                  />
+                </div>
+                {formData.paymentType == "CHEQUE" ||
+                formData.paymentType == "PAY_ORDER" ? (
+                  <>
+                    <div className="w-full lg:w-4/12 px-4 mt-3">
+                      <InputField
+                        label={
+                          formData.paymentType == "CHEQUE"
+                            ? "Cheque No"
+                            : formData.paymentType == "PAY_ORDER"
+                            ? "Pay Order No"
+                            : ""
+                        }
+                        name={"paymentDocNo"}
+                        value={formData.paymentDocNo}
+                        onChange={handleChange}
+                        type={"text"}
+                        readOnly={false}
+                      />
+                    </div>
+                    <div className="w-full lg:w-4/12 px-4 mt-3">
+                      <InputField
+                        label={
+                          formData.paymentType == "CHEQUE"
+                            ? "Cheque Date"
+                            : formData.paymentType == "PAY_ORDER"
+                            ? "Pay Order Date"
+                            : ""
+                        }
+                        type="datetime-local"
+                        name="paymentDocDate"
+                        value={formData["paymentDocDate"]}
+                        onChange={handleChange}
+                        readOnly={false}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  ""
+                )}
                 <div className="w-full lg:w-4/12 px-4 mt-3">
                   <InputField
                     label={"Created Date"}

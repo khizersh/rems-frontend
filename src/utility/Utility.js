@@ -10,7 +10,11 @@ export const CHEQUE = "CHEQUE";
 export const CASH = "CASH";
 export const PAY_ORDER = "PAY_ORDER";
 export const CUSTOM = "CUSTOM";
-export const PAYMENT_PLANS_TYPE = ["INSTALLMENT", "ONE_TIME_PAYMENT"];
+export const PAYMENT_PLANS_TYPE = [
+  "ONE_TIME_PAYMENT",
+  "INSTALLMENT_RANGE",
+  "INSTALLMENT_SPECIFIC",
+];
 export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
 export const EXPENSE_TYPE = ["CONSTRUCTION", "MISCELLANEOUS"];
 export const MONTH_LABELS = [
@@ -27,6 +31,18 @@ export const MONTH_LABELS = [
   "November",
   "December",
 ];
+
+export const generateYears = (past, future) => {
+  const currentYear = new Date().getFullYear();
+  const startYear = currentYear - past;
+  const endYear = currentYear + future;
+
+  const years = [];
+  for (let year = startYear; year <= endYear; year++) {
+    years.push(year);
+  }
+  return years;
+};
 
 export const getOrdinal = (num) => {
   if (num == 0) return "Ground";
@@ -229,4 +245,3 @@ export function formatPaymentSchedule(scheduleData) {
       };
     });
 }
-

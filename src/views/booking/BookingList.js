@@ -10,6 +10,7 @@ import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdPrint } from "react-icons/md";
 import { generateBookingHtml } from "utility/Utility.js";
 import { getOrdinal } from "utility/Utility.js";
+import { BsBuildingFillAdd } from "react-icons/bs";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError } = useContext(MainContext);
@@ -193,6 +194,9 @@ export default function BookingList() {
   const handleEdit = (booking) => {
     history.push(`/dashboard/update-booking/${booking.id}`);
   };
+  const handleAdd = (booking) => {
+    history.push(`/dashboard/add-booking`);
+  };
 
   const handleDelete = (floor) => {
     console.log("Delete Floor:", floor);
@@ -267,6 +271,12 @@ export default function BookingList() {
           totalElements={totalElements}
           loading={loading}
           title="Booking List"
+          firstButton={{
+            title: "Create Booking",
+            onClick: handleAdd,
+            icon: BsBuildingFillAdd,
+            className: "bg-emerald-500",
+          }}
           actions={actions}
         />
       </div>

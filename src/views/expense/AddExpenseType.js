@@ -2,7 +2,11 @@ import { MainContext } from "context/MainContext";
 import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { FaUserPlus } from "react-icons/fa";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
+import {
+  useHistory,
+  useLocation,
+} from "react-router-dom/cjs/react-router-dom.min.js";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 const AddExpenseType = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -36,7 +40,10 @@ const AddExpenseType = () => {
 
       notifySuccess(response.responseMessage, 4000);
 
-      console.log("formData :: ", formData);
+      setFormData({
+        organizationId: 0,
+        name: "",
+      });
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -67,10 +74,24 @@ const AddExpenseType = () => {
     fetchEditDetails();
   }, []);
 
+  const history = useHistory();
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
-      <div className="mb-0 px-6 py-6">
+      <div className="mb-0 py-6">
         <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{
+                  paddingBottom: "3px",
+                  paddingRight: "7px",
+                  marginBottom: "3px",
+                }}
+              />
+            </button>
+          </span>
           Add Expense Type
         </h6>
       </div>

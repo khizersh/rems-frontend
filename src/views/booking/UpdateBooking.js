@@ -8,7 +8,13 @@ import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDr
 import { getOrdinal } from "utility/Utility.js";
 import { generateBookingHtml } from "utility/Utility.js";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min.js";
+import {
+  useHistory,
+  useParams,
+} from "react-router-dom/cjs/react-router-dom.min.js";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { MONTH_LABELS } from "utility/Utility.js";
+import { generateYears } from "utility/Utility.js";
 
 export default function UpdateBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -31,13 +37,8 @@ export default function UpdateBooking() {
     unitCost: 0,
     customerCost: 0,
     monthWiseTotal: 0,
-    monthWisePaymentList: [
-      {
-        fromMonth: 0,
-        toMonth: 0,
-        amount: 0,
-      },
-    ],
+    monthWisePaymentList: [],
+    monthSpecificPaymentList: [],
   });
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -80,7 +81,8 @@ export default function UpdateBooking() {
       halfYearlyPayment: 0,
       yearlyPayment: 0,
       onPossessionPayment: 0,
-      monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+      monthWisePaymentList: [],
+      monthSpecificPaymentList: [],
     });
   };
 
@@ -153,12 +155,37 @@ export default function UpdateBooking() {
     setPaymentSchedule(updatedPaymentSchedule);
   };
 
+  const changeMonthlySpecificPaymentFields = (monthlyIndex, e) => {
+    const updatedPaymentSchedule = { ...paymentSchedule };
+    updatedPaymentSchedule.monthSpecificPaymentList[monthlyIndex][
+      e.target.name
+    ] = e.target.value;
+
+    let monthSpecificTotal = calculateMonthlySpecificPaymentSum(
+      updatedPaymentSchedule
+    );
+
+    updatedPaymentSchedule.monthSpecificTotal = monthSpecificTotal;
+
+    setPaymentSchedule(updatedPaymentSchedule);
+  };
+
   const addRow = () => {
     setPaymentSchedule((prev) => ({
       ...prev,
       monthWisePaymentList: [
         ...prev.monthWisePaymentList,
         { fromMonth: 0, toMonth: 0, amount: 0 },
+      ],
+    }));
+  };
+
+  const addSpecificRow = () => {
+    setPaymentSchedule((prev) => ({
+      ...prev,
+      monthSpecificPaymentList: [
+        ...prev.monthSpecificPaymentList,
+        { month: "", year: "", amount: 0 },
       ],
     }));
   };
@@ -172,6 +199,20 @@ export default function UpdateBooking() {
     setPaymentSchedule((prev) => ({
       ...prev,
       monthWisePaymentList: prev.monthWisePaymentList.filter(
+        (_, i) => i !== monthIndex
+      ),
+    }));
+  };
+
+  const removeMonthSpecificPayment = (monthIndex) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this month specifc payment?"
+    );
+    if (!confirmed) return;
+
+    setPaymentSchedule((prev) => ({
+      ...prev,
+      monthSpecificPaymentList: prev.monthSpecificPaymentList.filter(
         (_, i) => i !== monthIndex
       ),
     }));
@@ -211,9 +252,8 @@ export default function UpdateBooking() {
       const yearlyPeriods = Math.floor(durationInMonths / 12);
 
       // ✅ Calculate month-wise total
-      let monthWiseTotal = 0;
-
-      monthWiseTotal = calculateMonthlyPaymentSum(schedule);
+      let monthWiseTotal =  calculateMonthlyPaymentSum(schedule);
+      let monthSpecificTotal =  calculateMonthlySpecificPaymentSum(schedule);
 
       // ✅ Totals
       const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
@@ -227,8 +267,8 @@ export default function UpdateBooking() {
       schedule.unitCost = unitCost;
       schedule.customerCost = customerCost;
       schedule.monthWiseTotal = monthWiseTotal;
+      schedule.monthSpecificTotal = monthSpecificTotal;
 
-      console.log("response :: ", schedule);
 
       if (schedule) {
         setPaymentSchedule(schedule || {});
@@ -274,6 +314,19 @@ export default function UpdateBooking() {
       const monthsInRange = end - start + 1;
       sum += monthsInRange * amount;
     }
+
+    return sum;
+  };
+
+  const calculateMonthlySpecificPaymentSum = (schedule) => {
+    if (!schedule || !Array.isArray(schedule.monthSpecificPaymentList))
+      return 0;
+
+    let sum = 0;
+
+    schedule.monthSpecificPaymentList.map(
+      (payment) => (sum += Number(payment.amount))
+    );
 
     return sum;
   };
@@ -434,11 +487,22 @@ export default function UpdateBooking() {
     fetchCustomers(value);
   };
 
+  const history = useHistory();
+
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className=" mb-0 px-6 py-6">
+      <div className=" mb-0 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+            <span>
+              <button className="">
+                <IoArrowBackOutline
+                  onClick={() => history.goBack()}
+                  className="back-button-icon inline-block back-button"
+                  style={{ paddingBottom: "3px", paddingRight: "7px" }}
+                />
+              </button>
+            </span>
             Update Booking
           </h6>
         </div>
@@ -733,7 +797,7 @@ export default function UpdateBooking() {
                 </div>
               </div>
 
-              {paymentSchedule?.paymentPlanType == "INSTALLMENT" ? (
+              {paymentSchedule?.paymentPlanType == "INSTALLMENT_RANGE" ? (
                 <div className="w-full lg:w-6/12 ">
                   <div className="relative w-full">
                     <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
@@ -946,6 +1010,186 @@ export default function UpdateBooking() {
                                 <button
                                   type="button"
                                   onClick={() => removeMonthWisePayment(mIndex)}
+                                  className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                                >
+                                  <MdDeleteForever
+                                    style={{
+                                      fontSize: "25px",
+                                      marginTop: "9px",
+                                    }}
+                                  />
+                                </button>
+                              </div>
+                              <hr className="mt-6 border-b-1 border-blueGray-300" />
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : paymentSchedule?.paymentPlanType == "INSTALLMENT_SPECIFIC" ? (
+                <div className="w-full lg:w-6/12 ">
+                  <div className="relative w-full">
+                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
+                      Customer Payment Schedule
+                      {(() => {
+                        const unitCost = paymentSchedule.unitCost;
+
+                        const customerCost =
+                          paymentSchedule?.customerCost +
+                          paymentSchedule?.monthSpecificTotal;
+
+                        const classColor =
+                          unitCost == customerCost
+                            ? "text-green-600"
+                            : unitCost > customerCost
+                            ? "text-blue-600"
+                            : "text-red-600";
+                        return (
+                          <text className={`ml-3 ${classColor}`}>
+                            ({parseFloat(customerCost).toLocaleString()})
+                          </text>
+                        );
+                      })()}
+                    </div>
+                    <div className="mt-6 flex flex-wrap">
+                      <>
+                        <div className="w-full px-4 lg:w-6/12 md:px-0">
+                          <div className="relative w-full mb-3">
+                            <label
+                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                              htmlFor="downPayment"
+                            >
+                              Down Payment
+                            </label>
+                            <input
+                              id="downPayment"
+                              type="text"
+                              name="downPayment"
+                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                              onChange={(e) => changePaymentScheduleFields(e)}
+                              value={paymentSchedule.downPayment}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    </div>
+                    <div>
+                      <div className="px-4 mt-3 mb-3 rounded md:px-0">
+                        <div className="flex justify-between">
+                          <div className="uppercase text-blueGray-600 font-bold text-sm text-left">
+                            Month Specific Payment
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => addSpecificRow()}
+                            className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+                          >
+                            <IoMdAddCircle
+                              className="inline-block w-3 h-3"
+                              style={{ paddingRight: "0px" }}
+                            />{" "}
+                            Row
+                          </button>
+                        </div>
+
+                        {console.log("schedule inner :: ", paymentSchedule)}
+                        {paymentSchedule?.monthSpecificPaymentList?.map(
+                          (monthly, mIndex) => (
+                            <div className="mt-6 flex flex-wrap justify-between">
+                              <div className="mt-6 text-left pt-4">
+                                {mIndex + 1} -
+                              </div>
+                              <div className="w-full lg:w-3/12 ">
+                                <div className="relative w-full mb-3">
+                                  <label
+                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                    htmlFor="name"
+                                  >
+                                    Month
+                                  </label>
+                                  <select
+                                    id="name"
+                                    type="text"
+                                    name="month"
+                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                    onChange={(e) =>
+                                      changeMonthlySpecificPaymentFields(
+                                        mIndex,
+                                        e
+                                      )
+                                    }
+                                    value={monthly.month}
+                                  >
+                                    <option>Select Month</option>
+                                    {MONTH_LABELS.map((month) => (
+                                      <option key={month} value={month}>
+                                        {month}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="w-full lg:w-3/12 px-2 md:px-0">
+                                <div className="relative w-full mb-3">
+                                  <label
+                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                    htmlFor="name"
+                                  >
+                                    Year
+                                  </label>
+                                  <select
+                                    id="name"
+                                    type="text"
+                                    name="year"
+                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                    onChange={(e) =>
+                                      changeMonthlySpecificPaymentFields(
+                                        mIndex,
+                                        e
+                                      )
+                                    }
+                                    value={monthly.year}
+                                  >
+                                    <option>Select Year</option>
+                                    {generateYears(10, 10).map((year) => (
+                                      <option key={year} value={year}>
+                                        {year}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="w-full lg:w-3/12">
+                                <div className="relative w-full mb-3">
+                                  <label
+                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                    htmlFor="name"
+                                  >
+                                    Amount
+                                  </label>
+                                  <input
+                                    id="name"
+                                    type="number"
+                                    name="amount"
+                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                    onChange={(e) =>
+                                      changeMonthlySpecificPaymentFields(
+                                        mIndex,
+                                        e
+                                      )
+                                    }
+                                    value={monthly.amount}
+                                  />
+                                </div>
+                              </div>
+                              <div className="mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeMonthSpecificPayment(mIndex)
+                                  }
                                   className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
                                 >
                                   <MdDeleteForever

@@ -143,10 +143,13 @@ export default function DynamicTableComponent({
                     const rawValue = getNestedValue(item, col.field);
                     let displayValue = rawValue;
 
+                    console.log("item :: ", col);
+
                     // ✅ Format amount fields
                     if (
                       col.header?.toLowerCase().includes("amount") ||
-                      col.header?.toLowerCase().includes("balance")
+                      col.header?.toLowerCase().includes("balance") ||
+                      col.field?.toLowerCase().includes("amount")
                     ) {
                       const num = parseFloat(rawValue);
                       displayValue = isNaN(num) ? "-" : num.toLocaleString();
@@ -160,8 +163,6 @@ export default function DynamicTableComponent({
                     ) {
                       displayValue = rawValue.split("T")[0];
                     }
-
-                  
 
                     if (
                       displayValue === null ||

@@ -368,7 +368,7 @@
 //                           </div>
 //                         </div>
 
-//                         {unit.paymentPlanType == "INSTALLMENT" ? (
+//                         {unit.paymentPlanType == "INSTALLMENT_RANGE" ? (
 //                           <>
 //                             {/* Down Payment */}
 //                             <div className="w-full px-4 lg:w-6/12">
@@ -486,7 +486,7 @@
 //                       </div>
 //                     </div>
 
-//                     {unit.paymentPlanType == "INSTALLMENT" ? (
+//                     {unit.paymentPlanType == "INSTALLMENT_RANGE" ? (
 //                       <div className="w-full lg:w-6/12 ">
 //                         <div className="relative w-full">
 //                           <div>

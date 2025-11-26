@@ -34,7 +34,6 @@ button:hover {
   height: 1.25rem;
 }
 
-
 .back-button {
   color: #374151; /* gray-700 */
   border: none;
@@ -55,6 +54,13 @@ button:hover {
 .back-button svg {
   width: 18px;
   height: 18px;
+}
+
+.payback-modal {
+  width: 90%;
+  position: fixed;
+  left: 5%;
+  top: 25%;
 }
 
 /* ===========================
@@ -173,9 +179,10 @@ button:hover {
 
   .payback-modal {
     position: fixed;
+    position: fixed;
     left: 0%;
-    top: 22%;
-    margin: 20px;
+    top: 12%;
+    margin: 10px;
   }
 
   .modal-width {

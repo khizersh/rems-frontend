@@ -144,7 +144,6 @@ export default function CustomerPayment() {
       const obj = [];
       var remaining = scheduleData.totalAmount;
 
-      console.log("remaining  :: ", remaining);
       if (scheduleData.downPayment > 0) {
         remaining -= scheduleData.downPayment;
         obj.push({
@@ -1060,9 +1059,7 @@ export default function CustomerPayment() {
             <Card
               props={{
                 statSubtitle: "Total Amount",
-                statTitle: parseFloat(
-                  customerAccount?.totalAmount
-                ).toLocaleString(),
+                statTitle: customerAccount?.totalAmount,
                 statIconName: "far fa-chart-bar",
                 statIconColor: "bg-red-500",
               }}
@@ -1072,9 +1069,7 @@ export default function CustomerPayment() {
             <Card
               props={{
                 statSubtitle: "Total Paid Amount",
-                statTitle: parseFloat(
-                  customerAccount?.totalPaidAmount
-                ).toLocaleString(),
+                statTitle: customerAccount?.totalPaidAmount,
                 statIconName: "far fa-chart-bar",
                 statIconColor: "bg-red-500",
               }}
@@ -1084,9 +1079,7 @@ export default function CustomerPayment() {
             <Card
               props={{
                 statSubtitle: "Total Balance Amount",
-                statTitle: parseFloat(
-                  customerAccount?.totalBalanceAmount
-                ).toLocaleString(),
+                statTitle: customerAccount?.totalBalanceAmount,
                 statIconName: "far fa-chart-bar",
                 statIconColor: "bg-red-500",
               }}

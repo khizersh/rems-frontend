@@ -15,6 +15,8 @@ import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
 import "../../assets/styles/custom/custom.css";
+import { MONTH_LABELS } from "utility/Utility.js";
+import { generateYears } from "utility/Utility.js";
 
 export default function UnitList() {
   const {
@@ -56,7 +58,9 @@ export default function UnitList() {
       unitCost: 0,
       customerCost: 0,
       monthWiseTotal: 0,
+      monthSpecificTotal: 0,
       monthWisePaymentList: [{ fromMonth: 0, toMonth: 0, amount: 0 }],
+      monthSpecificPaymentList: [{ month: 0, year: 0, amount: 0 }],
     },
   });
   const pageSize = 10;
@@ -168,9 +172,8 @@ export default function UnitList() {
       const yearlyPeriods = Math.floor(durationInMonths / 12);
 
       // ✅ Calculate month-wise total
-      let monthWiseTotal = 0;
-
-      monthWiseTotal = calculateMonthlyPaymentSum(schedule);
+      let monthWiseTotal = calculateMonthlyPaymentSum(schedule);
+      let monthSpecificTotal = calculateMonthlySpecificPaymentSum(schedule);
 
       // ✅ Totals
       const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
@@ -184,9 +187,11 @@ export default function UnitList() {
       schedule.unitCost = unitCost;
       schedule.customerCost = customerCost;
       schedule.monthWiseTotal = monthWiseTotal;
+      schedule.monthSpecificTotal = monthSpecificTotal;
 
       data.paymentSchedule = schedule;
 
+      console.log("data :: ", data);
 
       setUnit(data);
       toggleAdd();
@@ -235,6 +240,18 @@ export default function UnitList() {
     return sum;
   };
 
+  const calculateMonthlySpecificPaymentSum = (schedule) => {
+    if (!schedule || !Array.isArray(schedule.monthSpecificPaymentList))
+      return 0;
+
+    let sum = 0;
+
+    schedule.monthSpecificPaymentList.map(
+      (payment) => (sum += Number(payment.amount))
+    );
+
+    return sum;
+  };
 
   const actions = [
     {
@@ -254,7 +271,6 @@ export default function UnitList() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-
       const response = await httpService.post(`/unit/addOrUpdate`, unit);
       const data = await response.data;
 
@@ -331,6 +347,19 @@ export default function UnitList() {
     }));
   };
 
+  const addMonthSpecificPayment = () => {
+    setUnit((prevUnit) => ({
+      ...prevUnit,
+      paymentSchedule: {
+        ...prevUnit.paymentSchedule,
+        monthSpecificPaymentList: [
+          ...(prevUnit.paymentSchedule?.monthSpecificPaymentList || []),
+          { month: "", year: "", amount: 0 },
+        ],
+      },
+    }));
+  };
+
   const handleMonthWisePaymentChange = (index, e) => {
     setUnit((prevUnit) => {
       const updatedList = [...prevUnit.paymentSchedule.monthWisePaymentList];
@@ -354,6 +383,31 @@ export default function UnitList() {
     });
   };
 
+  const handleMonthSpecificPaymentChange = (index, e) => {
+    setUnit((prevUnit) => {
+      const updatedList = [
+        ...prevUnit.paymentSchedule.monthSpecificPaymentList,
+      ];
+      updatedList[index] = {
+        ...updatedList[index],
+        [e.target.name]: e.target.value,
+      };
+
+      let updatedSchedule = {
+        ...prevUnit.paymentSchedule,
+        monthSpecificPaymentList: updatedList,
+      };
+
+      let monthWiseTotal = calculateMonthlySpecificPaymentSum(updatedSchedule);
+
+      updatedSchedule.monthSpecificTotal = monthWiseTotal;
+      return {
+        ...prevUnit,
+        paymentSchedule: updatedSchedule,
+      };
+    });
+  };
+
   const removeMonthWisePayment = (monthIndex) => {
     const confirmed = window.confirm(
       "Are you sure you want to remove this month-wise payment?"
@@ -363,6 +417,22 @@ export default function UnitList() {
     setUnit((prevUnit) => {
       const updatedUnit = { ...prevUnit };
       updatedUnit.paymentSchedule.monthWisePaymentList.splice(monthIndex, 1);
+      return updatedUnit;
+    });
+  };
+
+  const removeMonthSpecificPayment = (monthIndex) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this month specific payment?"
+    );
+    if (!confirmed) return;
+
+    setUnit((prevUnit) => {
+      const updatedUnit = { ...prevUnit };
+      updatedUnit.paymentSchedule.monthSpecificPaymentList.splice(
+        monthIndex,
+        1
+      );
       return updatedUnit;
     });
   };
@@ -378,7 +448,7 @@ export default function UnitList() {
             className="p-4 bg-white rounded modal-height-add-unit inset-0 z-50 mx-auto  fixed-unit-position modal-height"
           >
             <div className="flex justify-between items-center mb-4 p-4">
-              <h2 className="text-xl font-bold uppercase">Update Unit Form</h2>
+              <h2 className="text-xl font-bold uppercase">{unit.id ? "Update" : "Add"}  Unit Form</h2>
               <button onClick={toggleAdd}>
                 <RxCross2 className="w-5 h-5 text-red-500" />
               </button>
@@ -456,7 +526,7 @@ export default function UnitList() {
                     </label>
                     <input
                       id="name"
-                      type="text"
+                      type="number"
                       name="roomCount"
                       className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       onChange={(e) => onChangeUnit(e)}
@@ -474,7 +544,7 @@ export default function UnitList() {
                     </label>
                     <input
                       id="name"
-                      type="text"
+                      type="number"
                       name="bathroomCount"
                       className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       onChange={(e) => onChangeUnit(e)}
@@ -558,7 +628,7 @@ export default function UnitList() {
                             </label>
                             <input
                               id="actualAmount"
-                              type="text"
+                              type="number"
                               name="actualAmount"
                               className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                               onChange={(e) => changePaymentScheduleFields(e)}
@@ -578,7 +648,7 @@ export default function UnitList() {
                             </label>
                             <input
                               id="miscellaneousAmount"
-                              type="text"
+                              type="number"
                               name="miscellaneousAmount"
                               className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                               onChange={(e) => changePaymentScheduleFields(e)}
@@ -598,7 +668,7 @@ export default function UnitList() {
                             </label>
                             <input
                               id="developmentAmount"
-                              type="text"
+                              type="number"
                               name="developmentAmount"
                               className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                               onChange={(e) => changePaymentScheduleFields(e)}
@@ -634,16 +704,15 @@ export default function UnitList() {
                         </div>
                       </div>
 
-                      {/* {unit.paymentPlanType == "INSTALLMENT" ? (
+                      {/* {unit.paymentPlanType == "INSTALLMENT_RANGE" ? (
                        
                       ) : (
                         <></>
                       )} */}
                     </div>
                   </div>
-                  
 
-                  {unit.paymentPlanType == "INSTALLMENT" ? (
+                  {unit.paymentPlanType == "INSTALLMENT_RANGE" ? (
                     <div className="w-full lg:w-6/12 ">
                       <div className="relative w-full">
                         <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
@@ -667,7 +736,6 @@ export default function UnitList() {
                               </text>
                             );
                           })()}
-                          
                         </div>
                         <div className="mt-6 flex flex-wrap">
                           <>
@@ -682,7 +750,7 @@ export default function UnitList() {
                                 </label>
                                 <input
                                   id="downPayment"
-                                  type="text"
+                                  type="number"
                                   name="downPayment"
                                   className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                   onChange={(e) =>
@@ -892,6 +960,200 @@ export default function UnitList() {
                                       type="button"
                                       onClick={() =>
                                         removeMonthWisePayment(mIndex)
+                                      }
+                                      className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                                    >
+                                      <MdDeleteForever
+                                        style={{
+                                          fontSize: "25px",
+                                          marginTop: "9px",
+                                        }}
+                                      />
+                                    </button>
+                                  </div>
+                                  <hr className="mt-6 border-b-1 border-blueGray-300" />
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : unit.paymentPlanType == "INSTALLMENT_SPECIFIC" ? (
+                    <div className="w-full lg:w-6/12 ">
+                      <div className="relative w-full">
+                        <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
+                          Customer Payment Schedule
+                          {(() => {
+                            const unitCost = unit.paymentSchedule.unitCost;
+
+                            const customerCost =
+                              unit.paymentSchedule?.customerCost +
+                              unit.paymentSchedule?.monthSpecificTotal;
+
+                            const classColor =
+                              unitCost == customerCost
+                                ? "text-green-600"
+                                : unitCost > customerCost
+                                ? "text-blue-600"
+                                : "text-red-600";
+                            return (
+                              <text className={`ml-3 ${classColor}`}>
+                                ({parseFloat(customerCost).toLocaleString()})
+                              </text>
+                            );
+                          })()}
+                        </div>
+                        <div className="mt-6 flex flex-wrap">
+                          <>
+                            {/* Down Payment */}
+                            <div className="w-full px-4 lg:w-12/12">
+                              <div className="relative w-full mb-3">
+                                <label
+                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                  htmlFor="downPayment"
+                                >
+                                  Down Payment
+                                </label>
+                                <input
+                                  id="downPayment"
+                                  type="number"
+                                  name="downPayment"
+                                  className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(e)
+                                  }
+                                  value={unit.paymentSchedule.downPayment}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        </div>
+                        <div>
+                          <div className="px-4 mt-3 mb-3  rounded">
+                            <div className="flex justify-between">
+                              <div className="uppercase text-blueGray-600 font-bold text-sm text-center">
+                                Month Specific Payment
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => addMonthSpecificPayment()}
+                                className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+                              >
+                                <IoMdAddCircle
+                                  className="inline-block w-3 h-3"
+                                  style={{ paddingRight: "0px" }}
+                                />{" "}
+                                Row
+                              </button>
+                            </div>
+
+                            {unit?.paymentSchedule?.monthSpecificPaymentList?.map(
+                              (monthly, mIndex) => (
+                                <div className="mt-6 flex flex-wrap">
+                                  <div className="mt-6 text-left pt-4">
+                                    {mIndex + 1} -
+                                  </div>
+                                  <div className="w-full lg:w-3/12 ">
+                                    <div className="relative w-full mb-3">
+                                      <label
+                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                        htmlFor="name"
+                                      >
+                                        Month
+                                      </label>
+                                      <select
+                                        id="name"
+                                        type="text"
+                                        name="month"
+                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        onChange={(e) =>
+                                          handleMonthSpecificPaymentChange(
+                                            mIndex,
+                                            e
+                                          )
+                                        }
+                                        value={
+                                          unit.paymentSchedule
+                                            .monthSpecificPaymentList[mIndex]
+                                            .month
+                                        }
+                                      >
+                                        <option>Select Month</option>
+                                        {MONTH_LABELS.map((month) => (
+                                          <option key={month} value={month}>
+                                            {month}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className="w-full lg:w-3/12 px-2">
+                                    <div className="relative w-full mb-3">
+                                      <label
+                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                        htmlFor="name"
+                                      >
+                                        Year
+                                      </label>
+                                      <select
+                                        id="name"
+                                        type="text"
+                                        name="year"
+                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        onChange={(e) =>
+                                          handleMonthSpecificPaymentChange(
+                                            mIndex,
+                                            e
+                                          )
+                                        }
+                                        value={
+                                          unit.paymentSchedule
+                                            .monthSpecificPaymentList[mIndex]
+                                            .year
+                                        }
+                                      >
+                                        <option>Select Year</option>
+                                        {generateYears(10, 10).map((year) => (
+                                          <option key={year} value={year}>
+                                            {year}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className="w-full lg:w-4/12">
+                                    <div className="relative w-full mb-3">
+                                      <label
+                                        className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                        htmlFor="name"
+                                      >
+                                        Amount
+                                      </label>
+                                      <input
+                                        id="name"
+                                        type="number"
+                                        name="amount"
+                                        className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                        onChange={(e) =>
+                                          handleMonthSpecificPaymentChange(
+                                            mIndex,
+                                            e
+                                          )
+                                        }
+                                        value={
+                                          unit.paymentSchedule
+                                            .monthSpecificPaymentList[mIndex]
+                                            .amount
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className=" pl-7 mt-6 text-right pt-1">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeMonthSpecificPayment(mIndex)
                                       }
                                       className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
                                     >

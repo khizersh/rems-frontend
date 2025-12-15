@@ -255,6 +255,17 @@ const AddExpense = () => {
                       />
                     </div>
                   ))}
+
+                  <div className="w-full lg:w-12/12 px-4 mt-3 ">
+                    <InputField
+                      label={"Narrations"}
+                      name={"comments"}
+                      value={formData["comments"]}
+                      onChange={handleChange}
+                      type={"text"}
+                      readOnly={false}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -421,7 +432,7 @@ const AddExpense = () => {
                 </div>
                 <div className="w-full lg:w-12/12 px-4 mt-3 ">
                   <InputField
-                    label={"Comments"}
+                    label={"Narrations"}
                     name={"comments"}
                     value={formData["comments"]}
                     onChange={handleChange}

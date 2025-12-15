@@ -182,9 +182,10 @@ export default function AddBooking() {
     }));
   };
   const addSpecificRow = () => {
+
     setPaymentSchedule((prev) => ({
       ...prev,
-      monthWisePaymentList: [
+      monthSpecificPaymentList: [
         ...prev.monthSpecificPaymentList,
         { month: "", year: "", amount: 0 },
       ],
@@ -204,6 +205,7 @@ export default function AddBooking() {
       ),
     }));
   };
+
   const removeMonthSpecificPayment = (monthIndex) => {
     const confirmed = window.confirm(
       "Are you sure you want to remove this month specifc payment?"
@@ -1063,7 +1065,6 @@ export default function AddBooking() {
                           </button>
                         </div>
 
-                        {console.log("schedule inner :: ", paymentSchedule)}
                         {paymentSchedule?.monthSpecificPaymentList?.map(
                           (monthly, mIndex) => (
                             <div className="mt-6 flex flex-wrap justify-between">

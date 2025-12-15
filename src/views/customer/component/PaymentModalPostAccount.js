@@ -140,7 +140,7 @@ const PaymentModalPostAccount = ({
               <div className="mt-10 ">
                 {/* <div className={`flex justify-between`}>
                   <h2 id="modal-title" className="text-lg font-bold">
-                    Receiving Account Management
+                    Posting Account
                   </h2>
                 </div> */}
                 {fields?.organizationAccountDetails?.map((detail, ind) => (

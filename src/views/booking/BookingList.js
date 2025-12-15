@@ -11,18 +11,27 @@ import { MdPrint } from "react-icons/md";
 import { generateBookingHtml } from "utility/Utility.js";
 import { getOrdinal } from "utility/Utility.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
+import { MdSchedule, MdCancel } from "react-icons/md";
+import CancelBookingModal from "./CancelBookingModal.js";
+import CustomerAccount from "views/customer/CustomerAccount.js";
 
 export default function BookingList() {
-  const { loading, setLoading, notifyError } = useContext(MainContext);
+  const { loading, setLoading, notifyError, setBackdrop, backdrop } =
+    useContext(MainContext);
   const history = useHistory();
 
   const [bookingList, setBookingList] = useState([]);
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [filterFloor, setFilterFloor] = useState("");
   const [fileteredId, setFileteredId] = useState("");
   const [filteredBy, setFilteredBy] = useState("organization");
   const [floorOptions, setFloorOptions] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState({
+    booking: null,
+    customerAccount: null,
+  });
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -98,8 +107,6 @@ export default function BookingList() {
   };
 
   const changeSelectedProjected = (projectId) => {
-    console.log("projectId :: ", projectId);
-
     if (projectId) {
       setFileteredId(projectId);
       setFilteredBy("project");
@@ -122,6 +129,10 @@ export default function BookingList() {
       setFilterFloor("");
       setFilterProject(Number(filterProject) + Number(0));
     }
+  };
+
+  const handleSchedule = async (unit) => {
+    history.push("/dashboard/customer-schedule/" + unit?.id);
   };
   const tableColumns = [
     { header: "Customer Name", field: "customerName" },
@@ -184,6 +195,23 @@ export default function BookingList() {
     setTimeout(() => win.print(), 500);
   };
 
+  const onClickCancelBooking = async (data) => {
+    const confirmed = window.confirm("Do you want to cancel the booking?");
+    if (!confirmed) return;
+    try {
+      const response = await httpService.get(
+        `/customerAccount/getByUnitId/${data?.id}`
+      );
+      let formattedData = { booking: data, customerAccount: response?.data };
+      setSelectedBooking(formattedData);
+      onClickToggleModal();
+    } catch (err) {
+      notifyError(err?.message, err?.data, 4000);
+    }
+
+    // setSelectedBooking(data?.id);
+  };
+
   const hanldeCustomerAccount = (customer) => {
     if (!customer) {
       return notifyError("Invalid Customer!", 4000);
@@ -209,6 +237,12 @@ export default function BookingList() {
       title: "Customer Account",
       className: "text-green-600",
     },
+    {
+      icon: MdSchedule,
+      onClick: handleSchedule,
+      title: "Payment Schedule",
+      className: "text-blue-600",
+    },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
       icon: MdPrint,
@@ -216,7 +250,18 @@ export default function BookingList() {
       title: "Print Slip",
       className: "yellow",
     },
+    {
+      icon: MdCancel,
+      onClick: onClickCancelBooking,
+      title: "Cancel Booking",
+      className: "text-red-600",
+    },
   ];
+
+  const onClickToggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsOpen(!isOpen);
+  };
 
   return (
     <>
@@ -259,6 +304,17 @@ export default function BookingList() {
         </div>
       </div>
 
+      <div className="container mx-auto p-4">
+        {isOpen && selectedBooking?.booking ? (
+          <CancelBookingModal
+            selectedBooking={selectedBooking}
+            isOpen={isOpen}
+            onClose={onClickToggleModal}
+          />
+        ) : (
+          <></>
+        )}
+      </div>
       <div className="container mx-auto p-4">
         <DynamicTableComponent
           fetchDataFunction={fetchBookingList}

@@ -143,8 +143,6 @@ export default function DynamicTableComponent({
                     const rawValue = getNestedValue(item, col.field);
                     let displayValue = rawValue;
 
-                    console.log("item :: ", col);
-
                     // ✅ Format amount fields
                     if (
                       col.header?.toLowerCase().includes("amount") ||

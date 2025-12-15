@@ -1,6 +1,6 @@
 /* ----------- Base Layout ----------- */
 .schedule-container {
-  width: 800px;
+  width: auto;
   margin: 0 auto;
   padding: 40px;
   font-family: "Segoe UI", Arial, sans-serif;
@@ -35,8 +35,8 @@
 .schedule-box {
   width: 48%;
 }
-.schedule-box h2 {
-  font-size: 18px;
+.schedule-box h4 {
+  font-size: 15px;
   margin-bottom: 10px;
   border-bottom: 2px solid #ddd;
   padding-bottom: 4px;
@@ -48,7 +48,7 @@
 
 /* ----------- Table ----------- */
 .schedule-table-section h2 {
-  font-size: 18px;
+  font-size: 15px;
   margin-bottom: 12px;
 }
 .schedule-table {
@@ -73,7 +73,7 @@
   margin-bottom: 40px;
 }
 .schedule-terms h2 {
-  font-size: 18px;
+  font-size: 15px;
   margin-bottom: 10px;
 }
 .schedule-terms ul {
@@ -81,7 +81,7 @@
 }
 .schedule-terms li {
   margin-bottom: 6px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* ----------- Signatures ----------- */
@@ -101,7 +101,7 @@
   height: 1px;
 }
 .signature-box p {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* ----------- Print Button ----------- */
@@ -136,7 +136,7 @@
   }
 
   .schedule-container {
-    width: 800px !important;
+    width: auto !important;
     margin: 0 auto !important;
     padding: 40px !important;
     box-shadow: none !important;

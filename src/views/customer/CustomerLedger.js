@@ -226,10 +226,9 @@ export default function CustomerLedger() {
         customerPaymentDetails: customerPaymentList,
       };
 
-      console.log("formatedData:: ", formatedData);
 
-      const win = window.open("", "_blank");
       const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string
+      const win = window.open("", "_blank");
       win.document.write(printContent);
       win.document.close();
       win.focus();
@@ -358,7 +357,8 @@ export default function CustomerLedger() {
   `;
   };
 
-  const handleDelete = (customerPayment) => {};
+  
+
 
   const actions = [];
 

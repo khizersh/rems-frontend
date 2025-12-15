@@ -51,6 +51,7 @@ import AddUnit from "views/projects/components/AddUnit";
 import UpdateExpense from "views/expense/UpdateExpense";
 import TransactionSummary from "views/transactionsummary/TransactionSummary";
 import UpdateVendorComponent from "views/vendor/UpdateVendorAccount";
+import BookingCancelList from "views/booking/BookingCancelList";
 
 export default function Admin() {
   return (
@@ -97,9 +98,10 @@ export default function Admin() {
               <Route path="/dashboard/update-customer/:customerId" exact component={UpdateCustomer} />
               <Route path="/dashboard/customer-account" exact component={CustomerAccount} />
               <Route path="/dashboard/customer-ledger" exact component={CustomerLedger} />
-              <Route path="/dashboard/customer-schedule/:customerAccountId" exact component={CustomerSchedule} />
+              <Route path="/dashboard/customer-schedule/:unitID" exact component={CustomerSchedule} />
               <Route path="/dashboard/customer-payment/:customerAccountId" exact component={CustomerPayment} />
               <Route path="/dashboard/booking" exact component={BookingList} />
+              <Route path="/dashboard/cancel-booking" exact component={BookingCancelList} />
               <Route path="/dashboard/add-booking" exact component={AddBooking} />
               <Route path="/dashboard/update-booking/:bookingId" exact component={UpdateBooking} />
               <Route path="/dashboard/map" exact component={Maps} />

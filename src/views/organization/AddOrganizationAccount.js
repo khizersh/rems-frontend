@@ -70,7 +70,7 @@ const AddOrganizationComponent = () => {
       <div className="rounded-t bg-white mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            Add Organization Customer
+            Add Organization Account
           </h6>
         </div>
       </div>

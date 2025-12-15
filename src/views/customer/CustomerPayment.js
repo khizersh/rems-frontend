@@ -152,7 +152,10 @@ export default function CustomerPayment() {
           remaining: remaining,
         });
       }
-      if (scheduleData.monthWisePaymentList?.length > 0) {
+      if (
+        scheduleData?.paymentPlanType == "INSTALLMENT_RANGE" &&
+        scheduleData.monthWisePaymentList?.length > 0
+      ) {
         const array = formatPaymentSchedule(scheduleData);
 
         array.map((formattedMonthly) => {
@@ -208,14 +211,18 @@ export default function CustomerPayment() {
             remaining: remaining,
           });
         }
-        // if (scheduleData.developmentAmount > 0) {
-        //   remaining -= scheduleData.developmentAmount;
-        //   obj.push({
-        //     description: "Development Charges",
-        //     amount: scheduleData.developmentAmount,
-        //     remaining: remaining,
-        //   });
-        // }
+      } else if (
+        scheduleData?.paymentPlanType == "INSTALLMENT_SPECIFIC" &&
+        scheduleData.monthSpecificPaymentList?.length > 0
+      ) {
+        scheduleData.monthSpecificPaymentList.map((specific) => {
+          remaining -= specific.amount;
+          obj.push({
+            description: `${specific.month} - ${specific.year} `,
+            amount: specific.amount,
+            remaining: remaining,
+          });
+        });
       }
 
       setScheduleBreakdown(obj);
@@ -413,28 +420,35 @@ export default function CustomerPayment() {
             return sum + (parseFloat(item.amount) || 0);
           }, 0);
 
-          const formatedData = {
-            contactNo: data.customer?.contactNo || "-",
-            customerName: data.customer?.customerName || "-",
-            cnic: data.customer?.nationalId || "-",
-            fatherHusbandName: data.customer?.guardianName || "-",
-            address: data.customer?.customerAddress || "-",
-            flatNo: data.customer?.unitSerial || "-",
-            floor: data.customer?.floorNo?.toString() || "-",
-            type: data.customer?.unitType || "-",
-            paymentType: data.payment?.paymentType || "-",
-            amount: sumDetailAmount || 0,
-            receiptNo: data.payment?.id || "-",
-            createdAt: data.payment?.createdDate || "-",
-            customerPaymentDetails: data.paymentDetails,
-          };
+          const organization =
+            JSON.parse(localStorage.getItem("organization")) || {};
+          if (organization) {
+            const formatedData = {
+              orgTitle: organization?.name || "-",
+              orgAddress: organization?.address || "-",
+              orgContact: organization?.contactNo || "-",
+              contactNo: data.customer?.contactNo || "-",
+              customerName: data.customer?.customerName || "-",
+              cnic: data.customer?.nationalId || "-",
+              fatherHusbandName: data.customer?.guardianName || "-",
+              address: data.customer?.customerAddress || "-",
+              flatNo: data.customer?.unitSerial || "-",
+              floor: data.customer?.floorNo?.toString() || "-",
+              type: data.customer?.unitType || "-",
+              paymentType: data.payment?.paymentType || "-",
+              amount: sumDetailAmount || 0,
+              receiptNo: data.payment?.id || "-",
+              createdAt: data.payment?.createdDate || "-",
+              customerPaymentDetails: data.paymentDetails,
+            };
 
-          const win = window.open("", "_blank");
-          const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string
-          win.document.write(printContent);
-          win.document.close();
-          win.focus();
-          setTimeout(() => win.print(), 500); // slight delay to render
+            const win = window.open("", "_blank");
+            const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string
+            win.document.write(printContent);
+            win.document.close();
+            win.focus();
+            setTimeout(() => win.print(), 500); // slight delay to render
+          }
         }
       }
     } else {
@@ -448,6 +462,9 @@ export default function CustomerPayment() {
 
   const generateReceiptHTML = (data) => {
     const {
+      orgTitle,
+      orgAddress,
+      orgContact,
       contactNo,
       customerName,
       cnic,
@@ -463,34 +480,14 @@ export default function CustomerPayment() {
 
     const formattedDate = new Date().toLocaleString();
 
-    return `
-    <html>
-    <head>
-      <title>Receipt</title>
-      <style>
-        body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
-        .receipt-container { width: 800px; margin: auto; }
-        .header { text-align: center; }
-        .header h2 { margin: 0; font-size: 20px; }
-        .header p { margin: 0; font-size: 12px; }
-        .receipt-title { font-weight: bold; font-size: 16px; background: #000; color: #fff; padding: 5px; display: inline-block; margin: 10px 0; }
-        .info { display: flex; justify-content: space-between; margin-top: 20px; }
-        .info div { width: 48%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size : 13px; }
-        .footer { margin-top: 30px; border-top : 1px solid black; }
-        .footer-div { display: flex; justify-content: space-left;}
-        .signature { text-align: right; margin-top: 50px; }
-        .page {margin-left : 10px;}
-      </style>
-    </head>
-    <body>
-      <div class="receipt-container">
+    const generateSingleReceipt = (copyType) => {
+      return `
+      <div class="receipt-container page">
         <div class="header">
-          <h2>VISION BUILDERS & MARKETING</h2>
-          <p>SHOP # 4, B-81 Mustafabad, Malir City, Karachi</p>
-          <p>0336-2590911, 03132107640, 0313-2510343, 0347-2494998</p>
-          <div class="receipt-title">RECEIPT</div>
+          <h2>${orgTitle}</h2>
+          <p>${orgAddress}</p>
+          <p>${orgContact}</p>
+          <div class="receipt-title">RECEIPT – ${copyType}</div>
         </div>
 
         <div class="info">
@@ -556,9 +553,38 @@ export default function CustomerPayment() {
           </div>
         </div>
       </div>
+    `;
+    };
+
+    return `
+  <html>
+    <head>
+      <title>Receipt</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+        .receipt-container { width: 800px; margin: auto; }
+        .header { text-align: center; }
+        .header h2 { margin: 0; font-size: 20px; }
+        .header p { margin: 0; font-size: 12px; }
+        .receipt-title { font-weight: bold; font-size: 16px; background: #000; color: #fff; padding: 5px; display: inline-block; margin: 10px 0; }
+        .info { display: flex; justify-content: space-between; margin-top: 20px; }
+        .info div { width: 48%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size : 13px; }
+        .footer { margin-top: 30px; border-top : 1px solid black; }
+        .footer-div { display: flex; justify-content: space-left;}
+        .signature { text-align: right; margin-top: 50px; }
+        
+        /* 🔥 Ensures each copy prints on a separate page */
+        .page { page-break-after: always; }
+        .page:last-child { page-break-after: auto; }
+      </style>
+    </head>
+    <body>
+      ${generateSingleReceipt("Customer Copy")}
+      ${generateSingleReceipt("Builder Copy")}
     </body>
-    </html>
-  `;
+  </html>`;
   };
 
   const toggleModal = () => {

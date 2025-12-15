@@ -34,6 +34,7 @@ export default function DynamicTableComponent({
   endDate,
   changeTransactionType,
   selectTransactionType,
+  firstButton = null,
 }) {
   const history = useHistory();
   return (
@@ -77,9 +78,24 @@ export default function DynamicTableComponent({
             onChange={(update) => onChangeDate(update)}
           />
 
+          {firstButton && (
+            <button
+              onClick={firstButton.onClick}
+              className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded ml-3 mr-3`}
+            >
+              {firstButton.icon && (
+                <firstButton.icon
+                  className="w-5 h-5 inline-block"
+                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                />
+              )}
+              {firstButton.title}
+            </button>
+          )}
+
           <button
             onClick={() => fetchDataFunction(null)}
-            className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded ml-3"
+            className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded "
           >
             <RxReload
               className="w-5 h-5 inline-block"

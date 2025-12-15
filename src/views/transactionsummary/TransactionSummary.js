@@ -7,6 +7,7 @@ import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicTableComponentDateRange from "../../components/table/DynamicTableComponentDateRange.js";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { getFormattedDateNDaysAgo } from "utility/Utility.js";
+import { MdPrint } from "react-icons/md";
 
 export default function TransactionSummary() {
   const {
@@ -71,8 +72,6 @@ export default function TransactionSummary() {
           accountDetailRequest.filteredBy = "account";
           accountDetailRequest.filteredId = fileteredId;
         }
-
-        console.log("accountDetailRequest :: ", accountDetailRequest);
 
         const response = await httpService.post(
           `/organizationAccount/getAccountDetailByDateRange`,
@@ -180,10 +179,155 @@ export default function TransactionSummary() {
     { header: "Created Date", field: "createdDate" },
   ];
 
-  const toggleModal = () => {
-    setBackdrop(!backdrop);
-    setIsModalOpen(!isModalOpen);
+  const handlePrint = async () => {
+    setLoading(true);
+
+    try {
+      setLoading(true);
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || {};
+      if (organization) {
+        accountDetailRequest.organizationId = organization.organizationId;
+
+        if (!accountDetailRequest.startDate || !accountDetailRequest.endDate) {
+          accountDetailRequest.startDate = getFormattedDateNDaysAgo(0);
+          accountDetailRequest.endDate = getFormattedDateNDaysAgo(0);
+        }
+
+        accountDetailRequest.filteredBy = "all";
+        if (fileteredId) {
+          accountDetailRequest.filteredBy = "account";
+          accountDetailRequest.filteredId = fileteredId;
+        }
+
+        const response = await httpService.post(
+          `/organizationAccount/getAccountDetailByDateRangePrint`,
+          accountDetailRequest
+        );
+
+        console.log("response :: ", response?.data);
+
+        let totalDebitAmount = 0;
+        let totalCreditAmount = 0;
+        response?.data?.forEach((transaction) => {
+          if (transaction.transactionType === "CREDIT") {
+            totalCreditAmount += transaction.amount;
+          }
+          if (transaction.transactionType === "DEBIT") {
+            totalDebitAmount += transaction.amount;
+          }
+        });
+
+        response.organizationTitle = organization?.name;
+        response.address = organization?.address;
+        response.numbers = organization?.contactNo;
+        response.totalDebitAmount = totalDebitAmount;
+        response.totalCreditAmount = totalCreditAmount;
+
+        console.log("response :: ", response);
+
+        const html = generateOrganizationLedgerHTML(response);
+
+        const win = window.open("", "_blank");
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 500); // slight delay to render
+        setLoading(false);
+      }
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+      setLoading(false);
+    }
   };
+
+  const generateOrganizationLedgerHTML = (input) => {
+    let data = input.data;
+    let mainData = input?.data;
+    const formattedDate = new Date().toLocaleString();
+
+    return `
+  <html>
+    <head>
+      <title>Organization Ledger</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+        .ledger-container { width: 800px; margin: auto; }
+        .header { text-align: center; }
+        .header h2 { margin: 0; font-size: 20px; }
+        .header p { margin: 0; font-size: 12px; }
+        .ledger-title { font-weight: bold; font-size: 16px; background: #000; color: #fff; padding: 5px; display: inline-block; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size: 13px; }
+        .footer { margin-top: 30px; border-top: 1px solid black; }
+        .signature { text-align: right; margin-top: 50px; }
+      </style>
+    </head>
+    <body>
+      <div class="ledger-container">
+        <div class="header">
+          <h2>${input?.organizationTitle}</h2>
+          <p>${input?.address}</p>
+          <p>${input?.numbers}</p>
+          <div class="ledger-title">ORGANIZATION ACCOUNT LEDGER</div>
+        </div>
+
+        <div>
+          <p><strong>Total Debit ↓:</strong> ${parseFloat(
+            input?.totalDebitAmount || 0
+          ).toLocaleString()}</p>
+          <p><strong>Total Credit ↑:</strong> ${parseFloat(
+            input?.totalCreditAmount || 0
+          ).toLocaleString()}</p>
+          <p><strong>Ledger Date:</strong> ${formattedDate}</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Sr#</th>
+              <th>Account Name</th>
+              <th>Transaction Type</th>
+              <th>Amount</th>
+              <th>Narration</th>
+              <th>Date</th>
+              <th>Created By</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data
+              .map((detail, ind) => {
+                return `
+                  <tr>
+                    <td>${ind + 1}</td>
+                    <td>${detail?.accountName}</td>
+                    <td>${
+                      detail.transactionType == "CREDIT"
+                        ? "↑ CREDIT"
+                        : "↓ DEBIT" || ""
+                    }</td>
+                    <td>${parseFloat(detail.amount || 0).toLocaleString()}</td>
+                    <td>${detail.comments || "-"}</td>
+                    <td>${
+                      detail.createdDate ? detail.createdDate.split("T")[0] : ""
+                    }</td>
+                    <td>${detail.createdBy || "-"}</td>
+                  </tr>
+                `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p><strong>Print Date:</strong> ${formattedDate}</p>
+        </div>
+      </div>
+    </body>
+  </html>
+  `;
+  };
+
   const toggleModalAccount = () => {
     setBackdrop(!backdrop);
     setIsModalOpenAccount(!isModalOpenAccount);
@@ -269,6 +413,12 @@ export default function TransactionSummary() {
           endDate={endDate}
           changeTransactionType={null}
           selectTransactionType={null}
+          firstButton={{
+            icon: MdPrint,
+            onClick: handlePrint,
+            title: "Print Report",
+            className: "bg-emerald-500",
+          }}
         />
       </div>
     </>

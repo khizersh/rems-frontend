@@ -6,6 +6,7 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
+import { AiFillSchedule } from "react-icons/ai";
 import { projectTypes, unitTypes } from "utility/Utility";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
@@ -144,6 +145,11 @@ export default function UnitList() {
     toggleModal();
   };
 
+  const history = useHistory();
+
+  const handleSchedule = async (unit) => {
+    history.push("/dashboard/customer-schedule/" + unit?.id);
+  };
   const handleEdit = async (unit) => {
     setLoading(true);
     try {
@@ -257,10 +263,16 @@ export default function UnitList() {
     {
       icon: FaEye,
       onClick: handleView,
-      title: "Customer Detail",
+      title: "Detail",
       className: "text-green-600",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: AiFillSchedule,
+      onClick: handleSchedule,
+      title: "Payment Schedule",
+      className: "text-blue-600",
+    },
   ];
 
   const toggleModal = () => {
@@ -448,7 +460,9 @@ export default function UnitList() {
             className="p-4 bg-white rounded modal-height-add-unit inset-0 z-50 mx-auto  fixed-unit-position modal-height"
           >
             <div className="flex justify-between items-center mb-4 p-4">
-              <h2 className="text-xl font-bold uppercase">{unit.id ? "Update" : "Add"}  Unit Form</h2>
+              <h2 className="text-xl font-bold uppercase">
+                {unit.id ? "Update" : "Add"} Unit Form
+              </h2>
               <button onClick={toggleAdd}>
                 <RxCross2 className="w-5 h-5 text-red-500" />
               </button>

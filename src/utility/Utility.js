@@ -1,4 +1,5 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
+export const CANCEL_BOOKING_FEES_TYPE = ["fixed", "percentile"];
 export const unitTypes = ["APARTMENT", "SHOP"];
 export const paymentReasons = [
   "INSTALLMENT",

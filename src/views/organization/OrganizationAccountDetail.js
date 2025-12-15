@@ -8,6 +8,7 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import { MdPrint } from "react-icons/md";
 
 export default function OrganizationAccountDetail() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =
@@ -56,7 +57,35 @@ export default function OrganizationAccountDetail() {
     { header: "Customer Name", field: "customerName" },
     { header: "Project Name", field: "projectName" },
     { header: "Unit Serial", field: "unitSerialNo" },
-    { header: "Transaction Type", field: "transactionType" },
+    {
+      header: "Transaction Type",
+      field: "transactionType",
+      render: (value) => {
+        const baseClass = "font-semibold uppercase";
+        if (value === "CREDIT")
+          return (
+            <span className="text-red-600">
+              <i className="fas fa-arrow-up text-red-500 mr-1"></i>
+              {value}
+            </span>
+          );
+        if (value === "DEBIT")
+          return (
+            <span className="text-green-600">
+              <i className="fas fa-arrow-down text-emerald-500 mr-1"></i>
+              {value}
+            </span>
+          );
+        else
+          return (
+            <span>
+              <i className="fas fa-arrow-up text-emerald-500"></i>
+              <i className="fas fa-arrow-down text-red-500 mr-4"></i>
+              {value}
+            </span>
+          );
+      },
+    },
     { header: "Amount", field: "amount" },
     { header: "Comments", field: "comments" },
   ];
@@ -103,12 +132,131 @@ export default function OrganizationAccountDetail() {
       onClick: handleView,
       title: "View Detail",
       className: "text-green-600",
-    }
+    },
   ];
 
   const toggleModal = () => {
     setBackdrop(!backdrop);
     setIsModalOpen(!isModalOpen);
+  };
+
+  const handlePrint = async () => {
+    setLoading(true);
+
+    try {
+      const response = await httpService.get(
+        `/organizationAccount/getAccountDetailByAcctIdPrint/${accountId}`
+      );
+
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || {};
+
+      response.organizationTitle = organization?.name;
+      response.address = organization?.address;
+      response.numbers = organization?.contactNo;
+
+      console.log("response :: ", response);
+
+      const html = generateOrganizationLedgerHTML(response);
+
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 500); // slight delay to render
+      setLoading(false);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+      setLoading(false);
+    }
+  };
+
+  const generateOrganizationLedgerHTML = (input) => {
+    let data = input.data?.list;
+    let mainData = input?.data?.account;
+    const formattedDate = new Date().toLocaleString();
+
+    return `
+  <html>
+    <head>
+      <title>Organization Ledger</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+        .ledger-container { width: 800px; margin: auto; }
+        .header { text-align: center; }
+        .header h2 { margin: 0; font-size: 20px; }
+        .header p { margin: 0; font-size: 12px; }
+        .ledger-title { font-weight: bold; font-size: 16px; background: #000; color: #fff; padding: 5px; display: inline-block; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; font-size: 13px; }
+        .footer { margin-top: 30px; border-top: 1px solid black; }
+        .signature { text-align: right; margin-top: 50px; }
+      </style>
+    </head>
+    <body>
+      <div class="ledger-container">
+        <div class="header">
+          <h2>${input?.organizationTitle}</h2>
+          <p>${input?.address}</p>
+          <p>${input?.numbers}</p>
+          <div class="ledger-title">ORGANIZATION ACCOUNT LEDGER</div>
+        </div>
+
+        <div>
+          <p><strong>Account Title:</strong> ${mainData?.name || "-"}</p>
+          <p><strong>Bank Name:</strong> ${mainData?.bankName || "-"}</p>
+          <p><strong>Account Number:</strong> ${mainData?.accountNo || "-"}</p>
+          <p><strong>Iban:</strong> ${mainData?.iban || "-"}</p>
+          <p><strong>Current Balance:</strong> ${parseFloat(
+            mainData?.totalAmount || 0
+          ).toLocaleString()}</p>
+          <p><strong>Ledger Date:</strong> ${formattedDate}</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Sr#</th>
+              <th>Transaction Type</th>
+              <th>Amount</th>
+              <th>Project Name</th>
+              <th>Narration</th>
+              <th>Date</th>
+              <th>Created By</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data
+              .map((detail, ind) => {
+                return `
+                  <tr>
+                    <td>${ind + 1}</td>
+                    <td>${
+                      detail.transactionType == "CREDIT"
+                        ? "↑ CREDIT"
+                        : "↓ DEBIT" || ""
+                    }</td>
+                    <td>${parseFloat(detail.amount || 0).toLocaleString()}</td>
+                    <td>${detail.projectName || ""}</td>
+                    <td>${detail.comments || ""}</td>
+                    <td>${
+                      detail.createdDate ? detail.createdDate.split("T")[0] : ""
+                    }</td>
+                    <td>${detail.createdBy || ""}</td>
+                  </tr>
+                `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p><strong>Print Date:</strong> ${formattedDate}</p>
+        </div>
+      </div>
+    </body>
+  </html>
+  `;
   };
 
   return (
@@ -131,6 +279,12 @@ export default function OrganizationAccountDetail() {
         loading={loading}
         title="Organization Account Detail"
         actions={actions}
+        firstButton={{
+          icon: MdPrint,
+          onClick: handlePrint,
+          title: "Print Report",
+          className: "bg-emerald-500",
+        }}
       />
     </div>
   );

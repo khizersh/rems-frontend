@@ -6,17 +6,19 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaDownload, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaDownload, FaEdit, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdPrint } from "react-icons/md";
 import { generateBookingHtml } from "utility/Utility.js";
 import { getOrdinal } from "utility/Utility.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MdSchedule, MdCancel } from "react-icons/md";
 import CancelBookingModal from "./CancelBookingModal.js";
+import CancelBookingModalEdit from "./CancelBookingModalEdit.js";
 import CustomerAccount from "views/customer/CustomerAccount.js";
 import { GoSearch } from "react-icons/go";
 import { RxCross2 } from "react-icons/rx";
 import { paymentTypes } from "utility/Utility.js";
+import { FaMoneyBillTrendUp } from "react-icons/fa6";
 
 export default function BookingCancelList() {
   const {
@@ -34,8 +36,8 @@ export default function BookingCancelList() {
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenEditFee, setIsOpenEditFee] = useState(false);
   const [filterFloor, setFilterFloor] = useState("");
-  const [fileteredId, setFileteredId] = useState("");
   const [projectId, setProjectId] = useState("");
   const [accountList, setAccountList] = useState([]);
   const [customerName, setCustomerName] = useState("");
@@ -47,6 +49,12 @@ export default function BookingCancelList() {
     paymentDocNo: 0,
     paymentDocDate: new Date().toISOString().slice(0, 16),
     createdDate: new Date().toISOString().slice(0, 16),
+  });
+  const [editFeeRequest, setEditFeeRequest] = useState({
+    id: "",
+    type: "",
+    title: "",
+    value: "",
   });
 
   const [page, setPage] = useState(0);
@@ -138,8 +146,10 @@ export default function BookingCancelList() {
     }
   };
 
-  const handleSchedule = async (unit) => {
-    // history.push("/dashboard/customer-schedule/" + unit?.id);
+  const handleDetails = async (booking) => {
+    history.push(
+      `/dashboard/cancel-booking-detail/${booking?.customerPayableId}`
+    );
   };
   const tableColumns = [
     { header: "Customer Name", field: "customerName" },
@@ -224,12 +234,26 @@ export default function BookingCancelList() {
       notifyError(err?.message, err?.data, 4000);
     }
   };
+  const onClickEdit = async (data) => {
+    try {
+      setLoading(true);
+      const response = await httpService.get(
+        `/customerpayable/${data?.customerPayableId}`
+      );
+
+      setSelectedBooking(response?.data);
+      onClickToggleModalEditFee();
+      setLoading(false);
+    } catch (err) {
+      notifyError(err?.message, err?.data, 4000);
+    }
+  };
 
   const actions = [
     {
-      icon: MdSchedule,
-      onClick: handleSchedule,
-      title: "Payment Schedule",
+      icon: FaMoneyBillTrendUp,
+      onClick: handleDetails,
+      title: "Cancel Details",
       className: "text-blue-600",
     },
     {
@@ -237,6 +261,12 @@ export default function BookingCancelList() {
       onClick: onClickPayback,
       title: "Pay back",
       className: "text-emerald-500",
+    },
+    {
+      icon: FaPen,
+      onClick: onClickEdit,
+      title: "Edit Fees",
+      className: "text-blue-500",
     },
   ];
 
@@ -248,6 +278,10 @@ export default function BookingCancelList() {
   const onClickToggleModal = () => {
     setBackdrop(!backdrop);
     setIsOpen(!isOpen);
+  };
+  const onClickToggleModalEditFee = () => {
+    setBackdrop(!backdrop);
+    setIsOpenEditFee(!isOpenEditFee);
   };
 
   const handleSubmit = async () => {
@@ -268,9 +302,8 @@ export default function BookingCancelList() {
           },
         ],
       };
-      console.log("requestBody :: ", requestBody);
       const data = await httpService.post(
-        `/booking/${selectedBooking?.customerPayableId}/addPaymentDetails`,
+        `/customerpayable/${selectedBooking?.customerPayableId}/addPaymentDetails`,
         requestBody
       );
       notifySuccess(data.responseMessage, 3000);
@@ -338,7 +371,7 @@ export default function BookingCancelList() {
           </div>
         </div>
       </div>
-
+      {/* payback modal */}
       <div className="container mx-auto p-4">
         {isOpen ? (
           <div>
@@ -382,7 +415,7 @@ export default function BookingCancelList() {
                           <option value="">All Account</option>
                           {accountList.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.name}
+                              {account.name} - {account.bankName}
                             </option>
                           ))}
                         </select>
@@ -488,6 +521,21 @@ export default function BookingCancelList() {
               </div>
             </div>
           </div>
+        ) : (
+          <></>
+        )}
+      </div>
+
+      {/* edit fees modal */}
+      <div className="container mx-auto p-4">
+        {isOpenEditFee ? (
+          <>
+            <CancelBookingModalEdit
+              selectedBooking={selectedBooking}
+              isOpen={isOpenEditFee}
+              onClose={onClickToggleModalEditFee}
+            />
+          </>
         ) : (
           <></>
         )}

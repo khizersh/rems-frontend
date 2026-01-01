@@ -52,6 +52,7 @@ import UpdateExpense from "views/expense/UpdateExpense";
 import TransactionSummary from "views/transactionsummary/TransactionSummary";
 import UpdateVendorComponent from "views/vendor/UpdateVendorAccount";
 import BookingCancelList from "views/booking/BookingCancelList";
+import BookingCancelDetail from "views/booking/BookingCancelDetail";
 
 export default function Admin() {
   return (
@@ -59,7 +60,7 @@ export default function Admin() {
       <MainProvider>
         <Sidebar />
         {/* <div className="relative md:ml-64 bg-blueGray-100"> */}
-        <div className="md:ml-64 bg-blueGray-50 ">
+        <div className="main-content md:ml-64 bg-blueGray-50 ">
           {/* Header */}
           <AdminNavbar />
        
@@ -102,6 +103,7 @@ export default function Admin() {
               <Route path="/dashboard/customer-payment/:customerAccountId" exact component={CustomerPayment} />
               <Route path="/dashboard/booking" exact component={BookingList} />
               <Route path="/dashboard/cancel-booking" exact component={BookingCancelList} />
+              <Route path="/dashboard/cancel-booking-detail/:customerPayableId" exact component={BookingCancelDetail} />
               <Route path="/dashboard/add-booking" exact component={AddBooking} />
               <Route path="/dashboard/update-booking/:bookingId" exact component={UpdateBooking} />
               <Route path="/dashboard/map" exact component={Maps} />

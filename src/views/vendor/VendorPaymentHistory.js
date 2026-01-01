@@ -111,6 +111,18 @@ export default function VendorPaymentHistory() {
           );
       },
     },
+    {
+      header: "Payment Type",
+      field: "vendorPaymentType",
+      render: (value) => {
+        const baseClass = "font-semibold uppercase";
+        if (value === "DIRECT_PURCHASE")
+          return <span className="text-blueGray-500 font-semibold">{value}</span>;
+        if (value === "DUE_CLEARANCE")
+          return <span className="text-green-600">{value}</span>;
+        else return <span>-</span>;
+      },
+    },
     { header: "Paid Amount", field: "amountPaid" },
     { header: "Credit Amount", field: "creditAmount" },
     { header: "Balance Amount", field: "balanceAmount" },
@@ -231,6 +243,7 @@ export default function VendorPaymentHistory() {
               <th>Sr#</th>
               <th>Date</th>
               <th>Transaction Type</th>
+              <th>Transaction Type</th>
               <th>Debit (Paid)</th>
               <th>Credit (Borrow)</th>
               <th>Total</th>
@@ -250,7 +263,9 @@ export default function VendorPaymentHistory() {
                     <td>${parseFloat(
                       detail.amountPaid + detail.creditAmount
                     ).toLocaleString()}</td>
-                    <td>${parseFloat(detail.balanceAmount).toLocaleString()}</td>
+                    <td>${parseFloat(
+                      detail.balanceAmount
+                    ).toLocaleString()}</td>
                   </tr>
                 `;
               })

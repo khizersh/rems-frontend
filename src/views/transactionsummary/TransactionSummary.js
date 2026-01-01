@@ -116,8 +116,6 @@ export default function TransactionSummary() {
   }, []);
 
   useEffect(() => {
-    console.log("use effect working...");
-
     fetchOrgAccountDetails(fileteredId);
   }, [fileteredId, accountDetailRequest]);
 
@@ -164,8 +162,8 @@ export default function TransactionSummary() {
         else
           return (
             <span>
-              <i className="fas fa-arrow-up text-emerald-500 mr-4"></i>
-              <i className="fas fa-arrow-down text-red-500 mr-4"></i>
+              <i className="fas fa-arrow-up text-emerald-500"></i>
+              <i className="fas fa-arrow-down text-red-500  mr-1"></i>
               {value}
             </span>
           );
@@ -205,8 +203,6 @@ export default function TransactionSummary() {
           accountDetailRequest
         );
 
-        console.log("response :: ", response?.data);
-
         let totalDebitAmount = 0;
         let totalCreditAmount = 0;
         response?.data?.forEach((transaction) => {
@@ -223,8 +219,6 @@ export default function TransactionSummary() {
         response.numbers = organization?.contactNo;
         response.totalDebitAmount = totalDebitAmount;
         response.totalCreditAmount = totalCreditAmount;
-
-        console.log("response :: ", response);
 
         const html = generateOrganizationLedgerHTML(response);
 
@@ -356,6 +350,16 @@ export default function TransactionSummary() {
     toggleModalAccount();
   };
 
+  const TRANSACTION_TYPES = [
+    { title: "CASH ACCOUNT", value: "DEBIT" },
+    { title: "LIABILITY ACCOUNT", value: "CREDIT" },
+  ];
+
+  const onChangeType = (type) => {
+    setAccountDetailRequest({ ...accountDetailRequest, transactionType: type });
+  };
+  const onClickSearch = (type) => {};
+
   return (
     <>
       <DynamicDetailsModal
@@ -366,8 +370,8 @@ export default function TransactionSummary() {
       />
       <div className="container mx-auto p-4">
         <div className="w-full sm:mb-0">
-          <div className="flex flex-wrap py-3 md:justify-content-between">
-            <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
+          <div className="bg-white shadow-lg flex flex-wrap py-3 md:justify-content-between">
+            <div className="  p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
               <label className="block text-sm font-medium mb-1 ">
                 Select Account
               </label>
@@ -380,6 +384,23 @@ export default function TransactionSummary() {
                 {accounts.map((account) => (
                   <option key={account.id} value={account.id}>
                     {account.name} - {account.bankName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className=" p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
+              <label className="block text-sm font-medium mb-1 ">
+                Select Type
+              </label>
+              <select
+                value={accountDetailRequest.transactionType}
+                onChange={(e) => onChangeType(e.target.value)}
+                className="border rounded-lg px-3 py-2 w-full"
+              >
+                <option value="">All Types</option>
+                {TRANSACTION_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.title}
                   </option>
                 ))}
               </select>

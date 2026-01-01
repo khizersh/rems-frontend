@@ -177,6 +177,15 @@ textarea {
   margin: 0; /* 2 */
 }
 
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f3f4f6; /* light grey */
+  color: #9ca3af; /* muted text */
+  cursor: not-allowed;
+  opacity: 1; /* prevent browser auto-dimming */
+}
+
 /**
 Remove the inheritance of text transform in Edge and Firefox.
 1. Remove the inheritance of text transform in Firefox.
@@ -320,7 +329,6 @@ ul {
 }
 
 @media (max-width: 799px) {
- 
   .sidebar-logo {
     width: 140px;
   }

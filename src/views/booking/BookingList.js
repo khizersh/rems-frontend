@@ -200,7 +200,7 @@ export default function BookingList() {
     if (!confirmed) return;
     try {
       const response = await httpService.get(
-        `/customerAccount/getByUnitId/${data?.id}`
+        `/customerAccount/getByUnitId/${data?.unitId}`
       );
       let formattedData = { booking: data, customerAccount: response?.data };
       setSelectedBooking(formattedData);
@@ -208,8 +208,6 @@ export default function BookingList() {
     } catch (err) {
       notifyError(err?.message, err?.data, 4000);
     }
-
-    // setSelectedBooking(data?.id);
   };
 
   const hanldeCustomerAccount = (customer) => {

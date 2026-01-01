@@ -21,7 +21,7 @@ export default function User() {
   return (
     <>
       <Sidebar />
-      <div className="relative md:ml-64 bg-blueGray-100">
+      <div className="main-content relative md:ml-64 bg-blueGray-100">
         <AdminNavbar />
         {/* Header */}
         <HeaderStats />

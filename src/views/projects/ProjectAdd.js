@@ -12,6 +12,11 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { generateYears } from "utility/Utility";
 import { MONTH_LABELS } from "utility/Utility";
+import { BiCommentDetail } from "react-icons/bi";
+import { GrMoney } from "react-icons/gr";
+import { PiBuildingsLight } from "react-icons/pi";
+import { RiHome4Line } from "react-icons/ri";
+
 
 export default function AddProject() {
   const { setLoading, notifyError, notifySuccess } = useContext(MainContext);
@@ -399,33 +404,95 @@ export default function AddProject() {
 
   const history = useHistory();
 
+  // 👉 High-level summary metrics for a quick project overview
+  const totalFloors = floors.length;
+  const totalUnits = floors.reduce(
+    (sum, floor) => sum + (floor?.unitList?.length || 0),
+    0
+  );
+  const totalProjectAmount =
+    Number(project.additionalAmount || 0) +
+    Number(project.purchasingAmount || 0) +
+    Number(project.registrationAmount || 0);
+
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 bg-blueGray-50 mt-12">
+      {/* Page header */}
       <div className="mb-0 px-6 py-6">
-        <div className="flex justify-between">
-          <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            <span>
-              <button className="">
-                <IoArrowBackOutline
-                  onClick={() => history.goBack()}
-                  className="back-button-icon inline-block back-button"
-                  style={{
-                    paddingBottom: "3px",
-                    paddingRight: "7px",
-                    marginBottom: "3px",
-                  }}
-                />
-              </button>
-            </span>
+        <div className="flex justify-between items-center">
+          <h6 className="text-blueGray-700 text-xl font-bold uppercase flex items-center gap-2">
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{
+                  paddingBottom: "3px",
+                  paddingRight: "7px",
+                  marginBottom: "3px",
+                }}
+              />
+            </button>
             Create Project
           </h6>
         </div>
       </div>
-      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-4">
+
+      {/* Project summary strip */}
+      <div className="bg-white rounded-12 shadow-md px-4 md:px-6 -mt-2">
+        <div className="  px-4 py-3 flex flex-wrap gap-4 md:gap-8">
+          <div className="flex items-center gap-3 mr-4">
+            <PiBuildingsLight className="text-lightBlue-500 w-5 h-5 mb-5" />
+            <div className="ml-2">
+              <div className="text-sm text-blueGray-400 uppercase">Project</div>
+              <div className="text-sm font-semibold text-blueGray-700">
+                {project.name || "--"}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mr-4">
+            <FaLayerGroup className="text-emerald-500 w-4 h-4 mb-5" />
+            <div className="ml-2">
+              <div className="text-xs text-blueGray-400 uppercase">Floors</div>
+              <div className="text-sm font-semibold text-blueGray-700">
+                {totalFloors}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mr-3">
+            <RiHome4Line className="text-indigo-500 w-4 h-4 mb-5" />
+            <div className="ml-2">
+              <div className="text-xs text-blueGray-400 uppercase">Units</div>
+              <div className="text-sm font-semibold text-blueGray-700">
+                {totalUnits}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center justify-center w-8 h-8 mb-5 rounded-full bg-lightBlue-50 text-lightBlue-600 text-xs font-bold">
+              Rs
+            </span>
+            <div>
+              <div className="text-xs text-blueGray-400 uppercase">
+                Total Amount
+              </div>
+              <div className="text-sm font-semibold text-blueGray-700">
+                {totalProjectAmount.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main form card */}
+      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-6 shadow-md">
         <form>
           <div className="flex flex-wrap">
             <div className="w-full lg:w-6/12 px-4  border-right-grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
+              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
+                <BiCommentDetail className="text-lightBlue-500 w-4 h-4 mr-1" />
                 Basic Details
               </h6>
               <div className="flex flex-wrap">
@@ -530,7 +597,8 @@ export default function AddProject() {
               </div>
             </div>
             <div className="w-full lg:w-6/12 px-4 grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
+              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
+                <GrMoney className="text-emerald-500 w-4 h-4 mr-1" />
                 Financial Details
               </h6>
               <div className="flex flex-wrap">
@@ -617,7 +685,12 @@ export default function AddProject() {
           <hr className="mt-6 border-b-1 border-blueGray-300" />
 
           <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between px-4">
-            Floor List
+            <div>
+            <FaLayerGroup
+                className="text-emerald-500 w-5 h-5 inline-block"
+                style={{ paddingBottom: "3px", paddingRight: "7px" }}
+              />
+              Floor List</div>
             <button
               type="button"
               onClick={addFloor}

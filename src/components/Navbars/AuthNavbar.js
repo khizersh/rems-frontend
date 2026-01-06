@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import "assets/styles/loading.css";
+import "../../assets/styles/custom/custom.css";
 import Logo from "../../assets/img/logo/hor-logo.png"
 
 // components
@@ -22,12 +23,12 @@ export default function Navbar(props) {
 
       <nav className="top-0 absolute z-50 w-full flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg">
         <div className="container px-4 mx-auto flex flex-wrap items-center justify-between">
-          <div className="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
+          <div className="w-full relative flex justify-between items-center lg:w-auto lg:static lg:block lg:justify-start">
             <Link
               className="text-white text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
               to="/"
             >
-             <img src={Logo} width={'200px'} />
+             <img src={Logo} className="auth-navbar-logo" alt="Logo" />
             </Link>
             <button
               className="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"
@@ -55,7 +56,7 @@ export default function Navbar(props) {
                 </a>
               </li>
             </ul> */}
-            <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">
+            <ul className="flex flex-row flex-wrap list-none lg:ml-auto navbar-social-icons">
               {/* <li className="flex items-center">
                 <PagesDropdown />
               </li> */}

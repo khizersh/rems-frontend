@@ -46,9 +46,9 @@ export default function CustomerList() {
   });
 
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
 
   useEffect(() => {
     fetchProjects();
@@ -59,7 +59,7 @@ export default function CustomerList() {
     const cid = queryParams.get("cId");
     setCId(cid);
     fetchCustomerDetails(cid);
-  }, [page, filterProject, filterFloor]);
+  }, [page, filterProject, filterFloor, pageSize]);
 
   const fetchProjects = async () => {
     try {
@@ -89,6 +89,7 @@ export default function CustomerList() {
 
   const fetchCustomerDetails = async (cid) => {
     setLoading(true);
+    
     try {
       const requestBody = {
         id: fileteredId,
@@ -398,7 +399,6 @@ export default function CustomerList() {
           </div>
         </div>
       </div>
-
       <div className="container mx-auto p-4">
         <DynamicTableComponent
           fetchDataFunction={fetchCustomerDetails}
@@ -407,6 +407,7 @@ export default function CustomerList() {
           data={customerList}
           columns={tableColumns}
           pageSize={pageSize}
+          setPageSize={setPageSize}
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaAngleDoubleLeft,
   FaAngleLeft,
@@ -17,13 +17,15 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 const getNestedValue = (obj, path) =>
   path.split(".").reduce((acc, part) => (acc ? acc[part] : ""), obj);
 
+// Page size options
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
 export default function DynamicTableComponent({
   fetchDataFunction,
   setPage,
   page,
   data = [],
   columns = [],
-  pageSize = 10,
   totalPages = 0,
   totalElements = 0,
   loading = false,
@@ -35,8 +37,26 @@ export default function DynamicTableComponent({
   changeTransactionType,
   selectTransactionType,
   firstButton = null,
+  onPageSizeChange,
 }) {
   const history = useHistory();
+  const [pageSize, setPageSize] = useState(10);
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0); // Reset to first page when changing page size
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    }
+  };
+
+  // Notify parent when pageSize changes (for fetching data)
+  useEffect(() => {
+    if (onPageSizeChange) {
+      onPageSizeChange(pageSize);
+    }
+  }, []);
+
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
@@ -223,16 +243,36 @@ export default function DynamicTableComponent({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-6 py-4 text-sm">
-        <div className="text-gray-600">
-          Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
-          <span className="font-medium">
-            {Math.min((page + 1) * pageSize, totalElements)}
-          </span>{" "}
-          of <span className="font-medium">{totalElements}</span> results
+      <div className="table-footer px-6 py-4 text-sm">
+        {/* Left side - Page size selector & info */}
+        <div className="table-footer-left">
+          <div className="flex items-center gap-2">
+            <label className="text-gray-600">Show</label>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700"
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <span className="text-gray-600">entries</span>
+          </div>
+          
+          <div className="text-gray-600">
+            Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
+            <span className="font-medium">
+              {Math.min((page + 1) * pageSize, totalElements)}
+            </span>{" "}
+            of <span className="font-medium">{totalElements}</span> results
+          </div>
         </div>
 
-        <div className="flex gap-2">
+        {/* Pagination controls */}
+        <div className="table-footer-right">
           <button
             onClick={() => setPage(0)}
             disabled={page === 0}

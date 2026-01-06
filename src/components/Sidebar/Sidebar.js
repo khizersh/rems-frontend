@@ -4,17 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 
 import NotificationDropdown from "components/Dropdowns/NotificationDropdown.js";
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
-import horizontalLogo from "../../assets/img/logo/hor-logo.png";
+import desktopLogo from "../../assets/img/logo/desktop-logo.png";
+import mobileLogo from "../../assets/img/logo/mobile-logo.png";
 import { MainContext } from "context/MainContext";
 import "../../assets/styles/custom/sidebar.css";
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = useState("hidden");
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    // Load collapsed state from localStorage
-    const saved = localStorage.getItem("sidebarCollapsed");
-    return saved ? JSON.parse(saved) : false;
-  });
   const [expandedItems, setExpandedItems] = useState(() => {
     // Load expanded items from localStorage
     const saved = localStorage.getItem("sidebarExpandedItems");
@@ -23,7 +19,7 @@ export default function Sidebar() {
   const location = useLocation();
   const [sidebarList, setSidebarList] = useState([]);
 
-  const { setBackdrop } = useContext(MainContext);
+  const { setBackdrop, isSidebarCollapsed: isCollapsed } = useContext(MainContext);
 
   useEffect(() => {
     const sidebarData = JSON.parse(localStorage.getItem("sidebar")) || [];
@@ -35,22 +31,6 @@ export default function Sidebar() {
     setCollapseShow("hidden");
   }, [location]);
 
-  // Save collapsed state to localStorage
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", JSON.stringify(isCollapsed));
-    // Update main content margin
-    const mainContent = document.querySelector(".main-content");
-    if (mainContent) {
-      if (isCollapsed) {
-        mainContent.classList.add("md:ml-20");
-        mainContent.classList.remove("md:ml-64");
-      } else {
-        mainContent.classList.add("md:ml-64");
-        mainContent.classList.remove("md:ml-20");
-      }
-    }
-  }, [isCollapsed]);
-
   // Save expanded items to localStorage
   useEffect(() => {
     localStorage.setItem("sidebarExpandedItems", JSON.stringify(expandedItems));
@@ -58,10 +38,6 @@ export default function Sidebar() {
 
   const onClick = (classes) => {
     setCollapseShow(classes);
-  };
-
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
   };
 
   const toggleExpandItem = (itemId) => {
@@ -94,50 +70,46 @@ export default function Sidebar() {
           isCollapsed ? "md:w-20 sidebar-collapsed" : "md:w-64 sidebar-expanded px-4"
         }`}
       >
-        <div className="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-wrap items-center justify-between w-full mx-auto">
+        <div className="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-nowrap items-center justify-between w-full mx-auto mobile-navbar-header">
           {/* Mobile Toggler */}
           <button
-            className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent hover:opacity-75 transition-opacity"
+            className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent hover:opacity-75 transition-opacity flex-shrink-0"
             type="button"
             onClick={() => onClick("bg-white m-2 py-3 px-6")}
           >
             <i className="fas fa-bars"></i>
           </button>
 
-          {/* Brand with Collapse Toggle */}
-          <div className="md:flex items-center justify-between w-full md:mb-4">
+          {/* Brand */}
+          <div className="md:flex items-center justify-between md:w-full md:mb-4 flex-shrink-0 text-center mobile-navbar">
             <Link
-              className={`md:block text-left text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold sidebar-logo-container ${
-                isCollapsed ? "px-2 flex-1" : "px-0 flex-1"
+              className={`md:block text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold sidebar-logo-container desktop-logo-a   ${
+                isCollapsed ? "px-2 md:flex-1" : "px-0 md:flex-1"
               }`}
               to="/"
               onClick={() => onClick("hidden")}
             >
+              {/* Desktop Logo - shown on md screens and up */}
               <img
-                src={horizontalLogo}
-                className="sidebar-logo"
+                src={isCollapsed ? mobileLogo : desktopLogo }
+                className="sidebar-logo hidden md:block"
                 alt="Logo"
                 style={{
                   maxWidth: isCollapsed ? "40px" : "100%",
                   height: "auto",
                 }}
               />
+              {/* Mobile Logo - shown on small screens */}
+              <img
+                src={mobileLogo}
+                className="sidebar-logo block md:hidden"
+                alt="Logo"
+              />
             </Link>
-            {/* Desktop Collapse Toggle */}
-            <button
-              className="hidden md:flex sidebar-toggle cursor-pointer text-blueGray-600 hover:text-blueGray-800 ml-2 p-2"
-              type="button"
-              onClick={toggleCollapse}
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              <i
-                className={`fas ${isCollapsed ? "fa-bars" : "fa-times"} text-lg`}
-              ></i>
-            </button>
           </div>
 
           {/* User Dropdowns (mobile only) */}
-          <ul className="md:hidden items-center flex flex-wrap list-none">
+          <ul className="md:hidden items-center flex flex-nowrap list-none flex-shrink-0 mobile-user-dropdowns">
             <li className="inline-block relative">
               <NotificationDropdown />
             </li>
@@ -149,20 +121,20 @@ export default function Sidebar() {
           {/* Collapse */}
           <div
             className={
-              "md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none shadow absolute top-0 left-0 right-0 z-40 overflow-y-auto overflow-x-hidden h-auto items-center flex-1 rounded " +
+              "md:flex md:flex-col md:items-stretch md:opacity-100 md:relative  md:shadow-none shadow absolute top-0 left-0 right-0 z-40 overflow-y-auto overflow-x-hidden h-auto items-center flex-1 rounded " +
               collapseShow
             }
           >
             {/* Collapse header (mobile) */}
             <div className="md:min-w-full md:hidden block pb-4 mb-4 border-b border-solid border-blueGray-200">
               <div className="flex flex-wrap">
-                <div className="w-6/12">
+                <div className="w-6/12 text-center">
                   <Link
-                    className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+                    className="md:block  md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
                     to="/"
                     onClick={() => onClick("hidden")}
                   >
-                    <img src={horizontalLogo} className="sidebar-logo" alt="Logo" />
+                    <img src={mobileLogo} className="sidebar-logo" alt="Logo" />
                   </Link>
                 </div>
                 <div className="w-6/12 flex justify-end">

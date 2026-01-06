@@ -43,6 +43,7 @@ export default function CustomerPayment() {
   const [customerAccountFilterId, setCustomerAccountFilterId] = useState(""); // The ID of the selected project or floor
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
   const [selectedPaymentFetch, setSelectedPaymentFetch] = useState(null);
   const [selectedPaymentPostAccount, setSelectedPostAccount] = useState(null);
@@ -83,11 +84,10 @@ export default function CustomerPayment() {
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const [customerPaymentList, setCustomerPaymentList] = useState([]);
   const [scheduleBreakdown, setScheduleBreakdown] = useState([]);
-  const pageSize = 10;
 
   useEffect(() => {
     fetchCustomerPaymentsAndScheduleAndCustomerAccount();
-  }, [selectedCustomerAccount, page]);
+  }, [selectedCustomerAccount, page, pageSize]);
 
   useEffect(() => {
     let organizationLocal = JSON.parse(localStorage.getItem("organization"));
@@ -1118,6 +1118,7 @@ export default function CustomerPayment() {
         <DynamicTableComponent
           fetchDataFunction={fetchCustomerPaymentsAndScheduleAndCustomerAccount}
           setPage={setPage}
+          setPageSize={setPageSize}
           page={page}
           data={customerPaymentList}
           columns={tableColumns} // You need to define the columns for the table

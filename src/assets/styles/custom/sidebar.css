@@ -11,6 +11,10 @@
   width: 80px !important;
 }
 
+.desktop-logo-a{
+  height: auto;
+}
+
 .sidebar-expanded {
   width: 256px !important;
 }
@@ -301,6 +305,84 @@
   
   .sidebar-tooltip {
     display: none;
+  }
+
+  /* Mobile navbar header styles */
+  .sidebar-container {
+    padding: 0.5rem 1rem !important;
+  }
+
+  /* Keep mobile header items horizontal */
+  .sidebar-container > div:first-child {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+  }
+
+  /* Logo sizing for mobile */
+  .sidebar-logo {
+    max-width: 120px !important;
+    width: 120px !important;
+    height: auto !important;
+  }
+
+  .sidebar-logo-container {
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+
+  /* Mobile user dropdowns - horizontal alignment */
+  .sidebar-container ul.items-center {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 0.25rem;
+  }
+
+  /* Mobile toggle button */
+  .sidebar-container button.md\:hidden {
+    flex-shrink: 0;
+    padding: 0.5rem;
+  }
+}
+
+/* Extra small mobile screens */
+@media (max-width: 480px) {
+  .sidebar-logo {
+    max-width: 50px !important;
+    width: 50px !important;
+  }
+
+  .mobile-navbar{
+    max-height: 47px;
+  }
+
+  .sidebar-container {
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Mobile navbar header - ensures horizontal layout */
+@media (max-width: 768px) {
+  .mobile-navbar-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.5rem;
+  }
+
+  .mobile-user-dropdowns {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    margin-left: auto;
+  }
+
+  .mobile-user-dropdowns li {
+    display: inline-flex !important;
   }
 }
 

@@ -29,10 +29,10 @@ export default function ExpenseDetailList() {
   const history = useHistory();
   const [expenseList, setExpenseList] = useState([]);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [accountList, setAccountList] = useState([]);
-  const pageSize = 10;
   const { expenseId } = useParams();
   const [expenseDetail, setExpenseDetail] = useState({
     expenseId: 0,
@@ -82,7 +82,7 @@ export default function ExpenseDetailList() {
   useEffect(() => {
     fetchExpenseList();
     fetchAccountList();
-  }, []);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "Expense Title", field: "expenseTitle" },
@@ -341,6 +341,7 @@ export default function ExpenseDetailList() {
           <DynamicTableComponent
             fetchDataFunction={fetchExpenseList}
             setPage={setPage}
+            setPageSize={setPageSize}
             page={page}
             data={expenseList}
             columns={tableColumns}

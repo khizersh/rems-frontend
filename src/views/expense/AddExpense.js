@@ -126,6 +126,16 @@ const AddExpense = () => {
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
 
+      if (requestBody.totalAmount <= 0) {
+        setLoading(false);
+        return notifyError(
+          "Expense is empty!",
+          "Please enter any amount",
+          4000
+        );
+      }
+
+
       const response = await httpService.post(
         "/expense/addExpense",
         requestBody

@@ -236,3 +236,52 @@ button:hover {
     display: block;
   }
 }
+
+/* ===========================
+   Table Footer Responsive
+=========================== */
+
+/* Desktop: horizontal layout */
+
+.pagesize-selector{
+  width: 55px;
+}
+
+.table-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-footer-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.table-footer-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Mobile: vertical layout */
+@media (max-width: 767px) {
+  .table-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .table-footer-left {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .table-footer-right {
+    justify-content: center;
+  }
+}

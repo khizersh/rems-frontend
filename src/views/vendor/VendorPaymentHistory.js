@@ -21,9 +21,9 @@ export default function VendorPaymentHistory() {
 
   const [accountDetailList, setAccountDetailList] = useState([]);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
 
   const fetchAccountList = async () => {
     setLoading(true);
@@ -77,7 +77,7 @@ export default function VendorPaymentHistory() {
   useEffect(() => {
     fetchAccountList();
     fetchVendorDetail();
-  }, [page]);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "From Account", field: "organizationAccount" },
@@ -243,7 +243,7 @@ export default function VendorPaymentHistory() {
               <th>Sr#</th>
               <th>Date</th>
               <th>Transaction Type</th>
-              <th>Transaction Type</th>
+              <th>Payment Type</th>
               <th>Debit (Paid)</th>
               <th>Credit (Borrow)</th>
               <th>Total</th>
@@ -258,6 +258,7 @@ export default function VendorPaymentHistory() {
                     <td>${ind + 1}</td>
                     <td>${detail.createdDate.split("T")[0]}</td>
                     <td>${detail.transactionType}</td>
+                    <td>${detail.vendorPaymentType}</td>
                     <td>${parseFloat(detail.amountPaid).toLocaleString()}</td>
                     <td>${parseFloat(detail.creditAmount).toLocaleString()}</td>
                     <td>${parseFloat(
@@ -296,6 +297,7 @@ export default function VendorPaymentHistory() {
         fetchDataFunction={fetchAccountList}
         setPage={setPage}
         page={page}
+        setPageSize={setPageSize}
         data={accountDetailList}
         columns={tableColumns}
         pageSize={pageSize}

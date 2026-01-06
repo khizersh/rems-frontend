@@ -34,9 +34,9 @@ export default function BookingList() {
   });
 
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
 
   useEffect(() => {
     fetchProjects();
@@ -44,7 +44,7 @@ export default function BookingList() {
 
   useEffect(() => {
     fetchBookingList();
-  }, [page, filterProject, filterFloor]);
+  }, [page, pageSize, filterProject, filterFloor]);
 
   const fetchProjects = async () => {
     try {
@@ -321,6 +321,7 @@ export default function BookingList() {
           data={bookingList}
           columns={tableColumns}
           pageSize={pageSize}
+          setPageSize={setPageSize}
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}

@@ -29,6 +29,7 @@ export default function ExpenseList() {
   const [filterProject, setFilterProject] = useState("");
   const [filterVendor, setFilterVendor] = useState("");
   const [projects, setProjects] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
   const [vendorList, setVendorList] = useState([]);
   const [filteredBy, setFilteredBy] = useState("organization");
   const [projectFileteredId, setProjectFilteredId] = useState("");
@@ -49,7 +50,6 @@ export default function ExpenseList() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
 
   const fetchProjects = async () => {
     try {
@@ -136,7 +136,7 @@ export default function ExpenseList() {
 
   useEffect(() => {
     fetchExpenseList();
-  }, [page, filterProject, filterVendor]);
+  }, [page, pageSize, filterProject, filterVendor]);
 
   useEffect(() => {
     fetchProjects();
@@ -529,6 +529,7 @@ export default function ExpenseList() {
         <DynamicTableComponent
           fetchDataFunction={fetchExpenseList}
           setPage={setPage}
+          setPageSize={setPageSize}
           page={page}
           data={expenseList}
           columns={tableColumns}

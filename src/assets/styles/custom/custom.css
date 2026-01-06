@@ -251,3 +251,58 @@
     margin-bottom: 0rem;
   }
 }
+
+/* Auth Navbar Responsive Styles */
+.auth-navbar-logo {
+  width: 200px;
+  height: auto;
+  transition: width 0.3s ease;
+}
+
+.navbar-social-icons {
+  gap: 0.25rem;
+}
+
+.navbar-social-icons li {
+  display: flex;
+  align-items: center;
+}
+
+/* Tablet Breakpoint */
+@media only screen and (max-width: 1024px) {
+  .auth-navbar-logo {
+    width: 160px;
+  }
+}
+
+/* Mobile Breakpoint */
+@media only screen and (max-width: 767px) {
+  .auth-navbar-logo {
+    width: 120px;
+  }
+  
+  .navbar-social-icons {
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+  
+  .navbar-social-icons li {
+    flex-shrink: 0;
+  }
+}
+
+/* Small Mobile Breakpoint */
+@media only screen and (max-width: 480px) {
+  .auth-navbar-logo {
+    width: 100px;
+  }
+  
+  .navbar-social-icons {
+    gap: 0.25rem;
+  }
+  
+  .navbar-social-icons li a {
+    padding: 0.5rem !important;
+  }
+}

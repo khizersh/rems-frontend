@@ -14,6 +14,7 @@ import {
   FaLayerGroup,
 } from "react-icons/fa";
 import "../../../assets/styles/projects/project.css";
+import "../../../assets/styles/responsive.css";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxReload } from "react-icons/rx";
@@ -31,9 +32,9 @@ export default function ProjectListComponent() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [size, setSize] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  const pageSize = 10;
+  const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
   const fetchProjects = async () => {
     const organization =
@@ -54,14 +55,18 @@ export default function ProjectListComponent() {
       );
 
       setProjects(res.data.content || []);
-      setTotalPages(res.data.totalPages || 0); // <-- this is crucial
-      setTotalElements(res.data.totalElements || 0); // <-- this is crucial
-      setSize(res.data.size || 0); // <-- this is crucial
+      setTotalPages(res.data.totalPages || 0);
+      setTotalElements(res.data.totalElements || 0);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0);
   };
 
   const handleClickFloor = (projectId) => {
@@ -120,7 +125,7 @@ export default function ProjectListComponent() {
 
   useEffect(() => {
     fetchProjects();
-  }, [page]);
+  }, [page, pageSize]);
 
   const toggleModal = () => {
     setBackdrop(!backdrop);
@@ -278,18 +283,35 @@ export default function ProjectListComponent() {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-between px-6 py-4 text-sm">
-          {/* Left side: Page info */}
-          <div className="text-gray-600">
-            Showing <span className="font-medium">{page * size + 1}</span> –{" "}
-            <span className="font-medium">
-              {Math.min((page + 1) * size, totalElements)}
-            </span>{" "}
-            of <span className="font-medium">{totalElements}</span> results
+        <div className="table-footer px-6 py-4 text-xs">
+          {/* Left side - Page size selector & info */}
+          <div className="table-footer-left">
+            <div className="flex items-center gap-2">
+              <label className="text-gray-600">Show</label>
+              <select
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 pagesize-selector ml-2"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="text-gray-600">
+              Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
+              <span className="font-medium">
+                {Math.min((page + 1) * pageSize, totalElements)}
+              </span>{" "}
+              of <span className="font-medium">{totalElements}</span> results
+            </div>
           </div>
 
-          {/* Right side: Pagination controls */}
-          <div className="flex gap-2">
+          {/* Pagination controls */}
+          <div className="table-footer-right">
             <button
               onClick={() => setPage(0)}
               disabled={page === 0}
@@ -311,7 +333,7 @@ export default function ProjectListComponent() {
               <button
                 key={idx}
                 onClick={() => setPage(idx)}
-                className={`px-3 py-1 text-sm font-medium rounded-full  ${
+                className={`px-3 py-1 text-sm font-medium rounded-full ${
                   idx === page
                     ? "bg-indigo-500 text-white border-indigo-500"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"

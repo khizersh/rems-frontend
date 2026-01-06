@@ -34,6 +34,7 @@ export default function UnitList() {
   const { floorId } = useParams();
   const [units, setUnits] = useState([]);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [unit, setUnit] = useState({
@@ -64,7 +65,6 @@ export default function UnitList() {
       monthSpecificPaymentList: [{ month: 0, year: 0, amount: 0 }],
     },
   });
-  const pageSize = 10;
 
   const fetchUnitList = async () => {
     setLoading(true);
@@ -94,7 +94,7 @@ export default function UnitList() {
 
   useEffect(() => {
     fetchUnitList();
-  }, [page]);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "Serial No", field: "serialNo" },
@@ -1221,6 +1221,7 @@ export default function UnitList() {
       <DynamicTableComponent
         fetchDataFunction={fetchUnitList}
         setPage={setPage}
+        setPageSize={setPageSize}
         page={page}
         data={units}
         columns={tableColumns}

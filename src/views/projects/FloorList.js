@@ -26,6 +26,7 @@ export default function FloorList() {
   const [floors, setFloors] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [addFloorModal, setAddFloorModal] = useState(false);
@@ -33,7 +34,6 @@ export default function FloorList() {
     projectId: projectId,
     floor: 0,
   });
-  const pageSize = 10;
 
   const fetchFloorList = async () => {
     setLoading(true);
@@ -63,7 +63,7 @@ export default function FloorList() {
 
   useEffect(() => {
     fetchFloorList();
-  }, [page]);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "Project Name", field: "projectName" },
@@ -227,6 +227,7 @@ export default function FloorList() {
       <DynamicTableComponent
         fetchDataFunction={fetchFloorList}
         setPage={setPage}
+        setPageSize={setPageSize}
         page={page}
         data={floors}
         columns={tableColumns}

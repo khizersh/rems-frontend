@@ -30,8 +30,8 @@ export default function VendorAccount() {
   const [accountList, setAccountList] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
 
   const fetchVendorList = async () => {
     setLoading(true);
@@ -65,7 +65,7 @@ export default function VendorAccount() {
 
   useEffect(() => {
     fetchVendorList();
-  }, [page]);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "Vendor Title", field: "name" },
@@ -215,6 +215,7 @@ export default function VendorAccount() {
           fetchDataFunction={fetchVendorList}
           setPage={setPage}
           page={page}
+          setPageSize={setPageSize}
           data={accountList}
           columns={tableColumns}
           pageSize={pageSize}

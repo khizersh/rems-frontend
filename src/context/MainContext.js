@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast, Bounce } from "react-toastify";
 
 // Create a new context
@@ -9,6 +9,11 @@ export function MainProvider({ children }) {
   const [imageData, setImageData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [backdrop, setBackdrop] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Load collapsed state from localStorage
+    const saved = localStorage.getItem("sidebarCollapsed");
+    return saved ? JSON.parse(saved) : false;
+  });
 
   // Function to set image data
   const setImage = (data) => {
@@ -72,6 +77,26 @@ export function MainProvider({ children }) {
     );
   };
 
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(isSidebarCollapsed));
+    // Update main content margin
+    const mainContent = document.querySelector(".main-content");
+    if (mainContent) {
+      if (isSidebarCollapsed) {
+        mainContent.classList.add("md:ml-20");
+        mainContent.classList.remove("md:ml-64");
+      } else {
+        mainContent.classList.add("md:ml-64");
+        mainContent.classList.remove("md:ml-20");
+      }
+    }
+  }, [isSidebarCollapsed]);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <MainContext.Provider
       value={{
@@ -84,6 +109,9 @@ export function MainProvider({ children }) {
         notifySuccess,
         notifyError,
         notifyWarning,
+        isSidebarCollapsed,
+        setIsSidebarCollapsed,
+        toggleSidebar,
       }}
     >
       {children}

@@ -1,27 +1,58 @@
 import React, { useContext } from "react";
+import { useLocation } from "react-router-dom";
 
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
-import "assets/styles/loading.css";
 import { MainContext } from "context/MainContext";
+
+import "assets/styles/loading.css";
 import "../../assets/styles/navbar/navbar.css";
 import "../../assets/styles/custom/sidebar.css";
 
+/**
+ * Converts URL pathname into a readable page title
+ * Example:
+ * /dashboard/customer-account -> Customer Account
+ */
+const getPageTitle = (pathname) => {
+  if (!pathname) return "Dashboard";
+
+  const parts = pathname.split("/").filter(Boolean);
+
+  // If only /dashboard
+  if (parts.length === 1) return "Dashboard";
+
+  // Take last segment after dashboard
+  const lastSegment = parts[parts.length - 1];
+
+  return lastSegment
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 export default function Navbar() {
-  const { loading, backdrop, isSidebarCollapsed, toggleSidebar } = useContext(MainContext);
+  const { loading, backdrop, isSidebarCollapsed, toggleSidebar } =
+    useContext(MainContext);
+
+  const location = useLocation();
+  const pageTitle = getPageTitle(location.pathname);
+
   return (
     <>
-      {loading ? (
+      {/* Loader */}
+      {loading && (
         <div className="backdrop" id="loaderDiv">
           <div className="loader"></div>
         </div>
-      ) : (
-        <></>
       )}
-      {backdrop ? <div className="backdrop-class"></div> : <></>}
+
+      {/* Backdrop */}
+      {backdrop && <div className="backdrop-class"></div>}
+
       {/* Navbar */}
-      <nav className="bg-white shadow-lg sticky top-0 left-0 w-full h-60-px z-20 md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 mb-5 sm-none">
-        <div className="w-full mx-autp items-center flex justify-between md:flex-nowrap flex-wrap md:px-10">
-          {/* Sidebar Toggle Button */}
+      <nav className="bg-white shadow-lg sticky top-0 left-0 w-full h-60-px z-20 flex items-center p-4 mb-5 sm-none">
+        <div className="w-full mx-auto flex justify-between items-center md:px-10 flex-wrap md:flex-nowrap">
+
+          {/* Sidebar Toggle */}
           <button
             className="sidebar-toggle cursor-pointer text-blueGray-600 hover:text-blueGray-800 mr-4"
             type="button"
@@ -29,32 +60,33 @@ export default function Navbar() {
             title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             <i
-              className={`fas ${isSidebarCollapsed ? "fa-indent" : "fa-outdent"} text-lg`}
-            ></i>
+              className={`fas ${
+                isSidebarCollapsed ? "fa-indent" : "fa-outdent"
+              } text-lg`}
+            />
           </button>
-          {/* Brand */}
-          <a
-            className="text-sm uppercase hidden lg:inline-block font-semibold"
-            href=""
-            onClick={(e) => e.preventDefault()}
-          >
-            Dashboard
-          </a>
-          {/* Form */}
-          <form className="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3">
-            <div className="relative flex w-full flex-wrap items-stretch">
-              <span className="z-10 h-full leading-snug font-normal absolute text-center text-blueGray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+
+          {/* Page Title */}
+          <span className="text-sm uppercase hidden lg:inline-block font-semibold text-blueGray-700">
+            {pageTitle}
+          </span>
+
+          {/* Search */}
+          <form className="md:flex hidden flex-row items-center lg:ml-auto mr-3">
+            <div className="relative flex w-full items-center">
+              <span className="absolute left-3 text-blueGray-300">
                 <i className="fas fa-search"></i>
               </span>
               <input
                 type="text"
                 placeholder="Search here..."
-                className="h-40-px px-3 py-2 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded-lg text-sm outline-none focus:outline-none focus:ring w-full pl-10"
+                className="h-40-px pl-10 pr-3 py-2 rounded-lg text-sm outline-none focus:ring w-full"
               />
             </div>
           </form>
-          {/* User */}
-          <ul className="flex-col md:flex-row list-none items-center hidden md:flex">
+
+          {/* User Dropdown */}
+          <ul className="hidden md:flex items-center">
             <UserDropdown />
           </ul>
         </div>

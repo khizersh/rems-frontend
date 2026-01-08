@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
@@ -15,7 +15,7 @@ import { RxCross2 } from "react-icons/rx";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
-import "../../assets/styles/custom/custom.css";
+import "../../../../assets/styles/custom/custom.css";
 import { MONTH_LABELS } from "utility/Utility.js";
 import { generateYears } from "utility/Utility.js";
 

@@ -9,7 +9,7 @@ import {
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
-import PaymentModalFundTransfer from "views/customer/component/FundTransferModal.js";
+import PaymentModalFundTransfer from "views/modules/operations/customer/component/FundTransferModal.js";
 
 export default function OrganizationAccount() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =

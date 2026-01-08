@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import httpService from "../../../utility/httpService.js";
+import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import {
   FaEye,
@@ -13,8 +13,8 @@ import {
   FaTrashAlt,
   FaLayerGroup,
 } from "react-icons/fa";
-import "../../../assets/styles/projects/project.css";
-import "../../../assets/styles/responsive.css";
+import "../../../../../assets/styles/projects/project.css";
+import "../../../../../assets/styles/responsive.css";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxReload } from "react-icons/rx";

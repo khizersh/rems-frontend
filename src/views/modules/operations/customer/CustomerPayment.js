@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
@@ -16,7 +16,7 @@ import PaymentModalFetch from "./component/PaymentModalFetch.js";
 import PaymentModalPostAccount from "./component/PaymentModalPostAccount.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
-import { formatPaymentSchedule, getOrdinal } from "../../utility/Utility.js";
+import { formatPaymentSchedule, getOrdinal } from "../../../../utility/Utility.js";
 import PaymentSchedule from "components/PaymentSchedule/PaymentSchedule.js";
 import { MdAccountBalance } from "react-icons/md";
 

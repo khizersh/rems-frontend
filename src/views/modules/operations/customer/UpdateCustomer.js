@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { MainContext } from "context/MainContext";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { FaUserPlus } from "react-icons/fa";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min.js";
 

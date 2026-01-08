@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
@@ -10,7 +10,7 @@ import { FaDownload, FaEdit, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import { TbFileExport } from "react-icons/tb";
-import "../../assets/styles/responsive.css";
+import "../../../../assets/styles/responsive.css";
 import { BiSolidDetail } from "react-icons/bi";
 import { paymentTypes } from "utility/Utility.js";
 

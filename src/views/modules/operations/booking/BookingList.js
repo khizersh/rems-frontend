@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
@@ -13,7 +13,7 @@ import { getOrdinal } from "utility/Utility.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MdSchedule, MdCancel } from "react-icons/md";
 import CancelBookingModal from "./CancelBookingModal.js";
-import CustomerAccount from "views/customer/CustomerAccount.js";
+import CustomerAccount from "views/modules/operations/customer/CustomerAccount.js";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError, setBackdrop, backdrop } =

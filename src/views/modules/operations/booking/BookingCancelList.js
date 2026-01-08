@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
   useParams,
@@ -14,7 +14,7 @@ import { BsBuildingFillAdd } from "react-icons/bs";
 import { MdSchedule, MdCancel } from "react-icons/md";
 import CancelBookingModal from "./CancelBookingModal.js";
 import CancelBookingModalEdit from "./CancelBookingModalEdit.js";
-import CustomerAccount from "views/customer/CustomerAccount.js";
+import CustomerAccount from "views/modules/operations/customer/CustomerAccount.js";
 import { GoSearch } from "react-icons/go";
 import { RxCross2 } from "react-icons/rx";
 import { paymentTypes } from "utility/Utility.js";

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useParams,
   useLocation,
   useHistory,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { getOrdinal } from "../../utility/Utility.js";
+import { getOrdinal } from "../../../../utility/Utility.js";
 import Tippy from "@tippyjs/react";
 import { MdPrint } from "react-icons/md";
 import { IoArrowBackOutline } from "react-icons/io5";

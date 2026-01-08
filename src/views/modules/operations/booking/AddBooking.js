@@ -3,30 +3,29 @@ import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MainContext } from "context/MainContext";
-import httpService from "../../utility/httpService.js";
-import DebounceSearch from "../../components/CustomerComponents/DebounceSearchDropDown.js";
+import httpService from "../../../../utility/httpService.js";
+import DebounceSearch from "../../../../components/CustomerComponents/DebounceSearchDropDown.js";
 import { getOrdinal } from "utility/Utility.js";
 import { generateBookingHtml } from "utility/Utility.js";
 import { PAYMENT_PLANS_TYPE } from "utility/Utility.js";
-import {
-  useHistory,
-  useParams,
-} from "react-router-dom/cjs/react-router-dom.min.js";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { MONTH_LABELS } from "utility/Utility.js";
 import { generateYears } from "utility/Utility.js";
 
-export default function UpdateBooking() {
+export default function AddBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
     useContext(MainContext);
   const [customerList, setCustomerList] = useState([]);
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState("");
   const [paymentSchedule, setPaymentSchedule] = useState({
+    unitCost: 0,
+    customerCost: 0,
+    monthWiseTotal: 0,
     durationInMonths: 0,
     actualAmount: 0,
     miscellaneousAmount: 0,
-    developmentAmount: 0,
     totalAmount: 0,
     downPayment: 0,
     quarterlyPayment: 0,
@@ -34,13 +33,9 @@ export default function UpdateBooking() {
     yearlyPayment: 0,
     onPossessionPayment: 0,
     paymentPlanType: "",
-    unitCost: 0,
-    customerCost: 0,
-    monthWiseTotal: 0,
     monthWisePaymentList: [],
     monthSpecificPaymentList: [],
   });
-
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [project, setProject] = useState("-");
   const [floor, setFloor] = useState("-");
@@ -61,12 +56,10 @@ export default function UpdateBooking() {
     createdDate: new Date().toISOString().slice(0, 16),
     updatedDate: null,
   });
-  const { bookingId } = useParams();
 
   useEffect(() => {
     fetchCustomers(search);
     fetchProjects();
-    bookingDetails();
   }, []);
 
   const resetState = () => {
@@ -74,11 +67,14 @@ export default function UpdateBooking() {
       durationInMonths: 0,
       actualAmount: 0,
       miscellaneousAmount: 0,
+      developmentAmount: 0,
       totalAmount: 0,
       downPayment: 0,
       paymentPlanType: "",
       quarterlyPayment: 0,
       halfYearlyPayment: 0,
+      monthWiseTotal: 0,
+      monthSpecificTotal: 0,
       yearlyPayment: 0,
       onPossessionPayment: 0,
       monthWisePaymentList: [],
@@ -90,8 +86,15 @@ export default function UpdateBooking() {
     setLoading(true);
     try {
       let request = {
+        orgId: "",
         name: search || "",
       };
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
+      if (organization) {
+        request.orgId = organization.organizationId;
+      }
+
       const response = await httpService.post(`/customer/search`, request);
 
       let customerList = response?.data;
@@ -112,8 +115,8 @@ export default function UpdateBooking() {
 
     // Parse all numeric values safely
     const actualAmount = parseFloat(schedule?.actualAmount) || 0;
-    const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
     const miscellaneousAmount = parseFloat(schedule?.miscellaneousAmount) || 0;
+    const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
     const downPayment = parseFloat(schedule?.downPayment) || 0;
     const quarterlyPayment = parseFloat(schedule?.quarterlyPayment) || 0;
     const halfYearlyPayment = parseFloat(schedule?.halfYearlyPayment) || 0;
@@ -142,7 +145,6 @@ export default function UpdateBooking() {
 
     setPaymentSchedule(schedule);
   };
-
   const changeMonthlyPaymentFields = (monthlyIndex, e) => {
     const updatedPaymentSchedule = { ...paymentSchedule };
     updatedPaymentSchedule.monthWisePaymentList[monthlyIndex][e.target.name] =
@@ -179,8 +181,8 @@ export default function UpdateBooking() {
       ],
     }));
   };
-
   const addSpecificRow = () => {
+
     setPaymentSchedule((prev) => ({
       ...prev,
       monthSpecificPaymentList: [
@@ -216,68 +218,6 @@ export default function UpdateBooking() {
         (_, i) => i !== monthIndex
       ),
     }));
-  };
-
-  const fetchPaymentScheduleByUnitId = async (id) => {
-    setLoading(true);
-    try {
-      let request = {
-        id: id,
-        paymentScheduleType: "CUSTOMER",
-      };
-      const response = await httpService.post(
-        `/paymentSchedule/getByUnit`,
-        request
-      );
-
-      const schedule = response.data;
-
-      // Parse all numeric values safely
-      const actualAmount = parseFloat(schedule?.actualAmount) || 0;
-      const miscellaneousAmount =
-        parseFloat(schedule?.miscellaneousAmount) || 0;
-      const downPayment = parseFloat(schedule?.downPayment) || 0;
-      const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
-      const quarterlyPayment = parseFloat(schedule?.quarterlyPayment) || 0;
-      const halfYearlyPayment = parseFloat(schedule?.halfYearlyPayment) || 0;
-      const yearlyPayment = parseFloat(schedule?.yearlyPayment) || 0;
-      const onPossessionPayment =
-        parseFloat(schedule?.onPossessionPayment) || 0;
-
-      const durationInMonths = parseInt(schedule?.durationInMonths) || 0;
-
-      // Calculate periods
-      const quarterlyPeriods = Math.floor(durationInMonths / 3);
-      const halfYearlyPeriods = Math.floor(durationInMonths / 6);
-      const yearlyPeriods = Math.floor(durationInMonths / 12);
-
-      // ✅ Calculate month-wise total
-      let monthWiseTotal =  calculateMonthlyPaymentSum(schedule);
-      let monthSpecificTotal =  calculateMonthlySpecificPaymentSum(schedule);
-
-      // ✅ Totals
-      const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
-      const customerCost =
-        downPayment +
-        (quarterlyPeriods > 0 ? quarterlyPayment * quarterlyPeriods : 0) +
-        (halfYearlyPeriods > 0 ? halfYearlyPayment * halfYearlyPeriods : 0) +
-        (yearlyPeriods > 0 ? yearlyPayment * yearlyPeriods : 0) +
-        onPossessionPayment;
-
-      schedule.unitCost = unitCost;
-      schedule.customerCost = customerCost;
-      schedule.monthWiseTotal = monthWiseTotal;
-      schedule.monthSpecificTotal = monthSpecificTotal;
-
-
-      if (schedule) {
-        setPaymentSchedule(schedule || {});
-      }
-    } catch (err) {
-      notifyError(err.message, err.data, 4000);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const calculateMonthlyPaymentSum = (schedule) => {
@@ -331,6 +271,67 @@ export default function UpdateBooking() {
     return sum;
   };
 
+  const fetchPaymentScheduleByUnitId = async (id) => {
+    setLoading(true);
+    try {
+      let request = {
+        id: id,
+        paymentScheduleType: "BUILDER",
+      };
+      const response = await httpService.post(
+        `/paymentSchedule/getByUnit`,
+        request
+      );
+
+      const schedule = response?.data;
+
+      // Parse all numeric values safely
+      const actualAmount = parseFloat(schedule?.actualAmount) || 0;
+      const developmentAmount = parseFloat(schedule?.developmentAmount) || 0;
+      const miscellaneousAmount =
+        parseFloat(schedule?.miscellaneousAmount) || 0;
+      const downPayment = parseFloat(schedule?.downPayment) || 0;
+      const quarterlyPayment = parseFloat(schedule?.quarterlyPayment) || 0;
+      const halfYearlyPayment = parseFloat(schedule?.halfYearlyPayment) || 0;
+      const yearlyPayment = parseFloat(schedule?.yearlyPayment) || 0;
+      const onPossessionPayment =
+        parseFloat(schedule?.onPossessionPayment) || 0;
+
+      const durationInMonths = parseInt(schedule?.durationInMonths) || 0;
+
+      // Calculate periods
+      const quarterlyPeriods = Math.floor(durationInMonths / 3);
+      const halfYearlyPeriods = Math.floor(durationInMonths / 6);
+      const yearlyPeriods = Math.floor(durationInMonths / 12);
+
+      // ✅ Calculate month-wise total
+      let monthWiseTotal = calculateMonthlyPaymentSum(schedule);
+      let monthSpecificTotal = calculateMonthlySpecificPaymentSum(schedule);
+
+      // ✅ Totals
+      const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
+      const customerCost =
+        downPayment +
+        (quarterlyPeriods > 0 ? quarterlyPayment * quarterlyPeriods : 0) +
+        (halfYearlyPeriods > 0 ? halfYearlyPayment * halfYearlyPeriods : 0) +
+        (yearlyPeriods > 0 ? yearlyPayment * yearlyPeriods : 0) +
+        onPossessionPayment;
+
+      schedule.unitCost = unitCost;
+      schedule.customerCost = customerCost;
+      schedule.monthWiseTotal = monthWiseTotal;
+      schedule.monthSpecificTotal = monthSpecificTotal;
+
+      if (schedule) {
+        setPaymentSchedule(schedule || {});
+      }
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchUnitDetailsByUnitId = async (id) => {
     setLoading(true);
     try {
@@ -359,32 +360,6 @@ export default function UpdateBooking() {
     setBooking({ ...booking, createdDate: e.target.value });
   };
 
-  const bookingDetails = async () => {
-    try {
-      const response = await httpService.get(
-        `/booking/getDetailById/${bookingId}`
-      );
-
-      const unit = response?.data?.unit;
-      const customer = response?.data?.customer;
-
-      changeSelectedUnit(unit?.id);
-      setFilterProject(customer?.projectId);
-      setFilterFloor(customer?.floorId);
-      fetchFloors(customer?.projectId);
-      fetchUnits(customer?.floorId);
-      setSelectedCustomer({
-        customerId: customer.customerId,
-        name: customer.name,
-      });
-
-      // onChangeCustomer({
-      //   customerId: customer.customerId,
-      //   name: customer.name,
-      // });
-    } catch (error) {}
-  };
-
   const createBooking = async (e) => {
     e.preventDefault();
 
@@ -398,16 +373,12 @@ export default function UpdateBooking() {
     updatedBooking.projectId = filterProject;
     updatedBooking.floorId = filterFloor;
     updatedBooking.organizationId = organization.organizationId;
+    delete paymentSchedule.id;
     updatedBooking.paymentSchedule = paymentSchedule;
-
-    console.log("updatedBooking :: ", updatedBooking);
 
     setLoading(true);
     try {
-      const response = await httpService.post(
-        `/booking/update`,
-        updatedBooking
-      );
+      const response = await httpService.post(`/booking/add`, updatedBooking);
       notifySuccess(response.responseMessage, 4000);
       resetState();
     } catch (err) {
@@ -447,11 +418,8 @@ export default function UpdateBooking() {
   const fetchUnits = async (floorId) => {
     try {
       const response = await httpService.get(
-        `/unit/getAllIdSerialByFloorId/${floorId}`
+        `/unit/getIdSerialByFloorId/${floorId}`
       );
-
-      console.log("response :: ", response);
-
       setUnitList(response.data || []);
     } catch (err) {
       notifyError("Failed to load floors", 4000);
@@ -466,8 +434,6 @@ export default function UpdateBooking() {
   };
 
   const changeSelectedFloor = (floorId) => {
-    console.log("floorId :: ", floorId);
-
     if (floorId) {
       setFilterFloor(floorId);
       fetchUnits(floorId);
@@ -477,7 +443,7 @@ export default function UpdateBooking() {
   const changeSelectedUnit = (unitId) => {
     if (unitId) {
       fetchPaymentScheduleByUnitId(unitId);
-      // fetchUnitDetailsByUnitId(unitId);
+      fetchUnitDetailsByUnitId(unitId);
     }
 
     setSelectedUnit(unitId);
@@ -491,7 +457,7 @@ export default function UpdateBooking() {
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className=" mb-0 py-6">
+      <div className=" mb-0  py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
             <span>
@@ -503,7 +469,7 @@ export default function UpdateBooking() {
                 />
               </button>
             </span>
-            Update Booking
+            Create Booking
           </h6>
         </div>
       </div>
@@ -528,8 +494,6 @@ export default function UpdateBooking() {
                             placeholder="Search customers..."
                             label="Select Customer"
                             delay={1500}
-                            defaultSelection={selectedCustomer?.name}
-                            noChange={true}
                           />
                         </div>
                       </div>
@@ -541,6 +505,9 @@ export default function UpdateBooking() {
                         </label>
                         <select
                           value={filterProject}
+                          onChange={(e) =>
+                            changeSelectedProjected(e.target.value)
+                          }
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Projects</option>
@@ -560,6 +527,7 @@ export default function UpdateBooking() {
                         </label>
                         <select
                           value={filterFloor}
+                          onChange={(e) => changeSelectedFloor(e.target.value)}
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Floors</option>
@@ -579,6 +547,7 @@ export default function UpdateBooking() {
                         </label>
                         <select
                           value={selectedUnit}
+                          onChange={(e) => changeSelectedUnit(e.target.value)}
                           className="border rounded-lg px-3 py-2 w-full"
                         >
                           <option value="">All Units</option>
@@ -680,7 +649,7 @@ export default function UpdateBooking() {
             <div className=" flex flex-wrap">
               <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
                 {/* Payment Schedule Heading */}
-                <div className="mt-3 mb-8 text-blueGray-600 text-md uppercase font-bold">
+                <div className="mt-3 mb-3 text-blueGray-600 text-md uppercase font-bold">
                   Unit Costing
                   <text className="ml-3 text-green-600">
                     ({parseFloat(paymentSchedule?.unitCost).toLocaleString()})
@@ -741,7 +710,7 @@ export default function UpdateBooking() {
                         </label>
                         <input
                           id="miscellaneousAmount"
-                          type="number"
+                          type="text"
                           name="miscellaneousAmount"
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
@@ -761,7 +730,7 @@ export default function UpdateBooking() {
                         </label>
                         <input
                           id="developmentAmount"
-                          type="number"
+                          type="text"
                           name="developmentAmount"
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           onChange={(e) => changePaymentScheduleFields(e)}
@@ -787,13 +756,14 @@ export default function UpdateBooking() {
                           className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                           value={
                             Number(paymentSchedule.actualAmount) +
-                            Number(paymentSchedule.miscellaneousAmount) +
-                            Number(paymentSchedule.developmentAmount)
+                            Number(paymentSchedule.miscellaneousAmount)
                           }
                         />
                       </div>
                     </div>
                   </div>
+
+                  {/* Down Payment */}
                 </div>
               </div>
 
@@ -803,7 +773,8 @@ export default function UpdateBooking() {
                     <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
                       Customer Payment Schedule
                       {(() => {
-                        const unitCost = paymentSchedule?.unitCost;
+                        const unitCost = paymentSchedule.unitCost;
+
                         const customerCost =
                           paymentSchedule?.customerCost +
                           paymentSchedule?.monthWiseTotal;
@@ -1094,7 +1065,6 @@ export default function UpdateBooking() {
                           </button>
                         </div>
 
-                        {console.log("schedule inner :: ", paymentSchedule)}
                         {paymentSchedule?.monthSpecificPaymentList?.map(
                           (monthly, mIndex) => (
                             <div className="mt-6 flex flex-wrap justify-between">

@@ -44,6 +44,7 @@ const handleResponse = async (response) => {
 };
 
 const httpService = {
+  BASE_URL,
   get: async (url, headers = {}) => {
 
     const response = await fetch(`${BASE_URL}${url}`, {

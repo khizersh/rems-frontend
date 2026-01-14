@@ -122,7 +122,7 @@ export function generateBookingHtml(data) {
       .declaration { margin-top: 30px; font-size: 14px; line-height: 1.5; font-style: italic; }
       .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; }
       .signature { text-align: right; }
-      .photo-box { border: 2px solid black; width: 120px; height: 140px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #f0f0f0; }
+      .photo-box { border: 2px solid black; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #f0f0f0; }
       .photo-td { max-width: 51px; }
       .mx { margin-right: 10px; }
       .mx-20 { margin-right: 20px; }
@@ -134,6 +134,12 @@ export function generateBookingHtml(data) {
       .field { flex: 1; padding-right: 15px; }
       .label { font-weight: bold; }
       .value { display: inline-block; border-bottom: 1px solid black; min-width: 50%; padding: 0 5px; text-align: center; }
+      .photo-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        object-position: center;
+      }
     </style>
   </head>
   <body>
@@ -179,7 +185,11 @@ export function generateBookingHtml(data) {
           </div>
         </div>
         <div class="right">
-          <div class="photo-box">Photo</div>
+          <div class="photo-box">${
+            data.profileImageUrl
+              ? `<img src="${data.profileImageUrl}" alt="Applicant Photo" />`
+              : `Photo`
+          }</div>
         </div>
       </div>
 

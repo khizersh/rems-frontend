@@ -5,9 +5,10 @@ import { BsBuildingFillAdd } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import "../../../../assets/styles/custom/uploadImage.css";
 
 export default function AddCustomer() {
-  const { loading, setLoading, notifyError, notifySuccess } =
+  const { loading, setLoading, notifyError, notifySuccess, notifyWarning } =
     useContext(MainContext);
 
   const [customer, setCustomer] = useState({
@@ -34,6 +35,10 @@ export default function AddCustomer() {
     createdDate: new Date().toISOString().slice(0, 16),
     updatedDate: null,
   });
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const [projects, setProjects] = useState([]);
   const [filterProject, setFilterProject] = useState("");
   const [filterFloor, setFilterFloor] = useState("");
@@ -67,6 +72,8 @@ export default function AddCustomer() {
       createdDate: new Date().toISOString().slice(0, 16),
       updatedDate: null,
     });
+    setProfileImage(null);
+    setImagePreview(null);
   };
 
   const fetchProjects = async () => {
@@ -140,15 +147,50 @@ export default function AddCustomer() {
       customer.updatedDate = customer.createdDate;
       customer.organizationId = organization?.organizationId;
 
-
       const response = await httpService.post(
         `/customer/addCustomer`,
         customer
       );
-      notifySuccess(
-        response.responseMessage || "Customer added successfully!",
-        4000
-      );
+
+      const createdCustomer = response.data;
+
+      if (profileImage && createdCustomer?.customerId) {
+        const formData = new FormData();
+        formData.append("image", profileImage);
+
+        const response = await fetch(
+          `${httpService.BASE_URL}/customer/${createdCustomer?.customerId}/upload-image`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT only
+              // ❌ DO NOT set Content-Type
+            },
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+
+        if (data?.responseCode == "0000") {
+          notifySuccess(
+            data?.responseMessage || "Customer updated successfully!",
+            4000
+          );
+        } else {
+          notifyWarning(
+            "Customer updated successfully!",
+            data?.responseMessage,
+            4000
+          );
+        }
+      } else {
+        notifySuccess(
+          response.responseMessage || "Customer added successfully!",
+          4000
+        );
+      }
+
       resetState();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -162,6 +204,23 @@ export default function AddCustomer() {
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  const handleImageSelect = (file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      notifyError("Please upload a valid image");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      notifyError("Image must be under 2MB");
+      return;
+    }
+
+    setProfileImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 md:px-0">
@@ -186,66 +245,76 @@ export default function AddCustomer() {
         </div>
       </div>
       <div className="flex flex-wrap md:justify-content-between px-4 py-6 md:pt-0">
-        {/* <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5">
-          <label className="block text-sm font-medium mb-1 ">
-            Select Project
-          </label>
-          <select
-            value={filterProject}
-            onChange={(e) => changeSelectedProjected(e.target.value)}
-            className="border rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">All Projects</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div> */}
-
-        {/* <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 mx-4 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 ">
-          <label className="block text-sm font-medium mb-1">Select Floor</label>
-          <select
-            value={filterFloor}
-            onChange={(e) => changeSelectedFloor(e.target.value)}
-            className="border rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">All Floors</option>
-            {floorOptions.map((floor) => (
-              <option key={floor.id} value={floor.id}>
-                {floor.floorNo}
-              </option>
-            ))}
-          </select>
-        </div> */}
-        {/* 
-        <div className="bg-white shadow-lg p-5 rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 md:mt-5 lg:mt-5">
-          <label className="block text-sm font-medium mb-1">Select Unit</label>
-          <select
-            value={selectedUnit}
-            onChange={(e) => setSelectedUnit(e.target.value)}
-            className="border rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">All Floors</option>
-            {unitList.map((unit) => (
-              <option key={unit.id} value={unit.id}>
-                {unit.serialNo}
-              </option>
-            ))}
-          </select>
-        </div> */}
-
         <form onSubmit={createCustomer} className="mt-6">
           <div className="flex flex-wrap border-bottom-grey py-3 mb-5 mt-5 bg-white rounded-12 shadow-lg">
             <div className="w-full lg:w-12/12 px-4 mt-2">
               <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
                 Customer Details
               </h6>
-              {/* City / Country */}
+
               <div className="flex flex-wrap">
+                {/* profile image */}
+                <div className="w-full lg:w-4/12 px-4">
+                  <div className="profile-upload-wrapper">
+                    <div className="profile-container">
+                      {/* ❌ OUTSIDE REMOVE BUTTON */}
+                      {imagePreview && (
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setImagePreview(null);
+                            setProfileImage(null);
+                          }}
+                        >
+                          <i
+                            className="fas fa-times remove-image-btn"
+                            aria-hidden="true"
+                          ></i>
+                        </button>
+                      )}
+
+                      <label
+                        className={`profile-upload ${
+                          isDragging ? "dragging" : ""
+                        }`}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDragging(false);
+                          handleImageSelect(e.dataTransfer.files[0]);
+                        }}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageSelect(e.target.files[0])}
+                        />
+
+                        {imagePreview ? (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="profile-preview"
+                          />
+                        ) : (
+                          <div className="profile-placeholder">
+                            <span>📷</span>
+                            Select/Drag Profile Image
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Name */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mt-5">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Name
                   </label>
@@ -259,21 +328,7 @@ export default function AddCustomer() {
                   />
                 </div>
 
-                {/* Created Date */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Created Date
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="createdDate"
-                    value={customer.createdDate}
-                    onChange={changeCustomerFields}
-                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
-                  />
-                </div>
-
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mt-5">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Email
                   </label>
@@ -287,8 +342,22 @@ export default function AddCustomer() {
                   />
                 </div>
 
+                {/* Created Date */}
+                <div className="w-full lg:w-4/12 px-4 mb-3">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Created Date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="createdDate"
+                    value={customer.createdDate}
+                    onChange={changeCustomerFields}
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
+                  />
+                </div>
+
                 {/* Username */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Username
                   </label>
@@ -302,7 +371,7 @@ export default function AddCustomer() {
                   />
                 </div>
                 {/* Username */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Contact No
                   </label>
@@ -316,7 +385,7 @@ export default function AddCustomer() {
                   />
                 </div>
 
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Age
                   </label>
@@ -331,7 +400,7 @@ export default function AddCustomer() {
                 </div>
 
                 {/* National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     National ID
                   </label>
@@ -345,7 +414,7 @@ export default function AddCustomer() {
                   />
                 </div>
                 {/* National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Guardian Name
                   </label>
@@ -360,7 +429,7 @@ export default function AddCustomer() {
                 </div>
 
                 {/* Next of Kin Name */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Next of Kin Name
                   </label>
@@ -375,7 +444,7 @@ export default function AddCustomer() {
                 </div>
 
                 {/* Next of Kin National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Next of Kin National ID
                   </label>
@@ -390,7 +459,7 @@ export default function AddCustomer() {
                 </div>
 
                 {/* Relationship with Kin */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Relationship With Kin
                   </label>

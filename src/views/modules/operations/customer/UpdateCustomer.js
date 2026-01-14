@@ -2,10 +2,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { MainContext } from "context/MainContext";
 import httpService from "../../../../utility/httpService.js";
 import { FaUserPlus } from "react-icons/fa";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min.js";
+import {
+  useHistory,
+  useParams,
+} from "react-router-dom/cjs/react-router-dom.min.js";
+import "../../../../assets/styles/custom/uploadImage.css";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 export default function AddCustomer() {
-  const { loading, setLoading, notifyError, notifySuccess } =
+  const { loading, setLoading, notifyError, notifySuccess, notifyWarning } =
     useContext(MainContext);
   const { customerId } = useParams();
   const [customer, setCustomer] = useState({
@@ -31,6 +36,11 @@ export default function AddCustomer() {
     updatedDate: null,
   });
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [imageChanged, setImageChanged] = useState(false);
+
   const resetState = () => {
     setCustomer({
       name: "",
@@ -54,12 +64,20 @@ export default function AddCustomer() {
       password: "",
       updatedDate: null,
     });
+    setProfileImage(null);
+    setImagePreview(null);
   };
 
   const fetchCustomerDetail = async () => {
     try {
       const response = await httpService.get(`/customer/${customerId}`);
-      console.log("response :: ", response);
+
+      if (response?.data?.profileImageUrl) {
+        let baseURl = httpService.BASE_URL.replace("/api", "");
+        let preview = `${baseURl}${response?.data?.profileImageUrl}`;
+
+        setImagePreview(preview);
+      }
 
       setCustomer(response.data || {});
     } catch (err) {
@@ -80,11 +98,43 @@ export default function AddCustomer() {
         `/customer/updateCustomer`,
         customer
       );
-      notifySuccess(
-        response.responseMessage || "Customer added successfully!",
-        4000
-      );
-      resetState();
+
+      if (profileImage && response?.data?.customerId && imageChanged) {
+        const formData = new FormData();
+        formData.append("image", profileImage);
+
+        const response = await fetch(
+          `${httpService.BASE_URL}/customer/${customerId}/upload-image`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT only
+              // ❌ DO NOT set Content-Type
+            },
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+
+        if (data?.responseCode == "0000") {
+          notifySuccess(
+            data?.responseMessage || "Customer updated successfully!",
+            4000
+          );
+        } else {
+          notifyWarning(
+            "Customer updated successfully!",
+            data?.responseMessage,
+            4000
+          );
+        }
+      } else {
+        notifySuccess(
+          response.responseMessage || "Customer added successfully!",
+          4000
+        );
+      }
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -96,11 +146,45 @@ export default function AddCustomer() {
     fetchCustomerDetail();
   }, []);
 
+  const handleImageSelect = (file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      notifyError("Please upload a valid image");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      notifyError("Image must be under 2MB");
+      return;
+    }
+
+    setProfileImage(file);
+    setImagePreview(URL.createObjectURL(file));
+
+    setImageChanged(true);
+  };
+
+  const history = useHistory();
+
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg border-0">
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg ">
       <div className="rounded-t bg-white mb-0 px-6 py-6">
         <div className="flex justify-between">
           <h6 className="text-blueGray-700 text-xl font-bold uppercase">
+            <span>
+              <button className="">
+                <IoArrowBackOutline
+                  onClick={() => history.goBack()}
+                  className="back-button-icon inline-block back-button"
+                  style={{
+                    paddingBottom: "3px",
+                    paddingRight: "7px",
+                    marginBottom: "3px",
+                  }}
+                />
+              </button>
+            </span>
             Update Customer
           </h6>
         </div>
@@ -114,8 +198,67 @@ export default function AddCustomer() {
               </h6>
               {/* City / Country */}
               <div className="flex flex-wrap">
+                <div className="w-full lg:w-4/12 px-4">
+                  <div className="profile-upload-wrapper">
+                    <div className="profile-container">
+                      {/* ❌ OUTSIDE REMOVE BUTTON */}
+                      {imagePreview && (
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setImagePreview(null);
+                            setProfileImage(null);
+                          }}
+                        >
+                          <i
+                            className="fas fa-times remove-image-btn"
+                            aria-hidden="true"
+                          ></i>
+                        </button>
+                      )}
+
+                      <label
+                        className={`profile-upload ${
+                          isDragging ? "dragging" : ""
+                        }`}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDragging(false);
+                          handleImageSelect(e.dataTransfer.files[0]);
+                        }}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageSelect(e.target.files[0])}
+                        />
+
+                        {imagePreview ? (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="profile-preview"
+                          />
+                        ) : (
+                          <div className="profile-placeholder">
+                            <span>📷</span>
+                            Select/Drag Profile Image
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Name */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mt-5">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Name
                   </label>
@@ -124,11 +267,11 @@ export default function AddCustomer() {
                     name="name"
                     value={customer.name}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter name"
                   />
                 </div>
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mt-5">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Email
                   </label>
@@ -137,13 +280,13 @@ export default function AddCustomer() {
                     name="email"
                     value={customer.email}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter email"
                   />
                 </div>
 
                 {/* Created Date */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Created Date
                   </label>
@@ -155,7 +298,7 @@ export default function AddCustomer() {
                     className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
                   />
                 </div>
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Contact No
                   </label>
@@ -164,76 +307,81 @@ export default function AddCustomer() {
                     name="contactNo"
                     value={customer.contactNo}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter contact no"
                   />
                 </div>
 
                 {/* National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     National ID
                   </label>
                   <input
+                    type="text"
                     name="nationalId"
                     value={customer.nationalId}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter national ID"
                   />
                 </div>
 
                 {/* Next of Kin Name */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Next of Kin Name
                   </label>
                   <input
+                    type="text"
                     name="nextOFKinName"
                     value={customer.nextOFKinName}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter next of kin name"
                   />
                 </div>
 
                 {/* Next of Kin National ID */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Next of Kin National ID
                   </label>
                   <input
+                    type="text"
                     name="nextOFKinNationalId"
                     value={customer.nextOFKinNationalId}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter next of kin national ID"
                   />
                 </div>
 
                 {/* Relationship with Kin */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Relationship With Kin
                   </label>
                   <input
+                    type="text"
                     name="relationShipWithKin"
                     value={customer.relationShipWithKin}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter relationship"
                   />
                 </div>
                 {/* Relationship with Kin */}
-                <div className="w-full lg:w-6/12 px-4 mb-3">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Guardian Name
                   </label>
                   <input
+                    type="text"
                     name="guardianName"
                     value={customer.guardianName}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter relationship"
                   />
                 </div>
@@ -249,7 +397,7 @@ export default function AddCustomer() {
                     name="address"
                     value={customer.address}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                   ></textarea>
                 </div>
 
@@ -258,10 +406,11 @@ export default function AddCustomer() {
                     City
                   </label>
                   <input
+                    type="text"
                     name="city"
                     value={customer.city}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter city"
                   />
                 </div>
@@ -271,10 +420,11 @@ export default function AddCustomer() {
                     Country
                   </label>
                   <input
+                    type="text"
                     name="country"
                     value={customer.country}
                     onChange={changeCustomerFields}
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                     placeholder="Enter country"
                   />
                 </div>

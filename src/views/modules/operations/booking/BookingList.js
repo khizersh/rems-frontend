@@ -13,7 +13,7 @@ import { getOrdinal } from "utility/Utility.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MdSchedule, MdCancel } from "react-icons/md";
 import CancelBookingModal from "./CancelBookingModal.js";
-import CustomerAccount from "views/modules/operations/customer/CustomerAccount.js";
+import "../../../../assets/styles/custom/uploadImage.css";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError, setBackdrop, backdrop } =
@@ -135,15 +135,54 @@ export default function BookingList() {
     history.push("/dashboard/customer-schedule/" + unit?.id);
   };
   const tableColumns = [
+    {
+      header: "Image",
+      field: "profileImageUrl",
+      render: (value) => {
+        let baseURL = httpService.BASE_URL.replace("/api", "");
+        let preview = value && value !== "—" ? `${baseURL}${value}` : null;
+
+        return (
+          <div className="avatar-wrapper">
+            {value != "—" ? (
+              <img
+                src={preview}
+                alt="Customer"
+                className="avatar-img"
+                onError={(e) => {
+                  // Prevent infinite loop
+                  e.target.onerror = null;
+
+                  // Hide broken image
+                  e.target.style.display = "none";
+
+                  // Show icon placeholder
+                  const placeholder =
+                    e.target.nextSibling || document.createElement("div");
+
+                  placeholder.className = "avatar-placeholder";
+                  placeholder.innerHTML =
+                    '<i class="fas fa-user avatar-customer"></i>';
+
+                  e.target.parentNode.appendChild(placeholder);
+                }}
+              />
+            ) : (
+              <div className="avatar-placeholder">
+                <i className="fas fa-user avatar-customer"></i>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    { header: "Customer Name", field: "customerName" },
     { header: "Customer Name", field: "customerName" },
     { header: "Unit Serial", field: "unitSerial" },
     { header: "Project", field: "project" },
     { header: "Floor No", field: "floorNo" },
     { header: "Total Amount", field: "totalAmount" },
-    { header: "Created By", field: "createdBy" },
-    { header: "Updated By", field: "updatedBy" },
     { header: "Created Date", field: "createdDate" },
-    { header: "Updated Date", field: "updatedDate" },
   ];
 
   const onClickPrintBooking = async (data) => {
@@ -160,6 +199,11 @@ export default function BookingList() {
     if (organization) {
       orgName = organization.name;
     }
+
+    let baseURL = httpService.BASE_URL.replace("/api", "");
+    let previewImage = customer?.profileImageUrl
+      ? `${baseURL}${customer?.profileImageUrl}`
+      : null;
 
     const formattedData = {
       orgName: orgName,
@@ -185,6 +229,7 @@ export default function BookingList() {
       payOrderNo: "",
       bank: "",
       date: data?.createdDate?.split("T")[0],
+      profileImageUrl: previewImage,
     };
 
     const win = window.open("", "_blank");

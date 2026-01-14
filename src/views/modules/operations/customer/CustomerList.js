@@ -7,6 +7,7 @@ import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import "../../../../assets/styles/custom/uploadImage.css";
 
 export default function CustomerList() {
   const {
@@ -89,7 +90,7 @@ export default function CustomerList() {
 
   const fetchCustomerDetails = async (cid) => {
     setLoading(true);
-    
+
     try {
       const requestBody = {
         id: fileteredId,
@@ -135,7 +136,6 @@ export default function CustomerList() {
         dataList = response?.data?.content;
       }
 
-
       setCustomerList(dataList || []);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
@@ -164,6 +164,47 @@ export default function CustomerList() {
   };
 
   const tableColumns = [
+    {
+      header: "Image",
+      field: "profileImageUrl",
+      render: (value) => {
+        let baseURL = httpService.BASE_URL.replace("/api", "");
+        let preview = value && value !== "—" ? `${baseURL}${value}` : null;
+
+        return (
+          <div className="avatar-wrapper">
+            {value != "—" ? (
+              <img
+                src={preview}
+                alt="Customer"
+                className="avatar-img"
+                onError={(e) => {
+                  // Prevent infinite loop
+                  e.target.onerror = null;
+
+                  // Hide broken image
+                  e.target.style.display = "none";
+
+                  // Show icon placeholder
+                  const placeholder =
+                    e.target.nextSibling || document.createElement("div");
+
+                  placeholder.className = "avatar-placeholder";
+                  placeholder.innerHTML =
+                    '<i class="fas fa-user avatar-customer"></i>';
+
+                  e.target.parentNode.appendChild(placeholder);
+                }}
+              />
+            ) : (
+              <div className="avatar-placeholder">
+                <i className="fas fa-user avatar-customer"></i>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
     { header: "Name", field: "name" },
     { header: "Email", field: "email" },
     { header: "Country", field: "country" },

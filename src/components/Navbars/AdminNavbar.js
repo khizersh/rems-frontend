@@ -18,13 +18,17 @@ const getPageTitle = (pathname) => {
 
   const parts = pathname.split("/").filter(Boolean);
 
-  // If only /dashboard
+  // Only /dashboard
   if (parts.length === 1) return "Dashboard";
 
-  // Take last segment after dashboard
-  const lastSegment = parts[parts.length - 1];
+  let titleSegment = parts[parts.length - 1];
 
-  return lastSegment
+  // If last part is numeric (ID), take the previous one
+  if (!isNaN(titleSegment)) {
+    titleSegment = parts[parts.length - 2];
+  }
+
+  return titleSegment
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
@@ -51,7 +55,6 @@ export default function Navbar() {
       {/* Navbar */}
       <nav className="bg-white shadow-lg sticky top-0 left-0 w-full h-60-px z-20 flex items-center p-4 mb-5 sm-none">
         <div className="w-full mx-auto flex justify-between items-center md:px-10 flex-wrap md:flex-nowrap">
-
           {/* Sidebar Toggle */}
           <button
             className="sidebar-toggle cursor-pointer text-blueGray-600 hover:text-blueGray-800 mr-4"
@@ -72,8 +75,8 @@ export default function Navbar() {
           </span>
 
           {/* Search */}
-          <form className="md:flex hidden flex-row items-center lg:ml-auto mr-3">
-            <div className="relative flex w-full items-center">
+          <form className="md:flex hidden flex-row items-center lg:ml-auto mr-3" onSubmit={(e) => e.preventDefault() }>
+            {/* <div className="relative flex w-full items-center">
               <span className="absolute left-3 text-blueGray-300">
                 <i className="fas fa-search"></i>
               </span>
@@ -82,7 +85,7 @@ export default function Navbar() {
                 placeholder="Search here..."
                 className="h-40-px pl-10 pr-3 py-2 rounded-lg text-sm outline-none focus:ring w-full"
               />
-            </div>
+            </div> */}
           </form>
 
           {/* User Dropdown */}

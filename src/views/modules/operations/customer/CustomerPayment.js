@@ -16,7 +16,10 @@ import PaymentModalFetch from "./component/PaymentModalFetch.js";
 import PaymentModalPostAccount from "./component/PaymentModalPostAccount.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
-import { formatPaymentSchedule, getOrdinal } from "../../../../utility/Utility.js";
+import {
+  formatPaymentSchedule,
+  getOrdinal,
+} from "../../../../utility/Utility.js";
 import PaymentSchedule from "components/PaymentSchedule/PaymentSchedule.js";
 import { MdAccountBalance } from "react-icons/md";
 
@@ -416,6 +419,8 @@ export default function CustomerPayment() {
             ...customerPayment,
           };
 
+          console.log("data :: ", data);
+
           const sumDetailAmount = data.paymentDetails.reduce((sum, item, i) => {
             return sum + (parseFloat(item.amount) || 0);
           }, 0);
@@ -434,6 +439,7 @@ export default function CustomerPayment() {
               address: data.customer?.customerAddress || "-",
               flatNo: data.customer?.unitSerial || "-",
               floor: data.customer?.floorNo?.toString() || "-",
+              projectName: data.customer?.projectName || "-",
               type: data.customer?.unitType || "-",
               paymentType: data.payment?.paymentType || "-",
               amount: sumDetailAmount || 0,
@@ -471,6 +477,7 @@ export default function CustomerPayment() {
       fatherHusbandName,
       address,
       flatNo,
+      projectName,
       floor,
       type,
       amount,
@@ -501,8 +508,9 @@ export default function CustomerPayment() {
             <p><strong>Receipt Date:</strong> ${formattedDate}</p>
           </div>
           <div>
-            <p><strong>Unit No:</strong> ${flatNo}</p>
+            <p><strong>Project:</strong> ${projectName}</p>
             <p><strong>Floor:</strong> ${getOrdinal(floor)}</p>
+            <p><strong>Unit No:</strong> ${flatNo}</p>
             <p><strong>Type:</strong> ${type}</p>
           </div>
         </div>
@@ -573,8 +581,14 @@ export default function CustomerPayment() {
         th, td { border: 1px solid black; padding: 8px; text-align: left; font-size : 13px; }
         .footer { margin-top: 30px; border-top : 1px solid black; }
         .footer-div { display: flex; justify-content: space-left;}
-        .signature { text-align: right; margin-top: 50px; }
-        
+        .signature { width: 220px;
+          margin-left: auto;
+          margin-top: 40px;
+          text-align: center;
+          border-top: 1px solid #000;
+          padding-top: 6px;
+          font-size: 14px; }
+              
         /* 🔥 Ensures each copy prints on a separate page */
         .page { page-break-after: always; }
         .page:last-child { page-break-after: auto; }

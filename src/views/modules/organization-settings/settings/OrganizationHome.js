@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { MainContext } from "context/MainContext";
-import httpService from "../../utility/httpService.js";
+import httpService from "../../../../utility/httpService.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 
 export default function UpdateOrganization() {

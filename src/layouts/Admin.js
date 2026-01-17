@@ -29,13 +29,13 @@ import BookingList from "views/modules/operations/booking/BookingList";
 import AddCustomer from "views/modules/operations/customer/AddCustomer";
 import UpdateCustomer from "views/modules/operations/customer/UpdateCustomer";
 import CustomerLedger from "views/modules/operations/customer/CustomerLedger";
-import OrganizationHome from "views/organization/OrganizationHome";
-import OrganizationAccount from "views/organization/OrganizationAccount";
-import OrganizationAccountDetail from "views/organization/OrganizationAccountDetail";
+import OrganizationHome from "views/modules/organization-settings/settings/OrganizationHome";
+import OrganizationAccount from "views/modules/organization-settings/organization-accounts/OrganizationAccount";
+import OrganizationAccountDetail from "views/modules/organization-settings/organization-accounts/OrganizationAccountDetail";
 import VendorAccount from "views/modules/operations/vendor/VendorAccount";
 import VendorHome from "views/modules/operations/vendor/VendorHome";
 import VendorPaymentHistory from "views/modules/operations/vendor/VendorPaymentHistory";
-import AddOrganizationComponent from "views/organization/AddOrganizationAccount";
+import AddOrganizationComponent from "views/modules/organization-settings/organization-accounts/AddOrganizationAccount";
 import AddVendorComponent from "views/modules/operations/vendor/AddVendorAccount";
 import ExpenseList from "views/modules/operations/expense/ExpenseList";
 import AddExpense from "views/modules/operations/expense/AddExpense";
@@ -52,68 +52,181 @@ import TransactionSummary from "views/transactionsummary/TransactionSummary";
 import UpdateVendorComponent from "views/modules/operations/vendor/UpdateVendorAccount";
 import BookingCancelList from "views/modules/operations/booking/BookingCancelList";
 import BookingCancelDetail from "views/modules/operations/booking/BookingCancelDetail";
+import { ROLE_MODULES } from "utility/RolesConfig";
+import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
+import { FEATURE_ALIASES } from "utility/RolesConfig";
 
 export default function Admin() {
+  const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
+
+  function normalize(path) {
+    return path.replace(/\/\d+/g, "").replace(/\/0/g, "").replace(/\/$/, "");
+  }
+
+  function isRouteAllowed(pathname, sidebar) {
+    const current = normalize(pathname);
+
+    for (const menu of sidebar) {
+      const base = normalize(menu.url);
+
+      // 1️⃣ Direct match
+      if (current === base || current.startsWith(base + "/")) {
+        return true;
+      }
+
+      // 2️⃣ Feature alias match
+      const aliases = FEATURE_ALIASES[base] || [];
+      if (aliases.some((a) => current.startsWith(normalize(a)))) {
+        return true;
+      }
+
+      // 3️⃣ Child menu match
+      for (const child of menu.childList || []) {
+        const childBase = normalize(child.url);
+        if (current === childBase || current.startsWith(childBase + "/")) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   return (
-    <>
-      <MainProvider>
-        <Sidebar />
-        {/* <div className="relative md:ml-64 bg-blueGray-100"> */}
-        <div className="main-content md:ml-64 bg-blueGray-50 ">
-          {/* Header */}
-          <AdminNavbar />
-       
-          {/* <div className="px-4 md:px-10 mx-auto w-full -m-24"> */}
-          <div className="px-4 md:px-10 mx-auto w-full ">
-            <NotificationContainer />
-            <Switch>
-              <Route path="/dashboard" exact component={Dashboard} />
-              <Route path="/dashboard/project-analysis/:projectId" exact component={ProjectAnalytics} />
-              <Route path="/dashboard/transaction-summary" exact component={TransactionSummary} />
-              <Route path="/dashboard/revenue-analysis" exact component={RevenueAnalytics} />
-              <Route path="/dashboard/organization" exact component={OrganizationHome} />
-              <Route path="/dashboard/organization-account" exact component={OrganizationAccount} />
-              <Route path="/dashboard/add-organization-account" exact component={AddOrganizationComponent} />
-              <Route path="/dashboard/organization-account-detail/:accountId" exact component={OrganizationAccountDetail} />
-              <Route path="/dashboard/vendor-account-detail/:accountId" exact component={VendorPaymentHistory} />
-              <Route path="/dashboard/vendor" exact component={VendorHome} />
-              <Route path="/dashboard/expense-list" exact component={ExpenseList} />
-              <Route path="/dashboard/expense-type-list" exact component={ExpenseTypeList} />
-              <Route path="/dashboard/expense-type-add" exact component={AddExpenseType} />
-              <Route path="/dashboard/expense-update/:expenseId" exact component={UpdateExpense} />
-              <Route path="/dashboard/add-expense" exact component={AddExpense} />
-              <Route path="/dashboard/expense-detail/:expenseId" exact component={ExpenseDetailList} />
-              <Route path="/dashboard/vendor-account" exact component={VendorAccount} />
-              <Route path="/dashboard/add-vendor-account" exact component={AddVendorComponent} />
-              <Route path="/dashboard/update-vendor-account/:accountId" exact component={UpdateVendorComponent} />
-              <Route path="/dashboard/projects" exact component={ProjectList} />
-              <Route path="/dashboard/add-project" exact component={AddProject} />
-              <Route path="/dashboard/update-project/:projectId" exact component={ProjectUpdate} />
-              <Route path="/dashboard/floor/:projectId" exact component={FloorList} />
-              <Route path="/dashboard/unit/:floorId" exact component={UnitList} />
-              {/* <Route path="/dashboard/add-unit/:floorId" exact component={AddUnit} /> */}
-              <Route path="/dashboard/add-project" exact component={ProjectAdd} />
-              <Route path="/dashboard/customers" exact component={CustomerList} />
-              <Route path="/dashboard/add-customers" exact component={AddCustomer} />
-              <Route path="/dashboard/update-customer/:customerId" exact component={UpdateCustomer} />
-              <Route path="/dashboard/customer-account" exact component={CustomerAccount} />
-              <Route path="/dashboard/customer-ledger" exact component={CustomerLedger} />
-              <Route path="/dashboard/customer-schedule/:unitID" exact component={CustomerSchedule} />
-              <Route path="/dashboard/customer-payment/:customerAccountId" exact component={CustomerPayment} />
-              <Route path="/dashboard/booking" exact component={BookingList} />
-              <Route path="/dashboard/cancel-booking" exact component={BookingCancelList} />
-              <Route path="/dashboard/cancel-booking-detail/:customerPayableId" exact component={BookingCancelDetail} />
-              <Route path="/dashboard/add-booking" exact component={AddBooking} />
-              <Route path="/dashboard/update-booking/:bookingId" exact component={UpdateBooking} />
-              <Route path="/dashboard/map" exact component={Maps} />
-              <Route path="/dashboard/settings" exact component={Settings} />
-              <Route path="/dashboard/tables" exact component={Tables} />
-              <Redirect from="/admin" to="/dashboard/" />
-            </Switch>
-            <FooterAdmin />
-          </div>
+    <MainProvider>
+      <Sidebar />
+
+      <div className="main-content md:ml-64 bg-blueGray-50">
+        <AdminNavbar />
+
+        <div className="px-4 md:px-10 mx-auto w-full">
+          <NotificationContainer />
+
+          <Switch>
+            {[
+              { path: "/dashboard", exact: true, component: Dashboard },
+              {
+                path: "/dashboard/project-analysis/:projectId",
+                component: ProjectAnalytics,
+              },
+              {
+                path: "/dashboard/transaction-summary",
+                component: TransactionSummary,
+              },
+              {
+                path: "/dashboard/revenue-analysis",
+                component: RevenueAnalytics,
+              },
+              { path: "/dashboard/organization", component: OrganizationHome },
+              {
+                path: "/dashboard/organization-account",
+                component: OrganizationAccount,
+              },
+              {
+                path: "/dashboard/add-organization-account",
+                component: AddOrganizationComponent,
+              },
+              {
+                path: "/dashboard/organization-account-detail/:accountId",
+                component: OrganizationAccountDetail,
+              },
+              {
+                path: "/dashboard/vendor-account-detail/:accountId",
+                component: VendorPaymentHistory,
+              },
+              { path: "/dashboard/vendor", component: VendorHome },
+              { path: "/dashboard/vendor-account", component: VendorAccount },
+              {
+                path: "/dashboard/add-vendor-account",
+                component: AddVendorComponent,
+              },
+              {
+                path: "/dashboard/update-vendor-account/:accountId",
+                component: UpdateVendorComponent,
+              },
+              { path: "/dashboard/expense-list", component: ExpenseList },
+              { path: "/dashboard/add-expense", component: AddExpense },
+              {
+                path: "/dashboard/expense-update/:expenseId",
+                component: UpdateExpense,
+              },
+              {
+                path: "/dashboard/expense-detail/:expenseId",
+                component: ExpenseDetailList,
+              },
+              {
+                path: "/dashboard/expense-type-list",
+                component: ExpenseTypeList,
+              },
+              {
+                path: "/dashboard/expense-type-add",
+                component: AddExpenseType,
+              },
+              { path: "/dashboard/projects", component: ProjectList },
+              { path: "/dashboard/add-project", component: AddProject },
+              {
+                path: "/dashboard/update-project/:projectId",
+                component: ProjectUpdate,
+              },
+              { path: "/dashboard/floor/:projectId", component: FloorList },
+              { path: "/dashboard/unit/:floorId", component: UnitList },
+              { path: "/dashboard/customers", component: CustomerList },
+              { path: "/dashboard/add-customers", component: AddCustomer },
+              {
+                path: "/dashboard/update-customer/:customerId",
+                component: UpdateCustomer,
+              },
+              {
+                path: "/dashboard/customer-account",
+                component: CustomerAccount,
+              },
+              { path: "/dashboard/customer-ledger", component: CustomerLedger },
+              {
+                path: "/dashboard/customer-schedule/:unitID",
+                component: CustomerSchedule,
+              },
+              {
+                path: "/dashboard/customer-payment/:customerAccountId",
+                component: CustomerPayment,
+              },
+              { path: "/dashboard/booking", component: BookingList },
+              { path: "/dashboard/add-booking", component: AddBooking },
+              {
+                path: "/dashboard/update-booking/:bookingId",
+                component: UpdateBooking,
+              },
+              {
+                path: "/dashboard/cancel-booking",
+                component: BookingCancelList,
+              },
+              {
+                path: "/dashboard/cancel-booking-detail/:customerPayableId",
+                component: BookingCancelDetail,
+              },
+              { path: "/dashboard/map", component: Maps },
+              { path: "/dashboard/settings", component: Settings },
+              { path: "/dashboard/tables", component: Tables },
+            ].map(({ path, exact = true, component: Component }) => (
+              <Route
+                key={path}
+                path={path}
+                exact={exact}
+                render={({ location }) =>
+                  isRouteAllowed(location.pathname, sidebar) ? (
+                    <Component />
+                  ) : (
+                    <Redirect to="/dashboard" />
+                  )
+                }
+              />
+            ))}
+
+            <Redirect from="/admin" to="/dashboard" />
+          </Switch>
+
+          <FooterAdmin />
         </div>
-      </MainProvider>
-    </>
+      </div>
+    </MainProvider>
   );
 }

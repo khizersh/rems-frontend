@@ -1,3 +1,10 @@
+import FullAdminHomepage from "../views/modules/homepages/FullAdminHomepage";
+import AccountantsHomepage from "../views/modules/homepages/AccountantsHomepage";
+import AdminHomepage from "../views/modules/homepages/AdminHomepage";
+import OperationsHomepage from "../views/modules/homepages/OperationsHomepage";
+import HrHomepage from "../views/modules/homepages/HrHomepage";
+import CustomerHomepage from "../views/modules/homepages/CustomerHomepage";
+
 export const FEATURE_ALIASES = {
   "/dashboard/projects": [
     "/dashboard/add-project",
@@ -42,3 +49,45 @@ export const FEATURE_ALIASES = {
     "/dashboard/expense-type",
   ],
 };
+
+export const ROLE_DASHBOARD_PRIORITY = {
+  FULL_ADMIN_ROLE: {
+    priority: 1,
+    path: "/dashboard",
+  },
+  ADMIN_ROLE: {
+    priority: 2,
+    path: "/dashboard",
+  },
+  OPERATIONS_ROLE: {
+    priority: 3,
+    path: "/operations",
+  },
+  ACCOUNTANT_ROLE: {
+    priority: 4,
+    path: "/accounts",
+  },
+  HR_PAYROLL_ROLE: {
+    priority: 5,
+    path: "/hr",
+  },
+  CUSTOMER_ROLE: {
+    priority: 6,
+    path: "/customer",
+  },
+};
+
+export function resolveHomepageByRole(roles = []) {
+  let selected = null;
+
+  roles.forEach((role) => {
+    const config = ROLE_DASHBOARD_PRIORITY[role];
+    if (!config) return;
+
+    if (!selected || config.priority < selected.priority) {
+      selected = config;
+    }
+  });
+
+  return selected?.path || "/dashboard";
+}

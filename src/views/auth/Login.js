@@ -2,6 +2,7 @@ import { MainContext } from "context/MainContext";
 import React, { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import httpService from "utility/httpService";
+import { FEATURE_ALIASES, resolveHomepageByRole } from "utility/RolesConfig";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -17,8 +18,7 @@ export default function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (isForgotPassword)
-      setForgotData((prev) => ({ ...prev, [name]: value }));
+    if (isForgotPassword) setForgotData((prev) => ({ ...prev, [name]: value }));
     else setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -27,28 +27,30 @@ export default function Login() {
     setError("");
 
     try {
-      const data = await httpService.post("/user/login", {
+      const res = await httpService.post("/user/login", {
         username: formData.email,
         password: formData.password,
       });
 
-      if (data?.data?.token) {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("sidebar", JSON.stringify(data.data.sidebar));
-        localStorage.setItem(
-          "organization",
-          JSON.stringify(data.data.organization)
-        );
+      const { token, sidebar, organization, role } = res.data || {};
 
-        notifySuccess(data.responseMessage, 3000);
+      if (!token) throw new Error("Invalid login response");
 
-        const homeurl = data.data.sidebar.find((side) =>
-          side.url.includes("/dashboard/customers")
-        );
+      // ✅ Persist auth data
+      localStorage.setItem("token", token);
+      localStorage.setItem("roles", JSON.stringify(role || []));
+      localStorage.setItem("sidebar", JSON.stringify(sidebar || []));
+      localStorage.setItem("organization", JSON.stringify(organization));
 
-        if (data.data.r === "ur") history.push(homeurl?.url);
-        if (data.data.r === "ar") history.push("/dashboard");
-      }
+      notifySuccess(res.responseMessage, 3000);
+
+      // ✅ Resolve homepage via role priority
+      const homePath = resolveHomepageByRole(role);
+
+      console.log("res :: ", res);
+      console.log("homePath :: ", homePath);
+
+      history.replace(homePath);
     } catch (err) {
       notifyError(err.message || "Login failed", err.data, 4000);
       setError("Invalid email or password");

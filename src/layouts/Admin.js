@@ -10,7 +10,7 @@ import FooterAdmin from "components/Footers/FooterAdmin.js";
 
 // views
 
-import Dashboard from "views/admin/Dashboard.js";
+import Dashboard from "views/modules/homepages/AdminHomepage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -64,31 +64,28 @@ export default function Admin() {
   }
 
   function isRouteAllowed(pathname, sidebar) {
-    const current = normalize(pathname);
+    const current = normalize(pathname); // e.g., /dashboard/floor
 
     for (const menu of sidebar) {
-      const base = normalize(menu.url);
+      const base = normalize(menu.url); // e.g., /dashboard
 
-      // 1️⃣ Direct match
-      if (current === base || current.startsWith(base + "/")) {
-        return true;
-      }
+      // 1️⃣ Direct match with menu
+      if (current === base) return true;
 
-      // 2️⃣ Feature alias match
+      // 2️⃣ Match FEATURE_ALIASES
       const aliases = FEATURE_ALIASES[base] || [];
-      if (aliases.some((a) => current.startsWith(normalize(a)))) {
+      if (aliases.some((a) => current === normalize(a))) {
         return true;
       }
 
       // 3️⃣ Child menu match
       for (const child of menu.childList || []) {
         const childBase = normalize(child.url);
-        if (current === childBase || current.startsWith(childBase + "/")) {
-          return true;
-        }
+        if (current === childBase) return true;
       }
     }
 
+    // ❌ Not allowed
     return false;
   }
 

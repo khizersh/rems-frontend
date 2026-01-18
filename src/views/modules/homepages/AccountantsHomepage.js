@@ -7,7 +7,7 @@ import CardBarChart from "components/Cards/CardBarChart.js";
 import CardPageVisits from "components/Cards/CardPageVisits.js";
 import CardSocialTraffic from "components/Cards/CardSocialTraffic.js";
 import HeaderStats from "components/Headers/HeaderStats";
-import "../../assets/styles/home/home.css"
+import "../../../assets/styles/home/home.css"
 
 export default function Dashboard() {
   return (

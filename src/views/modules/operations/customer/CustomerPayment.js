@@ -419,8 +419,6 @@ export default function CustomerPayment() {
             ...customerPayment,
           };
 
-          console.log("data :: ", data);
-
           const sumDetailAmount = data.paymentDetails.reduce((sum, item, i) => {
             return sum + (parseFloat(item.amount) || 0);
           }, 0);
@@ -924,13 +922,19 @@ export default function CustomerPayment() {
           ...customerPayment,
         };
 
+        const organization =
+          JSON.parse(localStorage.getItem("organization")) || {};
         const formatedData = {
+          orgTitle: organization?.name || "-",
+          orgAddress: organization?.address || "-",
+          orgContact: organization?.contactNo || "-",
           contactNo: data.customer?.contactNo || "-",
           customerName: data.customer?.customerName || "-",
           cnic: data.customer?.nationalId || "-",
           fatherHusbandName: data.customer?.guardianName || "-",
           address: data.customer?.customerAddress || "-",
           flatNo: data.customer?.unitSerial || "-",
+          projectName: data.customer?.projectName || "-",
           floor: data.customer?.floorNo?.toString() || "-",
           type: data.customer?.unitType || "-",
           paymentType: data.payment?.paymentType || "-",
@@ -939,6 +943,8 @@ export default function CustomerPayment() {
           createdAt: data.payment?.createdDate || "-",
           customerPaymentDetails: [customerPaymentDetail],
         };
+
+     
 
         const win = window.open("", "_blank");
         const printContent = generateReceiptHTML(formatedData); // 👈 generate HTML string

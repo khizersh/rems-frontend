@@ -11,6 +11,7 @@ export default function UpdateOrganization() {
     organizationId: 0,
     name: "",
     address: "",
+    contactNo: "",
     logo: "",
   });
 
@@ -81,8 +82,22 @@ export default function UpdateOrganization() {
               />
             </div>
 
+            
             {/* Address */}
             <div className="w-full lg:w-6/12 px-4 mb-4">
+              <label className="block text-xs font-bold mb-2">Contact No</label>
+              <input
+                name="contactNo"
+                value={organization.contactNo}
+                onChange={handleChange}
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Contact Number"
+              />
+            </div>
+
+
+            {/* Address */}
+            <div className="w-full lg:w-12/12 px-4 mb-4">
               <label className="block text-xs font-bold mb-2">Address</label>
               <input
                 name="address"

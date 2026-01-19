@@ -1,10 +1,3 @@
-import FullAdminHomepage from "../views/modules/homepages/FullAdminHomepage";
-import AccountantsHomepage from "../views/modules/homepages/AccountantsHomepage";
-import AdminHomepage from "../views/modules/homepages/AdminHomepage";
-import OperationsHomepage from "../views/modules/homepages/OperationsHomepage";
-import HrHomepage from "../views/modules/homepages/HrHomepage";
-import CustomerHomepage from "../views/modules/homepages/CustomerHomepage";
-
 export const FEATURE_ALIASES = {
   "/dashboard/projects": [
     "/dashboard/add-project",

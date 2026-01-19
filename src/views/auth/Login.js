@@ -36,7 +36,6 @@ export default function Login() {
 
       if (!token) throw new Error("Invalid login response");
 
-      // ✅ Persist auth data
       localStorage.setItem("token", token);
       localStorage.setItem("roles", JSON.stringify(role || []));
       localStorage.setItem("sidebar", JSON.stringify(sidebar || []));
@@ -44,11 +43,8 @@ export default function Login() {
 
       notifySuccess(res.responseMessage, 3000);
 
-      // ✅ Resolve homepage via role priority
       const homePath = resolveHomepageByRole(role);
 
-      console.log("res :: ", res);
-      console.log("homePath :: ", homePath);
 
       history.replace(homePath);
     } catch (err) {

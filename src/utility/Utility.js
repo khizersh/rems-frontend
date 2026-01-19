@@ -33,6 +33,9 @@ export const MONTH_LABELS = [
   "December",
 ];
 
+
+export const EXPENSE_TYPE_ID = 5;
+
 export const generateYears = (past, future) => {
   const currentYear = new Date().getFullYear();
   const startYear = currentYear - past;

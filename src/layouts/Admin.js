@@ -55,6 +55,8 @@ import BookingCancelDetail from "views/modules/operations/booking/BookingCancelD
 import { ROLE_MODULES } from "utility/RolesConfig";
 import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
+import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
+import AddExpenseGroup from "views/modules/operations/expense/account-group/AddExpenseGroup";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -143,6 +145,8 @@ export default function Admin() {
               },
               { path: "/dashboard/expense-list", component: ExpenseList },
               { path: "/dashboard/add-expense", component: AddExpense },
+              { path: "/dashboard/expense-account-group", component: AccountGroupList },
+              { path: "/dashboard/expense-group-add", component: AddExpenseGroup },
               {
                 path: "/dashboard/expense-update/:expenseId",
                 component: UpdateExpense,

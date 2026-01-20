@@ -33,6 +33,8 @@ export const MONTH_LABELS = [
   "December",
 ];
 
+export const EXPENSE_TYPE_ID = 5;
+
 export const generateYears = (past, future) => {
   const currentYear = new Date().getFullYear();
   const startYear = currentYear - past;
@@ -185,45 +187,38 @@ export function generateBookingHtml(data) {
           </div>
         </div>
         <div class="right">
-          <div class="photo-box">${
-            data.profileImageUrl
-              ? `<img src="${data.profileImageUrl}" alt="Applicant Photo" />`
-              : `Photo`
-          }</div>
+          <div class="photo-box">${data.profileImageUrl
+      ? `<img src="${data.profileImageUrl}" alt="Applicant Photo" />`
+      : `Photo`
+    }</div>
         </div>
       </div>
 
       <table class="info">
         <tbody>
           <tr><td><b>Name:</b></td><td>${data.name}</td></tr>
-          <tr><td><b>Father’s/Husband’s Name:</b></td><td>${
-            data.guardianName
-          }</td></tr>
+          <tr><td><b>Father’s/Husband’s Name:</b></td><td>${data.guardianName
+    }</td></tr>
           <tr><td><b>Postal Address:</b></td><td>${data.postalAddress}</td></tr>
-          <tr><td><b>Residential Address:</b></td><td>${
-            data.residentialAddress
-          }</td></tr>
+          <tr><td><b>Residential Address:</b></td><td>${data.residentialAddress
+    }</td></tr>
           <tr><td><b>Phone (Office):</b></td><td>${data.phone}</td></tr>
           <tr><td><b>Email Address:</b></td><td>${data.email}</td></tr>
           <tr><td><b>Age:</b></td><td>${data.age}</td></tr>
           <tr><td><b>Nationality:</b></td><td>${data.nationality}</td></tr>
           <tr><td><b>CNIC:</b></td><td>${data.cnic}</td></tr>
-          <tr><td><b>Nominee:</b></td><td>${data.nominee} (${
-    data.nomineeRelation
-  })</td></tr>
+          <tr><td><b>Nominee:</b></td><td>${data.nominee} (${data.nomineeRelation
+    })</td></tr>
         </tbody>
       </table>
 
       <div class="declaration">
         <p>1. I hereby declare that I have read and understand the terms and conditions of the allotment of the apartment and accept the same.</p>
         <p>2. I further agree to pay regularly installments and dues and abide by all rules and regulations prescribed by Vision Builders & Marketing from time to time.</p>
-        <p>3. I enclose herewith a sum of Rs. ${
-          data.amount
-        }/- by Bank Draft / Pay Order No. ${
-    data.payOrderNo || "________"
-  } drawn on ${
-    data.bank || "________"
-  } on account of booking of the above unit.</p>
+        <p>3. I enclose herewith a sum of Rs. ${data.amount
+    }/- by Bank Draft / Pay Order No. ${data.payOrderNo || "________"
+    } drawn on ${data.bank || "________"
+    } on account of booking of the above unit.</p>
       </div>
 
       <div class="footer">

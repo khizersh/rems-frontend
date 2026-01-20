@@ -21,20 +21,33 @@ export default function ExpenseTypeList() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const history = useHistory();
 
-  const fetchExpenseTypeList = async () => {
+  const fetchExpenseTypeList = async (pageNo = page) => {
     setLoading(true);
     try {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
-      const response = await httpService.get(
-        `/expense/getAllExpenseTypeByOrgId/${organization.organizationId}`
+
+      const payload = {
+        id: organization.organizationId,
+        page: page,
+        size: pageSize,
+        sortBy: "createdDate",
+        sortDir: "asc",
+      };
+
+      const response = await httpService.post(
+        "/expense/getAllExpenseTypeByOrgId",
+        payload,
       );
 
-      setExpenseTypeList(response?.data || []);
+
+      setExpenseTypeList(response?.data?.content || []);
+      setTotalPages(response?.data?.totalPages || 0);
+      setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -44,7 +57,7 @@ export default function ExpenseTypeList() {
 
   useEffect(() => {
     fetchExpenseTypeList();
-  }, []);
+  }, [page, pageSize]);
 
   const tableColumns = [
     { header: "Expense Type", field: "name" },
@@ -87,6 +100,7 @@ export default function ExpenseTypeList() {
           data={expenseTypeList}
           columns={tableColumns}
           pageSize={pageSize}
+          setPageSize={setPageSize}
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}

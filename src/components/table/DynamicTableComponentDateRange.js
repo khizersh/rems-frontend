@@ -24,6 +24,8 @@ export default function DynamicTableComponent({
   fetchDataFunction,
   setPage,
   page,
+  setPageSize,
+  pageSize = 10,
   data = [],
   columns = [],
   totalPages = 0,
@@ -40,11 +42,10 @@ export default function DynamicTableComponent({
   onPageSizeChange,
 }) {
   const history = useHistory();
-  const [pageSize, setPageSize] = useState(10);
+
 
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
-    setPage(0); // Reset to first page when changing page size
     if (onPageSizeChange) {
       onPageSizeChange(newSize);
     }
@@ -56,6 +57,36 @@ export default function DynamicTableComponent({
       onPageSizeChange(pageSize);
     }
   }, []);
+
+  const getPaginationRange = (currentPage, totalPages, delta = 1) => {
+    const range = [];
+    const rangeWithDots = [];
+    let lastPage;
+
+    for (let i = 0; i < totalPages; i++) {
+      if (
+        i === 0 ||
+        i === totalPages - 1 ||
+        (i >= currentPage - delta && i <= currentPage + delta)
+      ) {
+        range.push(i);
+      }
+    }
+
+    for (const page of range) {
+      if (lastPage !== undefined) {
+        if (page - lastPage === 2) {
+          rangeWithDots.push(lastPage + 1);
+        } else if (page - lastPage > 2) {
+          rangeWithDots.push("...");
+        }
+      }
+      rangeWithDots.push(page);
+      lastPage = page;
+    }
+
+    return rangeWithDots;
+  };
 
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
@@ -243,7 +274,7 @@ export default function DynamicTableComponent({
       </div>
 
       {/* Pagination */}
-      <div className="table-footer px-6 py-4 text-sm">
+      <div className="table-footer px-6 py-4 text-xs">
         {/* Left side - Page size selector & info */}
         <div className="table-footer-left">
           <div className="flex items-center gap-2">
@@ -251,7 +282,7 @@ export default function DynamicTableComponent({
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700"
+              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 pagesize-selector ml-2"
             >
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>
@@ -259,9 +290,8 @@ export default function DynamicTableComponent({
                 </option>
               ))}
             </select>
-            <span className="text-gray-600">entries</span>
           </div>
-          
+
           <div className="text-gray-600">
             Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
             <span className="font-medium">
@@ -288,19 +318,39 @@ export default function DynamicTableComponent({
             <FaAngleLeft />
           </button>
 
-          {[...Array(totalPages)].map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setPage(idx)}
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
-                idx === page
-                  ? "bg-indigo-500 text-white border-indigo-500"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {idx + 1}
-            </button>
-          ))}
+          {/* {[...Array(totalPages)].map((_, idx) => (
+               <button
+                 key={idx}
+                 onClick={() => setPage(idx)}
+                 className={`px-3 py-1 text-sm font-medium rounded-full ${
+                   idx === page
+                     ? "bg-indigo-500 text-white border-indigo-500"
+                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                 }`}
+               >
+                 {idx + 1}
+               </button>
+             ))} */}
+
+          {getPaginationRange(page, totalPages).map((item, idx) =>
+            item === "..." ? (
+              <span key={idx} className="px-2 text-gray-500">
+                …
+              </span>
+            ) : (
+              <button
+                key={idx}
+                onClick={() => setPage(item)}
+                className={`px-3 py-1 text-sm font-medium rounded-full ${
+                  item === page
+                    ? "bg-indigo-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {item + 1}
+              </button>
+            ),
+          )}
 
           <button
             onClick={() => setPage((prev) => prev + 1)}

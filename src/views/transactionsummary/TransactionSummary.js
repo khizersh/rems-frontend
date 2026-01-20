@@ -20,21 +20,14 @@ export default function TransactionSummary() {
   } = useContext(MainContext);
   const location = useLocation();
 
-  const history = useHistory();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [cId, setCId] = useState(null);
-  const [selectTransactionType, setSelectTransactionType] = useState("CREDIT");
   const [isModalOpenAccount, setIsModalOpenAccount] = useState(false);
-  const [customerList, setCustomerList] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState({});
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState({});
   const [accounts, setAccounts] = useState([]);
   const [accountDetailList, setAccountDetailList] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
-  const [filterProject, setFilterProject] = useState("");
-  const [filterFloor, setFilterFloor] = useState("");
   const [fileteredId, setFileteredId] = useState(null);
-  const [filteredBy, setFilteredBy] = useState("organization");
+  const [pageSize, setPageSize] = useState(10);
   const [accountDetailRequest, setAccountDetailRequest] = useState({
     organizationId: 0,
     startDate: null,
@@ -43,7 +36,7 @@ export default function TransactionSummary() {
     transactionType: "DEBIT",
     filteredBy: "all",
     page: 0,
-    size: 10,
+    size: 0,
     sortBy: "createdDate",
     sortDir: "desc",
   });
@@ -51,7 +44,6 @@ export default function TransactionSummary() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
   const [startDate, endDate] = dateRange;
 
   const fetchOrgAccountDetails = async (fileteredId) => {
@@ -73,9 +65,13 @@ export default function TransactionSummary() {
           accountDetailRequest.filteredId = fileteredId;
         }
 
+        accountDetailRequest.size = pageSize;
+        accountDetailRequest.page = page;
+
+
         const response = await httpService.post(
           `/organizationAccount/getAccountDetailByDateRange`,
-          accountDetailRequest
+          accountDetailRequest,
         );
 
         setTotalElements(response.data?.totalElements);
@@ -117,7 +113,7 @@ export default function TransactionSummary() {
 
   useEffect(() => {
     fetchOrgAccountDetails(fileteredId);
-  }, [fileteredId, accountDetailRequest]);
+  }, [fileteredId, accountDetailRequest, page, pageSize]);
 
   const fetchAccounts = async () => {
     try {
@@ -125,7 +121,7 @@ export default function TransactionSummary() {
         JSON.parse(localStorage.getItem("organization")) || null;
       if (sidebarData) {
         const response = await httpService.get(
-          `/organizationAccount/getAccountByOrgId/${sidebarData.organizationId}`
+          `/organizationAccount/getAccountByOrgId/${sidebarData.organizationId}`,
         );
         setAccounts(response.data || []);
       }
@@ -200,7 +196,7 @@ export default function TransactionSummary() {
 
         const response = await httpService.post(
           `/organizationAccount/getAccountDetailByDateRangePrint`,
-          accountDetailRequest
+          accountDetailRequest,
         );
 
         let totalDebitAmount = 0;
@@ -268,10 +264,10 @@ export default function TransactionSummary() {
 
         <div>
           <p><strong>Total Debit ↓:</strong> ${parseFloat(
-            input?.totalDebitAmount || 0
+            input?.totalDebitAmount || 0,
           ).toLocaleString()}</p>
           <p><strong>Total Credit ↑:</strong> ${parseFloat(
-            input?.totalCreditAmount || 0
+            input?.totalCreditAmount || 0,
           ).toLocaleString()}</p>
           <p><strong>Ledger Date:</strong> ${formattedDate}</p>
         </div>
@@ -414,6 +410,7 @@ export default function TransactionSummary() {
           fetchDataFunction={fetchOrgAccountDetails}
           setPage={setPage}
           page={page}
+          setPageSize={setPageSize}
           data={accountDetailList}
           columns={tableColumns}
           pageSize={pageSize}

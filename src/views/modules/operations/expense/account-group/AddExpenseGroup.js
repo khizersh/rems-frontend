@@ -19,7 +19,7 @@ const AddExpenseGroup = () => {
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, name: e.target.value });
+        setFormData((prev) => ({ ...prev, name: e.target.value }));
     };
 
     const handleSubmit = async (e) => {
@@ -27,18 +27,18 @@ const AddExpenseGroup = () => {
         setLoading(true);
 
         try {
+            let data = {...formData, name: formData.name.trim()};
+
             const organization =
                 JSON.parse(localStorage.getItem("organization")) || null;
 
             let url = `/accounting/${organization.organizationId}/accountGroup?accountType=${EXPENSE_TYPE_ID}`;
 
-            const response = await httpService.post(url, formData);
+            const response = await httpService.post(url, data);
+
             notifySuccess(response.responseMessage, 4000);
 
-            setFormData({
-                accountTypeId: 0,
-                name: "",
-            });
+            setFormData((prev) => ({ ...prev, name: "" }));
         } catch (err) {
             notifyError(err.message, err.data, 4000);
         } finally {
@@ -83,7 +83,7 @@ const AddExpenseGroup = () => {
                             value={formData.name}
                             onChange={handleChange}
                             className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
-                            placeholder="Enter Expense Group type"
+                            placeholder="Enter Expense Group Type"
                         />
                     </div>
                     <div className="w-full lg:w-6/12 px-4 mb-3">

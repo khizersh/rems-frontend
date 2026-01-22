@@ -5,7 +5,7 @@ import DynamicTableComponent from "../../../../../components/table/DynamicTableC
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaDownload } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
-import { FaLayerGroup, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaLayerGroup, FaPen, FaTrashAlt } from "react-icons/fa";
 import { EXPENSE_TYPE_ID } from "utility/Utility.js";
 
 export default function AccountGroupList() {
@@ -53,16 +53,31 @@ export default function AccountGroupList() {
     { header: "Created Date", field: "createdDate" },
   ];
 
-  const handleEdit = () => {
-        // Implement update logic
+  const handleEdit = ({ id }) => {
+    history.push(`/dashboard/update-expense-group/${id}`)
   };
 
   const handleDelete = () => {
     // Implement delete logic
   };
 
+  const handleView = ({id}) => {
+    history.push(`/dashboard/expense-group-detail/${id}`)
+  };
+
   const actions = [
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaEye,
+      onClick: handleView,
+      title: "View Detail",
+      className: "text-green-600",
+    },
+    {
+      icon: FaPen,
+      onClick: handleEdit,
+      title: "Edit",
+      className: "yellow"
+    },
     {
       icon: FaTrashAlt,
       onClick: handleDelete,

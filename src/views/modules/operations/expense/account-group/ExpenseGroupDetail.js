@@ -25,6 +25,8 @@ export default function ExpenseGroupDetail() {
     const [expenseGroupName, setExpenseGroupName] = useState('');
     const { expenseGroupId } = useParams();
     const [submitting, setSubmitting] = useState(false);
+    const [update, setUpdate] = useState(false);
+    const [expenseTypeId, setExpenseTypeId] = useState(null);
     const [formData, setFormData] = useState({
         accountGroupId: expenseGroupId,
         name: "",
@@ -36,7 +38,7 @@ export default function ExpenseGroupDetail() {
         setFormData((prev) => ({ ...prev, name: e.target.value }));
     };
 
-    // Form Submit 
+    // Form Submit Add & Update
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -49,15 +51,19 @@ export default function ExpenseGroupDetail() {
                 JSON.parse(localStorage.getItem("organization")) || null;
 
             let url = `/accounting/${organization.organizationId}/expenseChartOfAccount`;
+            if (update == true) {
+                url = `/accounting/1/expenseChartOfAccount?coaId=${expenseTypeId}`
+            }
 
-            const response = await httpService.post(url, { ...data, code: Math.random() });
+            const response = update ? (await httpService.put(url, { name: data.name })) : (await httpService.post(url, data));
 
             notifySuccess(response.responseMessage, 4000);
 
             setFormData((prev) => ({ ...prev, name: "" }));
 
             await fetchExpenseGroupDetail();
-
+            setUpdate(false);
+            setExpenseTypeId(null);
         } catch (err) {
             notifyError(err.message, err.data, 4000);
         } finally {
@@ -104,10 +110,34 @@ export default function ExpenseGroupDetail() {
         }
     };
 
+    // Fetch Edit Details 
+    const fetchEditDetails = async () => {
+        if (expenseTypeId) {
+            setUpdate(true);
+            setLoading(true);
+            try {
+                const response = await httpService.get(
+                    `/accounting/chartOfAccount/getById/${expenseTypeId}`
+                );
+
+                setFormData((prev) => ({ ...prev, name: response.data.name }));
+            } catch (err) {
+                notifyError(err.message, err.data, 4000);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+
     useEffect(() => {
         fetchExpenseGroupDetail();
         fetchExpenseGroupName();
     }, []);
+
+    useEffect(() => {
+        fetchEditDetails();
+    }, [expenseTypeId]);
 
     const tableColumns = [
         { header: "Expense Group Detail", field: "name" },
@@ -115,7 +145,8 @@ export default function ExpenseGroupDetail() {
     ];
 
     const handleEdit = ({ id }) => {
-        // history.push(`/dashboard/update-expense-group/${id}`)
+        setExpenseTypeId(id);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleDelete = () => {
@@ -184,7 +215,8 @@ export default function ExpenseGroupDetail() {
                                         className="w-5 h-5 inline-block "
                                         style={{ paddingBottom: "3px", paddingRight: "5px" }}
                                     />
-                                    {submitting ? "Saving..." : "Add"}
+                                    {update ?
+                                        (submitting ? "Updating..." : "Update") : (submitting ? "Saving..." : "Add")}
                                 </button>
                             </div>
                         </div>

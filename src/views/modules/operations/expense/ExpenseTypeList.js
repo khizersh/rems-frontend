@@ -37,7 +37,7 @@ export default function ExpenseTypeList() {
     setFormData({ ...formData, name: e.target.value });
   };
 
-  // Form Submit 
+  // Form Submit Add & Update
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -48,12 +48,13 @@ export default function ExpenseTypeList() {
         JSON.parse(localStorage.getItem("organization")) || null;
 
       formData.organizationId = Number(organization?.organizationId);
+      let data = { ...formData, name: formData.name.trim() };
 
       let url = "/expense/addExpenseType";
       if (update == true) {
         url = "/expense/updateExpenseType";
       }
-      const response = await httpService.post(url, formData);
+      const response = await httpService.post(url, data);
 
       notifySuccess(response.responseMessage, 4000);
 
@@ -76,6 +77,7 @@ export default function ExpenseTypeList() {
   const fetchEditDetails = async () => {
     if (expenseTypeId) {
       setUpdate(true);
+      setLoading(true);
       try {
         const response = await httpService.get(
           `/expense/getExpenseTypeById/${expenseTypeId}`

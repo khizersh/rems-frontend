@@ -43,7 +43,6 @@ import ExpenseDetailList from "views/modules/operations/expense/ExpenseDetailLis
 import ProjectUpdate from "views/modules/operations/projects/ProjectUpdate";
 import ProjectAnalytics from "views/analytics/ProjectAnalytics";
 import RevenueAnalytics from "views/analytics/RevenueAnalytics";
-import AddExpenseType from "views/modules/operations/expense/AddExpenseType";
 import ExpenseTypeList from "views/modules/operations/expense/ExpenseTypeList";
 import UpdateBooking from "views/modules/operations/booking/UpdateBooking";
 import CustomerSchedule from "views/modules/operations/customer/CustomerSchedule";
@@ -163,10 +162,6 @@ export default function Admin() {
                 path: "/dashboard/expense-type-list",
                 component: ExpenseTypeList,
               },
-              // {
-              //   path: "/dashboard/expense-type-add",
-              //   component: AddExpenseType,
-              // },
               { path: "/dashboard/projects", component: ProjectList },
               { path: "/dashboard/add-project", component: AddProject },
               {

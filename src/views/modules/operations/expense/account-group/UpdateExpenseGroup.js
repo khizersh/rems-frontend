@@ -48,6 +48,7 @@ const UpdateExpenseGroup = () => {
 
     const fetchEditDetails = async () => {
         if (expenseGroupId) {
+            setLoading(true);
             try {
                 const organization =
                     JSON.parse(localStorage.getItem("organization")) || null;

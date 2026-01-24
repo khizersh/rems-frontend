@@ -129,10 +129,11 @@ export default function ExpenseTypeList() {
 
   const handleEdit = ({ id }) => {
     setExpenseTypeId(id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
   };
 
-  const handleDelete = (floor) => {
-    // console.log("Delete Floor:", floor);
+  const handleDelete = () => {
     // Implement delete logic
   };
 
@@ -145,10 +146,6 @@ export default function ExpenseTypeList() {
       className: "text-red-600",
     },
   ];
-
-  // const addClick = () => {
-  //   history.push("/dashboard/expense-type-add");
-  // };
 
   return (
     <>
@@ -225,12 +222,6 @@ export default function ExpenseTypeList() {
             loading={loading}
             title="Expense Type"
             actions={actions}
-          // firstButton={{
-          //   title: "Add Type",
-          //   onClick: addClick,
-          //   icon: FaLayerGroup,
-          //   className: "bg-emerald-500",
-          // }}
           />
         </div>
       </div>

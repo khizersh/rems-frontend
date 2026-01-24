@@ -178,10 +178,6 @@ export default function ExpenseGroupDetail() {
         },
     ];
 
-    const addClick = () => {
-        history.push("/dashboard/expense-group-add");
-    };
-
     return (
         <>
             <div>
@@ -237,12 +233,6 @@ export default function ExpenseGroupDetail() {
                         loading={loading}
                         title="Expense Group Detail"
                         actions={actions}
-                    // firstButton={{
-                    //     title: "Add Expense Group",
-                    //     onClick: addClick,
-                    //     icon: FaLayerGroup,
-                    //     className: "bg-emerald-500",
-                    // }}
                     />
                 </div>
             </div>

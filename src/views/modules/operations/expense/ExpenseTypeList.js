@@ -151,26 +151,7 @@ export default function ExpenseTypeList() {
     <>
       <div>
         {/* Add Form  */}
-        <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
-          <div className="mb-0 py-6">
-            <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-              <span>
-                <button className="">
-                  <IoArrowBackOutline
-                    onClick={() => history.goBack()}
-                    className="back-button-icon inline-block back-button"
-                    style={{
-                      paddingBottom: "3px",
-                      paddingRight: "7px",
-                      marginBottom: "3px",
-                    }}
-                  />
-                </button>
-              </span>
-              Add Expense Type
-            </h6>
-          </div>
-
+        <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0 my-4">
           <form
             onSubmit={handleSubmit}
             className="py-4 bg-white rounded-12 shadow-lg"

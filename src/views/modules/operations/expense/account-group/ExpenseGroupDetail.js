@@ -182,7 +182,7 @@ export default function ExpenseGroupDetail() {
         <>
             <div>
                 {/* Form  */}
-                <div className="mb-4">
+                <div className="my-4">
                     <form
                         onSubmit={handleSubmit}
                         className="py-4 bg-white rounded-12 shadow-lg"

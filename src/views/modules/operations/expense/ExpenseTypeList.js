@@ -2,7 +2,10 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
-import { useHistory, useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
+import {
+  useHistory,
+  useLocation,
+} from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaDownload } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 import { FaLayerGroup, FaPen, FaTrashAlt, FaUserPlus } from "react-icons/fa";
@@ -22,16 +25,46 @@ export default function ExpenseTypeList() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
   const [formData, setFormData] = useState({
     organizationId: 0,
     name: "",
   });
+
   const [update, setUpdate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [expenseTypeId, setExpenseTypeId] = useState(null);
+
   const history = useHistory();
-  // const location = useLocation();
+
+  const fetchExpenseTypeList = async (pageNo = page) => {
+    setLoading(true);
+    try {
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
+
+      const payload = {
+        id: organization.organizationId,
+        page: page,
+        size: pageSize,
+        sortBy: "createdDate",
+        sortDir: "asc",
+      };
+
+      const response = await httpService.post(
+        "/expense/getAllExpenseTypeByOrgId",
+        payload,
+      );
+
+      setExpenseTypeList(response?.data?.content || []);
+      setTotalPages(response?.data?.totalPages || 0);
+      setTotalElements(response?.data?.totalElements || 0);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, name: e.target.value });
@@ -73,14 +106,14 @@ export default function ExpenseTypeList() {
     }
   };
 
-  // Fetch Edit Details 
+  // Fetch Edit Details
   const fetchEditDetails = async () => {
     if (expenseTypeId) {
       setUpdate(true);
       setLoading(true);
       try {
         const response = await httpService.get(
-          `/expense/getExpenseTypeById/${expenseTypeId}`
+          `/expense/getExpenseTypeById/${expenseTypeId}`,
         );
 
         setFormData({ name: response.data.name, id: response.data.id });
@@ -92,28 +125,9 @@ export default function ExpenseTypeList() {
     }
   };
 
-
-  // Fetch Expense Type List 
-  const fetchExpenseTypeList = async () => {
-    setLoading(true);
-    try {
-      const organization =
-        JSON.parse(localStorage.getItem("organization")) || null;
-      const response = await httpService.get(
-        `/expense/getAllExpenseTypeByOrgId/${organization.organizationId}`
-      );
-
-      setExpenseTypeList(response?.data || []);
-    } catch (err) {
-      notifyError(err.message, err.data, 4000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchExpenseTypeList();
-  }, []);
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchEditDetails();
@@ -130,7 +144,6 @@ export default function ExpenseTypeList() {
   const handleEdit = ({ id }) => {
     setExpenseTypeId(id);
     window.scrollTo({ top: 0, behavior: "smooth" });
-
   };
 
   const handleDelete = () => {
@@ -181,8 +194,13 @@ export default function ExpenseTypeList() {
                     style={{ paddingBottom: "3px", paddingRight: "5px" }}
                   />
 
-                  {update ?
-                    (submitting ? "Updating..." : "Update") : (submitting ? "Saving..." : "Add")}
+                  {update
+                    ? submitting
+                      ? "Updating..."
+                      : "Update"
+                    : submitting
+                      ? "Saving..."
+                      : "Add"}
                 </button>
               </div>
             </div>
@@ -198,6 +216,7 @@ export default function ExpenseTypeList() {
             data={expenseTypeList}
             columns={tableColumns}
             pageSize={pageSize}
+            setPageSize={setPageSize}
             totalPages={totalPages}
             totalElements={totalElements}
             loading={loading}

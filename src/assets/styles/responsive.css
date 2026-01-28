@@ -192,6 +192,7 @@ button:hover {
   .fixed-left-13p {
     position: fixed;
     left: 4%;
+    top: 10%;
   }
 
   .desktop-show {

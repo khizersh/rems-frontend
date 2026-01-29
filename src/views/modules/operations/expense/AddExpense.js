@@ -61,12 +61,12 @@ const AddExpense = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (name === "expenseAccountGroupId") {
+    if (name !== "expenseAccountGroupId") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    } else {
       setExpenseAccountGroupId(value);
     }
   };
@@ -143,6 +143,8 @@ const AddExpense = () => {
         creditAmount: parseFloat(formData.creditAmount || 0),
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
+      console.log(requestBody);
+
 
       if (requestBody.totalAmount <= 0) {
         setLoading(false);
@@ -354,7 +356,7 @@ const AddExpense = () => {
                   </div>
 
                   {formData.paymentType == "CHEQUE" ||
-                  formData.paymentType == "PAY_ORDER" ? (
+                    formData.paymentType == "PAY_ORDER" ? (
                     <>
                       <div className="w-full lg:w-6/12 px-4 mb-3">
                         <InputField
@@ -362,8 +364,8 @@ const AddExpense = () => {
                             formData.paymentType == "CHEQUE"
                               ? "Cheque No"
                               : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order No"
-                              : ""
+                                ? "Pay Order No"
+                                : ""
                           }
                           name={"paymentDocNo"}
                           value={formData.paymentDocNo}
@@ -378,8 +380,8 @@ const AddExpense = () => {
                             formData.paymentType == "CHEQUE"
                               ? "Cheque Date"
                               : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order Date"
-                              : ""
+                                ? "Pay Order Date"
+                                : ""
                           }
                           type="datetime-local"
                           name="paymentDocDate"
@@ -439,7 +441,7 @@ const AddExpense = () => {
                   />
                 </div>
                 {formData.paymentType == "CHEQUE" ||
-                formData.paymentType == "PAY_ORDER" ? (
+                  formData.paymentType == "PAY_ORDER" ? (
                   <>
                     <div className="w-full lg:w-4/12 px-4 mt-3">
                       <InputField
@@ -447,8 +449,8 @@ const AddExpense = () => {
                           formData.paymentType == "CHEQUE"
                             ? "Cheque No"
                             : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order No"
-                            : ""
+                              ? "Pay Order No"
+                              : ""
                         }
                         name={"paymentDocNo"}
                         value={formData.paymentDocNo}
@@ -463,8 +465,8 @@ const AddExpense = () => {
                           formData.paymentType == "CHEQUE"
                             ? "Cheque Date"
                             : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order Date"
-                            : ""
+                              ? "Pay Order Date"
+                              : ""
                         }
                         type="datetime-local"
                         name="paymentDocDate"
@@ -561,9 +563,8 @@ const InputField = ({
       value={value}
       onChange={onChange}
       readOnly={readOnly}
-      className={`w-full p-2 border rounded-lg ${
-        readOnly ? "bg-gray-100 cursor-not-allowed" : ""
-      }`}
+      className={`w-full p-2 border rounded-lg ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""
+        }`}
     />
   </div>
 );

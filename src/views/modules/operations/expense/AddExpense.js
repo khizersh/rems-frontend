@@ -6,6 +6,7 @@ import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
+import { EXPENSE_TYPE_ID } from "utility/Utility";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError } = useContext(MainContext);
@@ -21,6 +22,7 @@ const AddExpense = () => {
     projectId: 0,
     paymentType: "CASH",
     paymentDocNo: "",
+    expenseCOAId: 0,
     paymentDocDate: new Date().toISOString().slice(0, 16),
     expenseType: "MISCELLANEOUS",
     comments: "",
@@ -28,12 +30,15 @@ const AddExpense = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
   const [responseMessage, setResponseMessage] = useState("");
+  const [expenseAccountGroupId, setExpenseAccountGroupId] = useState("");
   const [dropdowns, setDropdowns] = useState({
     projects: [],
     vendors: [],
     accounts: [],
     expenseTypes: [],
+    expenseAccountGroups: [],
   });
 
   const resetForm = () => {
@@ -48,6 +53,7 @@ const AddExpense = () => {
       projectId: 0,
       expenseType: "",
       comments: "",
+      expenseCOAId: 0,
       createdDate: new Date().toISOString().slice(0, 16),
     });
   };
@@ -59,6 +65,10 @@ const AddExpense = () => {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "expenseAccountGroupId") {
+      setExpenseAccountGroupId(value);
+    }
   };
 
   useEffect(() => {
@@ -78,7 +88,7 @@ const AddExpense = () => {
       if (!org) return;
 
       setLoading(true);
-      const [projects, vendors, accounts, expenseTypes] = await Promise.all([
+      const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] = await Promise.all([
         httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
         httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
         httpService.get(
@@ -86,6 +96,9 @@ const AddExpense = () => {
         ),
         httpService.get(
           `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`
+        ),
+        httpService.get(
+          `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`
         ),
       ]);
 
@@ -101,6 +114,7 @@ const AddExpense = () => {
         vendors: vendors.data || [],
         accounts: accountList || [],
         expenseTypes: expenseTypes.data || [],
+        expenseAccountGroups: expenseAccountGroups.data.data || [],
       });
       setLoading(false);
     } catch (err) {
@@ -117,6 +131,10 @@ const AddExpense = () => {
     try {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
+
+      if (formData.expenseType === "CONSTRUCTION") {
+        formData.expenseCOAId = 0;
+      };
 
       const requestBody = {
         ...formData,
@@ -149,6 +167,35 @@ const AddExpense = () => {
     } finally {
     }
   };
+
+  // Fetch Expense Account 
+  const fetchExpenseAccount = async () => {
+    if (!expenseAccountGroupId) {
+      setFormData((prev) => ({
+        ...prev,
+        expenseCOAId: 0
+      }))
+      setExpenseAccountDropdown([]);
+      return;
+    };
+    try {
+      const org = JSON.parse(localStorage.getItem("organization")) || null;
+      if (!org) return;
+
+      const response = await httpService.get(
+        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`
+      );
+
+      setExpenseAccountDropdown(response?.data?.data || []);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenseAccount();
+  }, [expenseAccountGroupId]);
 
   useEffect(() => {
     fetchDropdownData();
@@ -438,6 +485,26 @@ const AddExpense = () => {
                     value={formData["createdDate"]}
                     onChange={handleChange}
                     readOnly={false}
+                  />
+                </div>
+                {/* Expense Account Group Dropdown */}
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label={"Select Expense Account Group"}
+                    name={"expenseAccountGroupId"}
+                    value={expenseAccountGroupId}
+                    onChange={handleChange}
+                    options={dropdowns.expenseAccountGroups}
+                  />
+                </div>
+                {/* Expense Account Dropdown */}
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label={"Select Expense Account"}
+                    name={"expenseCOAId"}
+                    value={formData["expenseCOAId"]}
+                    onChange={handleChange}
+                    options={ExpenseAccountDropdown}
                   />
                 </div>
                 <div className="w-full lg:w-12/12 px-4 mt-3 ">

@@ -122,11 +122,11 @@ export default function OrganizationAccountDetail() {
   };
 
   const tableColumns = [
-    { header: "Customer Name", field: "customerName" },
-    { header: "Project Name", field: "projectName" },
-    { header: "Unit Serial", field: "unitSerialNo" },
+    { header: "Customer", field: "customerName" },
+    { header: "Project", field: "projectName" },
+    { header: "Category", field: "transactionCategory" },
     {
-      header: "Transaction Type",
+      header: "Transaction",
       field: "transactionType",
       render: (value) => {
         const baseClass = "font-semibold uppercase";
@@ -162,6 +162,7 @@ export default function OrganizationAccountDetail() {
     const formattedAccountDetail = {
       "Transaction Info": {
         "Transaction Type": data.transactionType,
+        "Transaction Category": data.transactionCategory,
         Amount: data.amount,
         Comments: data.comments,
       },

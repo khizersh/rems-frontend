@@ -127,7 +127,7 @@ export default function Admin() {
                 component: AddOrganizationComponent,
               },
               {
-                path: "/dashboard/organization-account-detail/:accountId",
+                path: "/dashboard/organization-account-management/:accountId",
                 component: OrganizationAccountDetail,
               },
               {

@@ -170,17 +170,20 @@ const AddExpense = () => {
 
   // Fetch Expense Account 
   const fetchExpenseAccount = async () => {
-    if (!expenseAccountGroupId) {
-      setFormData((prev) => ({
-        ...prev,
-        expenseCOAId: 0
-      }))
-      setExpenseAccountDropdown([]);
-      return;
-    };
+    setFormData((prev) => ({
+      ...prev,
+      expenseCOAId: 0
+    }));
+    setExpenseAccountDropdown([]);
+    setLoading(true);
+
     try {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
-      if (!org) return;
+
+      if (!expenseAccountGroupId || !org) {
+        setLoading(false);
+        return;
+      };
 
       const response = await httpService.get(
         `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`
@@ -190,6 +193,7 @@ const AddExpense = () => {
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
+      setLoading(false);
     }
   };
 

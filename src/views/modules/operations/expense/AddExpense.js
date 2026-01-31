@@ -9,7 +9,8 @@ import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
 
 const AddExpense = () => {
-  const { notifySuccess, notifyError, setLoading, loading } = useContext(MainContext);
+  const { notifySuccess, notifyError, setLoading, loading } =
+    useContext(MainContext);
 
   const [formData, setFormData] = useState({
     amountPaid: 0,
@@ -29,9 +30,10 @@ const AddExpense = () => {
     createdDate: new Date().toISOString().slice(0, 16),
   });
 
-  const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
   const [responseMessage, setResponseMessage] = useState("");
+  const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
   const [expenseAccountGroupId, setExpenseAccountGroupId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [dropdowns, setDropdowns] = useState({
     projects: [],
     vendors: [],
@@ -60,14 +62,14 @@ const AddExpense = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name !== "expenseAccountGroupId") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    } else {
+    if (name === "expenseAccountGroupId") {
       setExpenseAccountGroupId(value);
+      return;
     }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   useEffect(() => {
@@ -88,28 +90,30 @@ const AddExpense = () => {
 
       setLoading(true);
 
-      
-      const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] = await Promise.all([
-        httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
-        httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
-        httpService.get(
-          `/organizationAccount/getAccountByOrgId/${org.organizationId}`
-        ),
-        httpService.get(
-          `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`
-        ),
-        httpService.get(
-          `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`
-        ),
-      ]);
-      
+      const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] =
+        await Promise.all([
+          httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
+          httpService.get(
+            `/vendorAccount/getVendorByOrg/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/organizationAccount/getAccountByOrgId/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+          ),
+        ]);
+
       let accountList = accounts.data?.map((account) => {
         return {
           ...account,
           name: account.name + " - " + account.bankName,
         };
       });
-      
+
       setDropdowns({
         projects: projects.data || [],
         vendors: vendors.data || [],
@@ -126,7 +130,7 @@ const AddExpense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    // setSubmitting(true);
     setResponseMessage("");
 
     try {
@@ -135,7 +139,7 @@ const AddExpense = () => {
 
       if (formData.expenseType === "CONSTRUCTION") {
         formData.expenseCOAId = 0;
-      };
+      }
 
       const requestBody = {
         ...formData,
@@ -144,11 +148,10 @@ const AddExpense = () => {
         creditAmount: parseFloat(formData.creditAmount || 0),
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
-      console.log(requestBody);
 
 
       if (requestBody.totalAmount <= 0) {
-        setLoading(false);
+        setSubmitting(false);
         return notifyError(
           "Expense is empty!",
           "Please enter any amount",
@@ -156,40 +159,36 @@ const AddExpense = () => {
         );
       }
 
-
       const response = await httpService.post(
         "/expense/addExpense",
         requestBody
       );
       await notifySuccess(response.responseMessage, 4000);
+      setSubmitting(false);
       resetForm();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
-    } finally {
       setLoading(false);
+    } finally {
     }
   };
 
-  // Fetch Expense Account 
+  // Fetch Expense Account
   const fetchExpenseAccount = async () => {
-    if (!expenseAccountGroupId) {
-      setFormData((prev) => ({
-        ...prev,
-        expenseCOAId: 0
-      }))
-      setExpenseAccountDropdown([]);
-      return;
-    };
+    setFormData((prev) => ({
+      ...prev,
+      expenseCOAId: 0,
+    }));
+    setExpenseAccountDropdown([]);
+    setLoading(true);
+
     try {
       setLoading(true);
       const org = JSON.parse(localStorage.getItem("organization")) || null;
-      if (!org) {
-        setLoading(false);
-        return;
-      }
+      if (!org) return;
 
       const response = await httpService.get(
-        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`
+        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`,
       );
 
       setExpenseAccountDropdown(response?.data?.data || []);
@@ -361,7 +360,7 @@ const AddExpense = () => {
                   </div>
 
                   {formData.paymentType == "CHEQUE" ||
-                    formData.paymentType == "PAY_ORDER" ? (
+                  formData.paymentType == "PAY_ORDER" ? (
                     <>
                       <div className="w-full lg:w-6/12 px-4 mb-3">
                         <InputField
@@ -446,7 +445,7 @@ const AddExpense = () => {
                   />
                 </div>
                 {formData.paymentType == "CHEQUE" ||
-                  formData.paymentType == "PAY_ORDER" ? (
+                formData.paymentType == "PAY_ORDER" ? (
                   <>
                     <div className="w-full lg:w-4/12 px-4 mt-3">
                       <InputField
@@ -531,14 +530,14 @@ const AddExpense = () => {
           <div className="w-full lg:w-12/12 px-4 text-right">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || submitting}
               className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
             >
               <TbFileExport
                 className="w-5 h-5 inline-block "
                 style={{ paddingBottom: "3px", paddingRight: "5px" }}
               />
-              {loading ? "Submitting..." : "Add Expense"}
+              {submitting ? "Submitting..." : "Add Expense"}
             </button>
             {responseMessage && (
               <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>
@@ -568,8 +567,9 @@ const InputField = ({
       value={value}
       onChange={onChange}
       readOnly={readOnly}
-      className={`w-full p-2 border rounded-lg ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""
-        }`}
+      className={`w-full p-2 border rounded-lg ${
+        readOnly ? "bg-gray-100 cursor-not-allowed" : ""
+      }`}
     />
   </div>
 );

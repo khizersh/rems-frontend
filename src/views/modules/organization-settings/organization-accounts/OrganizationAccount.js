@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
+import { IoSettingsOutline } from "react-icons/io5";
 import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import {
   useHistory,
@@ -32,7 +33,7 @@ export default function OrganizationAccount() {
       let organizationLocal = JSON.parse(localStorage.getItem("organization"));
       if (organizationLocal) {
         const response = await httpService.get(
-          `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`
+          `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`,
         );
 
         setAccountList(response?.data || []);
@@ -90,12 +91,10 @@ export default function OrganizationAccount() {
     // Implement delete logic
   };
   const handleViewAccountDetail = (data) => {
-    console.log("data :: ", data);
-
     if (!data) {
       return notifyError("Invalid Account!", 4000);
     }
-    history.push(`/dashboard/organization-account-detail/${data.id}`);
+    history.push(`/dashboard/organization-account-management/${data.id}`);
   };
 
   const toggleModalFt = () => {
@@ -111,10 +110,10 @@ export default function OrganizationAccount() {
       className: "text-green-600",
     },
     {
-      icon: FaEye,
+      icon: IoSettingsOutline,
       onClick: handleViewAccountDetail,
-      title: "View Account Detail",
-      className: "text-green-600",
+      title: "Account Management",
+      className: "text-lightBlue-600",
     },
   ];
 

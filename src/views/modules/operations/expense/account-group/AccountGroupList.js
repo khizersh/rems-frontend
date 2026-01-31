@@ -5,7 +5,7 @@ import DynamicTableComponent from "../../../../../components/table/DynamicTableC
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaDownload } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
-import { FaLayerGroup, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaLayerGroup, FaPen, FaTrashAlt } from "react-icons/fa";
 import { EXPENSE_TYPE_ID } from "utility/Utility.js";
 
 export default function AccountGroupList() {
@@ -32,13 +32,9 @@ export default function AccountGroupList() {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
 
-
       const response = await httpService.get(
-        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`
+        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
       );
-
-      console.log("response :: ",response);
-      
 
       setAccountGroup(response?.data?.data || []);
     } catch (err) {
@@ -57,27 +53,35 @@ export default function AccountGroupList() {
     { header: "Created Date", field: "createdDate" },
   ];
 
-  const handleEdit = (expenseType) => {
-    history.push("/dashboard/expense-type-add?eId=" + expenseType.id);
+  const handleEdit = ({ id }) => {
+    history.push(`/dashboard/update-expense-group/${id}`);
   };
 
-  const handleDelete = (floor) => {
-    console.log("Delete Floor:", floor);
+  const handleDelete = () => {
     // Implement delete logic
   };
 
+  const handleView = ({ id }) => {
+    history.push(`/dashboard/expense-group-detail/${id}`);
+  };
+
   const actions = [
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
+      icon: FaEye,
+      onClick: handleView,
+      title: "Expense Accounts",
+      className: "text-green-600",
+    },
+    {
+      icon: FaPen,
+      onClick: handleEdit,
+      title: "Edit",
+      className: "yellow",
     },
   ];
 
   const addClick = () => {
-    history.push("/dashboard/expense-type-add");
+    history.push("/dashboard/expense-group-add");
   };
 
   return (
@@ -93,7 +97,7 @@ export default function AccountGroupList() {
           totalPages={totalPages}
           totalElements={totalElements}
           loading={loading}
-          title="Expense Type"
+          title="Expense Group"
           actions={actions}
           firstButton={{
             title: "Add Expense Group",

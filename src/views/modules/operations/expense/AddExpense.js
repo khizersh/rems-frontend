@@ -6,9 +6,11 @@ import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
+import { EXPENSE_TYPE_ID } from "utility/Utility";
 
 const AddExpense = () => {
-  const { notifySuccess, notifyError } = useContext(MainContext);
+  const { notifySuccess, notifyError, setLoading, loading } =
+    useContext(MainContext);
 
   const [formData, setFormData] = useState({
     amountPaid: 0,
@@ -21,19 +23,23 @@ const AddExpense = () => {
     projectId: 0,
     paymentType: "CASH",
     paymentDocNo: "",
+    expenseCOAId: 0,
     paymentDocDate: new Date().toISOString().slice(0, 16),
     expenseType: "MISCELLANEOUS",
     comments: "",
     createdDate: new Date().toISOString().slice(0, 16),
   });
 
-  const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
+  const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
+  const [expenseAccountGroupId, setExpenseAccountGroupId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [dropdowns, setDropdowns] = useState({
     projects: [],
     vendors: [],
     accounts: [],
     expenseTypes: [],
+    expenseAccountGroups: [],
   });
 
   const resetForm = () => {
@@ -48,6 +54,7 @@ const AddExpense = () => {
       projectId: 0,
       expenseType: "",
       comments: "",
+      expenseCOAId: 0,
       createdDate: new Date().toISOString().slice(0, 16),
     });
   };
@@ -55,6 +62,10 @@ const AddExpense = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === "expenseAccountGroupId") {
+      setExpenseAccountGroupId(value);
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -78,16 +89,23 @@ const AddExpense = () => {
       if (!org) return;
 
       setLoading(true);
-      const [projects, vendors, accounts, expenseTypes] = await Promise.all([
-        httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
-        httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
-        httpService.get(
-          `/organizationAccount/getAccountByOrgId/${org.organizationId}`
-        ),
-        httpService.get(
-          `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`
-        ),
-      ]);
+
+      const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] =
+        await Promise.all([
+          httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
+          httpService.get(
+            `/vendorAccount/getVendorByOrg/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/organizationAccount/getAccountByOrgId/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`,
+          ),
+          httpService.get(
+            `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+          ),
+        ]);
 
       let accountList = accounts.data?.map((account) => {
         return {
@@ -101,6 +119,7 @@ const AddExpense = () => {
         vendors: vendors.data || [],
         accounts: accountList || [],
         expenseTypes: expenseTypes.data || [],
+        expenseAccountGroups: expenseAccountGroups.data.data || [],
       });
       setLoading(false);
     } catch (err) {
@@ -111,12 +130,16 @@ const AddExpense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    // setSubmitting(true);
     setResponseMessage("");
 
     try {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
+
+      if (formData.expenseType === "CONSTRUCTION") {
+        formData.expenseCOAId = 0;
+      }
 
       const requestBody = {
         ...formData,
@@ -126,8 +149,9 @@ const AddExpense = () => {
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
 
+
       if (requestBody.totalAmount <= 0) {
-        setLoading(false);
+        setSubmitting(false);
         return notifyError(
           "Expense is empty!",
           "Please enter any amount",
@@ -135,13 +159,12 @@ const AddExpense = () => {
         );
       }
 
-
       const response = await httpService.post(
         "/expense/addExpense",
         requestBody
       );
       await notifySuccess(response.responseMessage, 4000);
-      setLoading(false);
+      setSubmitting(false);
       resetForm();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -149,6 +172,36 @@ const AddExpense = () => {
     } finally {
     }
   };
+
+  // Fetch Expense Account
+  const fetchExpenseAccount = async () => {
+    setFormData((prev) => ({
+      ...prev,
+      expenseCOAId: 0,
+    }));
+    setExpenseAccountDropdown([]);
+    setLoading(true);
+
+    try {
+      setLoading(true);
+      const org = JSON.parse(localStorage.getItem("organization")) || null;
+      if (!org) return;
+
+      const response = await httpService.get(
+        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`,
+      );
+
+      setExpenseAccountDropdown(response?.data?.data || []);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenseAccount();
+  }, [expenseAccountGroupId]);
 
   useEffect(() => {
     fetchDropdownData();
@@ -315,8 +368,8 @@ const AddExpense = () => {
                             formData.paymentType == "CHEQUE"
                               ? "Cheque No"
                               : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order No"
-                              : ""
+                                ? "Pay Order No"
+                                : ""
                           }
                           name={"paymentDocNo"}
                           value={formData.paymentDocNo}
@@ -331,8 +384,8 @@ const AddExpense = () => {
                             formData.paymentType == "CHEQUE"
                               ? "Cheque Date"
                               : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order Date"
-                              : ""
+                                ? "Pay Order Date"
+                                : ""
                           }
                           type="datetime-local"
                           name="paymentDocDate"
@@ -400,8 +453,8 @@ const AddExpense = () => {
                           formData.paymentType == "CHEQUE"
                             ? "Cheque No"
                             : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order No"
-                            : ""
+                              ? "Pay Order No"
+                              : ""
                         }
                         name={"paymentDocNo"}
                         value={formData.paymentDocNo}
@@ -416,8 +469,8 @@ const AddExpense = () => {
                           formData.paymentType == "CHEQUE"
                             ? "Cheque Date"
                             : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order Date"
-                            : ""
+                              ? "Pay Order Date"
+                              : ""
                         }
                         type="datetime-local"
                         name="paymentDocDate"
@@ -440,6 +493,26 @@ const AddExpense = () => {
                     readOnly={false}
                   />
                 </div>
+                {/* Expense Account Group Dropdown */}
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label={"Select Expense Account Group"}
+                    name={"expenseAccountGroupId"}
+                    value={expenseAccountGroupId}
+                    onChange={handleChange}
+                    options={dropdowns.expenseAccountGroups}
+                  />
+                </div>
+                {/* Expense Account Dropdown */}
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label={"Select Expense Account"}
+                    name={"expenseCOAId"}
+                    value={formData["expenseCOAId"]}
+                    onChange={handleChange}
+                    options={ExpenseAccountDropdown}
+                  />
+                </div>
                 <div className="w-full lg:w-12/12 px-4 mt-3 ">
                   <InputField
                     label={"Narrations"}
@@ -457,14 +530,14 @@ const AddExpense = () => {
           <div className="w-full lg:w-12/12 px-4 text-right">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || submitting}
               className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
             >
               <TbFileExport
                 className="w-5 h-5 inline-block "
                 style={{ paddingBottom: "3px", paddingRight: "5px" }}
               />
-              {loading ? "Submitting..." : "Add Expense"}
+              {submitting ? "Submitting..." : "Add Expense"}
             </button>
             {responseMessage && (
               <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>

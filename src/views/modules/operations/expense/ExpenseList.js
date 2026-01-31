@@ -6,13 +6,24 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaDownload, FaEdit, FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import {
+  FaDownload,
+  FaEdit,
+  FaEye,
+  FaPen,
+  FaTrashAlt,
+  FaSearch,
+} from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import { TbFileExport } from "react-icons/tb";
 import "../../../../assets/styles/responsive.css";
 import { BiSolidDetail } from "react-icons/bi";
-import { paymentTypes } from "utility/Utility.js";
+import {
+  paymentTypes,
+  EXPENSE_TYPE,
+  EXPENSE_TYPE_ID,
+} from "utility/Utility.js";
 
 export default function ExpenseList() {
   const {
@@ -35,6 +46,11 @@ export default function ExpenseList() {
   const [projectFileteredId, setProjectFilteredId] = useState("");
   const [vendorFileteredId, setVendorFilteredId] = useState("");
   const [accountList, setAccountList] = useState([]);
+  const [expenseType, setExpenseType] = useState("ALL");
+  const [accountGroupId, setAccountGroupId] = useState(null);
+  const [coaId, setCoaId] = useState(null);
+  const [accountGroups, setAccountGroups] = useState([]);
+  const [coaList, setCoaList] = useState([]);
   const [expenseDetail, setExpenseDetail] = useState({
     expenseId: 0,
     amountPaid: 0,
@@ -57,7 +73,7 @@ export default function ExpenseList() {
         JSON.parse(localStorage.getItem("organization")) || null;
       if (sidebarData) {
         const response = await httpService.get(
-          `/project/getAllProjectByOrg/${sidebarData.organizationId}`
+          `/project/getAllProjectByOrg/${sidebarData.organizationId}`,
         );
         setProjects(response.data || []);
       }
@@ -82,6 +98,9 @@ export default function ExpenseList() {
         id: id1,
         id2: id2,
         filteredBy: filteredByFinal,
+        expenseType: expenseType,
+        accountGroupId: accountGroupId,
+        coaId: coaId,
         page,
         size: pageSize,
         sortBy: "id",
@@ -90,7 +109,7 @@ export default function ExpenseList() {
 
       if (!id1) {
         const organizationLocal = JSON.parse(
-          localStorage.getItem("organization")
+          localStorage.getItem("organization"),
         );
         if (organizationLocal) {
           requestBody.id = organizationLocal.organizationId;
@@ -99,7 +118,7 @@ export default function ExpenseList() {
       }
       const response = await httpService.post(
         `/expense/getAllExpensesByIds`,
-        requestBody
+        requestBody,
       );
 
       setExpenseList(response?.data?.content || []);
@@ -123,7 +142,7 @@ export default function ExpenseList() {
       let organizationLocal = JSON.parse(localStorage.getItem("organization"));
       if (organizationLocal) {
         const response = await httpService.get(
-          `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`
+          `/organizationAccount/getAccountByOrgId/${organizationLocal.organizationId}`,
         );
 
         setAccountList(response?.data || []);
@@ -134,15 +153,82 @@ export default function ExpenseList() {
     }
   };
 
+  const fetchAccountGroups = async () => {
+    try {
+      const org = JSON.parse(localStorage.getItem("organization")) || null;
+      if (!org) return;
+      const response = await httpService.get(
+        `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+      );
+      setAccountGroups(response?.data?.data || []);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    }
+  };
+
+  const fetchCoaList = async (groupId) => {
+    try {
+      if (!groupId) {
+        setCoaList([]);
+        return;
+      }
+      const org = JSON.parse(localStorage.getItem("organization")) || null;
+      if (!org) return;
+      const response = await httpService.get(
+        `/accounting/${org.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${groupId}`,
+      );
+      setCoaList(response?.data?.data || []);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    }
+  };
+
+  const [isSearched, setIsSearched] = useState(false);
+
   useEffect(() => {
     fetchExpenseList();
-  }, [page, pageSize, filterProject, filterVendor]);
+  }, [page, pageSize]);
 
   useEffect(() => {
     fetchProjects();
     fetchVendors();
     fetchAccountList();
+    fetchAccountGroups();
   }, []);
+
+  // Fetch COAs automatically when account group is selected
+  useEffect(() => {
+    if (accountGroupId) {
+      fetchCoaList(accountGroupId);
+    } else {
+      setCoaList([]);
+    }
+  }, [accountGroupId]);
+
+  const handleExpenseTypeChange = (e) => {
+    const val = e.target.value;
+    setExpenseType(val);
+    if (val !== "MISCELLANEOUS") {
+      setAccountGroupId(null);
+      setCoaId(null);
+      setCoaList([]);
+    } else {
+      if (!accountGroups.length) fetchAccountGroups();
+    }
+  };
+
+  const handleLoadCoas = async () => {
+    if (!accountGroupId)
+      return notifyError("Please select Account Group first", 4000);
+    await fetchCoaList(accountGroupId);
+  };
+
+  const handleSearch = async () => {
+    setPage(0);
+    if (page == 0) {
+      fetchExpenseList();
+    }
+  };
 
   const changeSelectedProjected = (projectId) => {
     setProjectFilteredId(projectId);
@@ -160,7 +246,7 @@ export default function ExpenseList() {
         JSON.parse(localStorage.getItem("organization")) || {};
 
       const response = await httpService.get(
-        `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`
+        `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`,
       );
       setVendorList(response.data || []);
     } catch (err) {
@@ -186,7 +272,7 @@ export default function ExpenseList() {
 
       const data = await httpService.post(
         "/expense/addExpenseDetail",
-        requestBody
+        requestBody,
       );
 
       notifySuccess(data.responseMessage, 3000);
@@ -200,7 +286,7 @@ export default function ExpenseList() {
   const tableColumns = [
     { header: "Title", field: "expenseTitle" },
     { header: "Vendor ", field: "vendorName" },
-    { header: "Project", field: "projectName" },
+    { header: "Comments", field: "comments" },
     { header: "Account", field: "orgAccountTitle" },
     {
       header: "State",
@@ -485,42 +571,114 @@ export default function ExpenseList() {
       )}
 
       <div className="container mx-auto p-4">
-        <div className="w-full mb-6 ">
-          <div className="flex flex-wrap  py-3 justify-between">
-            <div className=" bg-white  shadow-lg p-5 rounded  w-47">
-              <label className="block text-sm font-medium mb-1 ">
-                Select Project
-              </label>
-              <select
-                value={filterProject}
-                onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded px-3 py-2 w-full"
-              >
-                <option value="">All Projects</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
+        <div className="w-full mb-6 bg-white  shadow-lg rounded p-4">
+          <div className=" flex flex-wrap  py-3 justify-between">
+            <div className="w-full mb-4 flex justify-center">
+              <div className="flex items-center space-x-6">
+                {["ALL", "MISCELLANEOUS", "CONSTRUCTION"].map((type) => (
+                  <label key={type} className="flex items-center mx-4">
+                    <input
+                      type="radio"
+                      name="expenseTypeRadioTop"
+                      value={type}
+                      checked={expenseType === type}
+                      onChange={handleExpenseTypeChange}
+                      className="form-radio"
+                    />
+                    <span className="text-sm font-medium ml-1">{type}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
-            <div className=" bg-white  shadow-lg p-5 rounded w-47 ">
-              <label className="block text-sm font-medium mb-1">
-                Select Vendor
-              </label>
-              <select
-                value={filterVendor}
-                onChange={(e) => changeSelectedVendor(e.target.value)}
-                className="border rounded px-3 py-2 w-full"
-              >
-                <option value="">All Vendors</option>
-                {vendorList.map((vendor) => (
-                  <option key={vendor.id} value={vendor.id}>
-                    {vendor.name}
-                  </option>
-                ))}
-              </select>
+            {expenseType === "MISCELLANEOUS" ? (
+              <>
+                <div className="p-5 rounded w-47">
+                  <label className="block text-sm font-medium mb-1">
+                    Account Group
+                  </label>
+                  <select
+                    value={accountGroupId || ""}
+                    onChange={(e) => setAccountGroupId(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
+                  >
+                    <option value="">Select Account Group</option>
+                    {accountGroups.map((ag) => (
+                      <option key={ag.id} value={ag.id}>
+                        {ag.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="p-5 rounded w-47">
+                  <label className="block text-sm font-medium mb-1">
+                    Select Chart of Account
+                  </label>
+                  <select
+                    value={coaId || ""}
+                    onChange={(e) => setCoaId(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
+                  >
+                    <option value="">Select COA</option>
+                    {coaList.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : expenseType === "CONSTRUCTION" ? (
+              <>
+                <div className="  p-5 rounded  w-47">
+                  <label className="block text-sm font-medium mb-1 ">
+                    Select Project
+                  </label>
+                  <select
+                    value={filterProject}
+                    onChange={(e) => changeSelectedProjected(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
+                  >
+                    <option value="">All Projects</option>
+                    {projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="p-5 rounded w-47 ">
+                  <label className="block text-sm font-medium mb-1">
+                    Select Vendor
+                  </label>
+                  <select
+                    value={filterVendor}
+                    onChange={(e) => changeSelectedVendor(e.target.value)}
+                    className="border rounded px-3 py-2 w-full"
+                  >
+                    <option value="">All Vendors</option>
+                    {vendorList.map((vendor) => (
+                      <option key={vendor.id} value={vendor.id}>
+                        {vendor.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : null}
+            <div className="w-full flex justify-center mt-4">
+              <div className="space-x-3">
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="bg-emerald-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow-sm hover:shadow-lg"
+                >
+                  <FaSearch className="w-4 h-4 inline-block mr-2" />
+                  Search
+                </button>
+              </div>
             </div>
           </div>
         </div>

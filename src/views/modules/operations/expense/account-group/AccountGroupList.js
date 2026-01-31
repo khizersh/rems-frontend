@@ -33,7 +33,7 @@ export default function AccountGroupList() {
         JSON.parse(localStorage.getItem("organization")) || null;
 
       const response = await httpService.get(
-        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`
+        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
       );
 
       setAccountGroup(response?.data?.data || []);
@@ -54,35 +54,29 @@ export default function AccountGroupList() {
   ];
 
   const handleEdit = ({ id }) => {
-    history.push(`/dashboard/update-expense-group/${id}`)
+    history.push(`/dashboard/update-expense-group/${id}`);
   };
 
   const handleDelete = () => {
     // Implement delete logic
   };
 
-  const handleView = ({id}) => {
-    history.push(`/dashboard/expense-group-detail/${id}`)
+  const handleView = ({ id }) => {
+    history.push(`/dashboard/expense-group-detail/${id}`);
   };
 
   const actions = [
     {
       icon: FaEye,
       onClick: handleView,
-      title: "View Detail",
+      title: "Expense Accounts",
       className: "text-green-600",
     },
     {
       icon: FaPen,
       onClick: handleEdit,
       title: "Edit",
-      className: "yellow"
-    },
-    {
-      icon: FaTrashAlt,
-      onClick: handleDelete,
-      title: "Delete",
-      className: "text-red-600",
+      className: "yellow",
     },
   ];
 

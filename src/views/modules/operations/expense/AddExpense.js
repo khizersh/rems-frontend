@@ -9,7 +9,7 @@ import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
 
 const AddExpense = () => {
-  const { notifySuccess, notifyError } = useContext(MainContext);
+  const { notifySuccess, notifyError, setLoading, loading } = useContext(MainContext);
 
   const [formData, setFormData] = useState({
     amountPaid: 0,
@@ -29,7 +29,6 @@ const AddExpense = () => {
     createdDate: new Date().toISOString().slice(0, 16),
   });
 
-  const [loading, setLoading] = useState(false);
   const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
   const [responseMessage, setResponseMessage] = useState("");
   const [expenseAccountGroupId, setExpenseAccountGroupId] = useState("");
@@ -88,6 +87,8 @@ const AddExpense = () => {
       if (!org) return;
 
       setLoading(true);
+
+      
       const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] = await Promise.all([
         httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
         httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
@@ -101,14 +102,14 @@ const AddExpense = () => {
           `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`
         ),
       ]);
-
+      
       let accountList = accounts.data?.map((account) => {
         return {
           ...account,
           name: account.name + " - " + account.bankName,
         };
       });
-
+      
       setDropdowns({
         projects: projects.data || [],
         vendors: vendors.data || [],
@@ -161,12 +162,11 @@ const AddExpense = () => {
         requestBody
       );
       await notifySuccess(response.responseMessage, 4000);
-      setLoading(false);
       resetForm();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
-      setLoading(false);
     } finally {
+      setLoading(false);
     }
   };
 
@@ -181,8 +181,12 @@ const AddExpense = () => {
       return;
     };
     try {
+      setLoading(true);
       const org = JSON.parse(localStorage.getItem("organization")) || null;
-      if (!org) return;
+      if (!org) {
+        setLoading(false);
+        return;
+      }
 
       const response = await httpService.get(
         `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`
@@ -192,6 +196,7 @@ const AddExpense = () => {
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
+      setLoading(false);
     }
   };
 

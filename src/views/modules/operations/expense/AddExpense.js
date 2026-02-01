@@ -130,8 +130,9 @@ const AddExpense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setSubmitting(true);
+    setSubmitting(true);
     setResponseMessage("");
+     setLoading(true);
 
     try {
       const organization =

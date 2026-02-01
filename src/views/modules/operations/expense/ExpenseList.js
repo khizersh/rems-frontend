@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
+import DynamicTableComponentDateRange from "../../../../components/table/DynamicTableComponentDateRange.js";
 import {
   useHistory,
   useParams,
@@ -34,6 +34,7 @@ export default function ExpenseList() {
     backdrop,
     setBackdrop,
   } = useContext(MainContext);
+  const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
@@ -60,12 +61,18 @@ export default function ExpenseList() {
     paymentDocDate: new Date().toISOString().slice(0, 16),
     createdDate: new Date().toISOString().slice(0, 16),
   });
-  const history = useHistory();
 
   const [expenseList, setExpenseList] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [isSearched, setIsSearched] = useState(false);
+  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [startDateObj, endDateObj] = dateRange;
+   const [formattedDate, setFormattedDate] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
   const fetchProjects = async () => {
     try {
@@ -101,6 +108,8 @@ export default function ExpenseList() {
         expenseType: expenseType,
         accountGroupId: accountGroupId,
         coaId: coaId,
+        startDate: formattedDate.startDate,
+        endDate: formattedDate.endDate,
         page,
         size: pageSize,
         sortBy: "id",
@@ -183,11 +192,11 @@ export default function ExpenseList() {
     }
   };
 
-  const [isSearched, setIsSearched] = useState(false);
+ 
 
   useEffect(() => {
-    fetchExpenseList();
-  }, [page, pageSize]);
+    if (isSearched) fetchExpenseList();
+  }, [page, pageSize, formattedDate]);
 
   useEffect(() => {
     fetchProjects();
@@ -217,18 +226,38 @@ export default function ExpenseList() {
     }
   };
 
-  const handleLoadCoas = async () => {
-    if (!accountGroupId)
-      return notifyError("Please select Account Group first", 4000);
-    await fetchCoaList(accountGroupId);
-  };
 
   const handleSearch = async () => {
+    setIsSearched(true);
     setPage(0);
-    if (page == 0) {
-      fetchExpenseList();
+    await fetchExpenseList();
+  };
+
+  const handleDateRangeChange = (update) => {
+    setDateRange(update);
+    if (update[0] != null && update[1] != null) {
+      let startingDate = update[0]?.toLocaleDateString().split("/");
+      startingDate =
+        startingDate[1] + "-" + startingDate[0] + "-" + startingDate[2];
+      let endingDate = update[1]?.toLocaleDateString().split("/");
+      endingDate = endingDate[1] + "-" + endingDate[0] + "-" + endingDate[2];
+      setFormattedDate({
+        startDate: startingDate,
+        endDate: endingDate,
+      });
+    } else if (update[0] == null && update[1] == null) {
+      setFormattedDate({
+        startDate: null,
+        endDate: null,
+      });
     }
   };
+
+  // Run initial search on mount (uses default date range)
+  useEffect(() => {
+    handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const changeSelectedProjected = (projectId) => {
     setProjectFilteredId(projectId);
@@ -595,14 +624,14 @@ export default function ExpenseList() {
               <>
                 <div className="p-5 rounded w-47">
                   <label className="block text-sm font-medium mb-1">
-                    Account Group
+                    Account Expense Group
                   </label>
                   <select
                     value={accountGroupId || ""}
                     onChange={(e) => setAccountGroupId(e.target.value)}
                     className="border rounded px-3 py-2 w-full"
                   >
-                    <option value="">Select Account Group</option>
+                    <option value="">All Groups</option>
                     {accountGroups.map((ag) => (
                       <option key={ag.id} value={ag.id}>
                         {ag.name}
@@ -613,14 +642,14 @@ export default function ExpenseList() {
 
                 <div className="p-5 rounded w-47">
                   <label className="block text-sm font-medium mb-1">
-                    Select Chart of Account
+                    Select Expense Account
                   </label>
                   <select
                     value={coaId || ""}
                     onChange={(e) => setCoaId(e.target.value)}
                     className="border rounded px-3 py-2 w-full"
                   >
-                    <option value="">Select COA</option>
+                    <option value="">All Accounts</option>
                     {coaList.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -684,7 +713,7 @@ export default function ExpenseList() {
         </div>
       </div>
       <div className="container mx-auto p-4">
-        <DynamicTableComponent
+        <DynamicTableComponentDateRange
           fetchDataFunction={fetchExpenseList}
           setPage={setPage}
           setPageSize={setPageSize}
@@ -697,6 +726,9 @@ export default function ExpenseList() {
           loading={loading}
           title="Expense List"
           actions={actions}
+          onChangeDate={handleDateRangeChange}
+          startDate={startDateObj}
+          endDate={endDateObj}
           firstButton={{
             title: "Add Expense",
             onClick: handleAddExpense,

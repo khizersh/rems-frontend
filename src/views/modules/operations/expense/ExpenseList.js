@@ -315,7 +315,7 @@ export default function ExpenseList() {
   const tableColumns = [
     { header: "Title", field: "expenseTitle" },
     { header: "Vendor ", field: "vendorName" },
-    { header: "Comments", field: "comments" },
+    { header: "Expense Account", field: "expenseAccountName" },
     { header: "Account", field: "orgAccountTitle" },
     {
       header: "State",

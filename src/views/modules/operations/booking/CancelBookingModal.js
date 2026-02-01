@@ -60,26 +60,29 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
     let amount = updatedRequest.fees[ind]["value"];
     let totalAmount = 0;
 
-    if (type == "fixed") {
+    if (type == "FIXED") {
       totalAmount = amount;
-    } else if (type == "percentile") {
+    } else if (type == "PERCENTILE") {
       totalAmount =
         (selectedBooking?.customerAccount?.totalPaidAmount / 100) * amount;
     }
     updatedRequest.fees[ind]["amount"] = totalAmount;
+
     setCancelRequest(updatedRequest);
 
-    const total = cancelRequest.fees.reduce(
-      (sum, f) => sum + Number(f.amount),
-      0
+    const total = updatedRequest.fees.reduce(
+      (sum, f) => sum + Number(f.amount || 0),
+      0,
     );
 
-    setReturnAmount(selectedBooking?.customerAccount?.totalPaidAmount - total);
+    setReturnAmount(
+      (selectedBooking?.customerAccount?.totalPaidAmount || 0) - total,
+    );
   };
 
   const onRemoveFeesRow = (index) => {
     const confirmed = window.confirm(
-      "Are you sure you want to remove this month-wise payment?"
+      "Are you sure you want to remove this month-wise payment?",
     );
     if (!confirmed) return;
 
@@ -88,11 +91,11 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
       updatedCancelRequest.fees.splice(index, 1);
       const total = updatedCancelRequest.fees.reduce(
         (sum, f) => sum + Number(f.amount),
-        0
+        0,
       );
 
       setReturnAmount(
-        selectedBooking?.customerAccount?.totalPaidAmount - total
+        selectedBooking?.customerAccount?.totalPaidAmount - total,
       );
       return updatedCancelRequest;
     });
@@ -103,7 +106,7 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
       setLoading(true);
       await httpService.post(
         `/booking/${selectedBooking?.booking?.id}/cancel`,
-        cancelRequest
+        cancelRequest,
       );
 
       await notifySuccess("Successfully cancelled!", 4000);
@@ -143,7 +146,7 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
                     Customer Paid Amount :{" "}
                     <span style={{ fontSize: "23px" }}>
                       {parseFloat(
-                        selectedBooking?.customerAccount?.totalPaidAmount
+                        selectedBooking?.customerAccount?.totalPaidAmount,
                       ).toLocaleString()}
                     </span>
                   </div>
@@ -153,7 +156,7 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
                       {parseFloat(
                         returnAmount
                           ? returnAmount
-                          : selectedBooking?.customerAccount?.totalPaidAmount
+                          : selectedBooking?.customerAccount?.totalPaidAmount,
                       ).toLocaleString()}
                     </span>
                   </div>
@@ -251,7 +254,9 @@ const CancelBookingModal = ({ selectedBooking, isOpen, onClose }) => {
                       <div className="mt-5 border-right-grey">
                         Calculated Amount :{" "}
                         <p style={{ fontSize: "17px" }}>
-                          {parseFloat(detail?.amount ? detail?.amount : 0).toLocaleString()}
+                          {parseFloat(
+                            detail?.amount ? detail?.amount : 0,
+                          ).toLocaleString()}
                         </p>
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
 export const CANCEL_BOOKING_FEES_TYPE = ["FIXED", "PERCENTILE"];
-export const ACCOUNT_BALANCE_TRANSACTION_CATEGORY = ["SCRAP_SALE", "REFUND", "ADJUSTMENT", "OTHER"];
+export const ACCOUNT_BALANCE_TRANSACTION_CATEGORY = ["WITHDRAWL", "ADJUSTMENT", "SCRAP_SALE", "REFUND",  "OTHER"];
 export const unitTypes = ["APARTMENT", "SHOP"];
 export const TRANSACTION_TYPES = ["CREDIT", "DEBIT", "DEBIT_CREDIT"];
 export const paymentReasons = [

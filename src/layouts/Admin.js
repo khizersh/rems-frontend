@@ -55,8 +55,6 @@ import { ROLE_MODULES } from "utility/RolesConfig";
 import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
 import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
-import AddExpenseGroup from "views/modules/operations/expense/account-group/AddExpenseGroup";
-import UpdateExpenseGroup from "views/modules/operations/expense/account-group/UpdateExpenseGroup";
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
 
 export default function Admin() {
@@ -147,8 +145,6 @@ export default function Admin() {
               { path: "/dashboard/expense-list", component: ExpenseList },
               { path: "/dashboard/add-expense", component: AddExpense },
               { path: "/dashboard/expense-account-group", component: AccountGroupList },
-              { path: "/dashboard/expense-group-add", component: AddExpenseGroup },
-              { path: "/dashboard/update-expense-group/:expenseGroupId", component: UpdateExpenseGroup },
               { path: "/dashboard/expense-group-detail/:expenseGroupId", component: ExpenseGroupDetail },
               {
                 path: "/dashboard/expense-update/:expenseId",

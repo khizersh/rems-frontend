@@ -3,8 +3,6 @@ import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import { useHistory, useParams } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaDownload } from "react-icons/fa6";
-import { RxCross2 } from "react-icons/rx";
 import { FaEye, FaLayerGroup, FaPen, FaTrashAlt, FaUserPlus } from "react-icons/fa";
 import { EXPENSE_TYPE_ID } from "utility/Utility.js";
 
@@ -41,18 +39,19 @@ export default function ExpenseGroupDetail() {
     // Form Submit Add & Update
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setSubmitting(true);
 
         try {
             let data = { ...formData, name: formData.name.trim() };
 
             const organization =
                 JSON.parse(localStorage.getItem("organization")) || null;
+            if (!organization) return;
+            setLoading(true);
+            setSubmitting(true);
 
             let url = `/accounting/${organization.organizationId}/expenseChartOfAccount`;
-            if (update == true) {
-                url = `/accounting/1/expenseChartOfAccount?coaId=${expenseTypeId}`
+            if (update) {
+                url = `/accounting/${organization.organizationId}/expenseChartOfAccount?coaId=${expenseTypeId}`
             }
 
             const response = update ? (await httpService.put(url, { name: data.name })) : (await httpService.post(url, data));
@@ -74,10 +73,11 @@ export default function ExpenseGroupDetail() {
 
     // Fetching Expense Group Details By Id 
     const fetchExpenseGroupDetail = async () => {
-        setLoading(true);
         try {
             const organization =
                 JSON.parse(localStorage.getItem("organization")) || null;
+            if (!organization) return;
+            setLoading(true);
 
             const response = await httpService.get(
                 `/accounting/${organization?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseGroupId}`
@@ -97,6 +97,9 @@ export default function ExpenseGroupDetail() {
             try {
                 const organization =
                     JSON.parse(localStorage.getItem("organization")) || null;
+                if (!organization) return;
+                setLoading(true);
+
                 const response = await httpService.get(
                     `/accounting/getAccountGroupById/${expenseGroupId}`
                 );

@@ -24,6 +24,7 @@ import {
   EXPENSE_TYPE,
   EXPENSE_TYPE_ID,
 } from "utility/Utility.js";
+import { PAYMENT_STATUS } from "utility/Utility.js";
 
 export default function ExpenseList() {
   const {
@@ -46,6 +47,7 @@ export default function ExpenseList() {
   const [filteredBy, setFilteredBy] = useState("organization");
   const [projectFileteredId, setProjectFilteredId] = useState("");
   const [vendorFileteredId, setVendorFilteredId] = useState("");
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState("ALL");
   const [accountList, setAccountList] = useState([]);
   const [expenseType, setExpenseType] = useState("ALL");
   const [accountGroupId, setAccountGroupId] = useState(null);
@@ -69,7 +71,7 @@ export default function ExpenseList() {
   const [isSearched, setIsSearched] = useState(false);
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [startDateObj, endDateObj] = dateRange;
-   const [formattedDate, setFormattedDate] = useState({
+  const [formattedDate, setFormattedDate] = useState({
     startDate: null,
     endDate: null,
   });
@@ -105,6 +107,7 @@ export default function ExpenseList() {
         id: id1,
         id2: id2,
         filteredBy: filteredByFinal,
+        paymentStatus: selectedPaymentStatus,
         expenseType: expenseType,
         accountGroupId: accountGroupId,
         coaId: coaId,
@@ -192,8 +195,6 @@ export default function ExpenseList() {
     }
   };
 
- 
-
   useEffect(() => {
     if (isSearched) fetchExpenseList();
   }, [page, pageSize, formattedDate]);
@@ -225,7 +226,6 @@ export default function ExpenseList() {
       if (!accountGroups.length) fetchAccountGroups();
     }
   };
-
 
   const handleSearch = async () => {
     setIsSearched(true);
@@ -660,40 +660,60 @@ export default function ExpenseList() {
               </>
             ) : expenseType === "CONSTRUCTION" ? (
               <>
-                <div className="  p-5 rounded  w-47">
-                  <label className="block text-sm font-medium mb-1 ">
-                    Select Project
-                  </label>
-                  <select
-                    value={filterProject}
-                    onChange={(e) => changeSelectedProjected(e.target.value)}
-                    className="border rounded px-3 py-2 w-full"
-                  >
-                    <option value="">All Projects</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <div className="w-full flex items-center justify-between gap-4">
+                  <div className="p-5 rounded flex-1 min-w-0">
+                    <label className="block text-sm font-medium mb-1 ">
+                      Select Project
+                    </label>
+                    <select
+                      value={filterProject}
+                      onChange={(e) => changeSelectedProjected(e.target.value)}
+                      className="border rounded px-3 py-2 w-full"
+                    >
+                      <option value="">All Projects</option>
+                      {projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div className="p-5 rounded w-47 ">
-                  <label className="block text-sm font-medium mb-1">
-                    Select Vendor
-                  </label>
-                  <select
-                    value={filterVendor}
-                    onChange={(e) => changeSelectedVendor(e.target.value)}
-                    className="border rounded px-3 py-2 w-full"
-                  >
-                    <option value="">All Vendors</option>
-                    {vendorList.map((vendor) => (
-                      <option key={vendor.id} value={vendor.id}>
-                        {vendor.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="p-5 rounded flex-1 min-w-0">
+                    <label className="block text-sm font-medium mb-1">
+                      Select Vendor
+                    </label>
+                    <select
+                      value={filterVendor}
+                      onChange={(e) => changeSelectedVendor(e.target.value)}
+                      className="border rounded px-3 py-2 w-full"
+                    >
+                      <option value="">All Vendors</option>
+                      {vendorList.map((vendor) => (
+                        <option key={vendor.id} value={vendor.id}>
+                          {vendor.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="p-5 rounded flex-1 min-w-0">
+                    <label className="block text-sm font-medium mb-1">
+                      Select Payment State
+                    </label>
+                    <select
+                      value={selectedPaymentStatus}
+                      onChange={(e) => setSelectedPaymentStatus(e.target.value)}
+                      className="border rounded px-3 py-2 w-full"
+                    >
+                      <option value="">All Status</option>
+                      {PAYMENT_STATUS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </>
             ) : null}

@@ -42,11 +42,12 @@ export default function BookingCancelDetail() {
   const fetchExpenseList = async () => {
     setLoading(true);
     try {
+
+
       const response = await httpService.get(
-        `/booking/${customerPayableId}/customerPayable`
+        `/customerpayable/${customerPayableId}`
       );
 
-      console.log("response :: ", response?.data);
 
       setSelectedBooking(response?.data || {});
       setBookingList(response?.data?.details?.details || []);

@@ -39,6 +39,7 @@ export default function DynamicTableComponent({
   changeTransactionType,
   selectTransactionType,
   firstButton = null,
+  secondButton = null,
   onPageSizeChange,
 }) {
   const history = useHistory();
@@ -141,6 +142,21 @@ export default function DynamicTableComponent({
                 />
               )}
               {firstButton.title}
+            </button>
+          )}
+
+          {secondButton && (
+            <button
+              onClick={secondButton.onClick}
+              className={`${secondButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
+            >
+              {secondButton.icon && (
+                <secondButton.icon
+                  className="w-5 h-5 inline-block"
+                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                />
+              )}
+              {secondButton.title}
             </button>
           )}
 

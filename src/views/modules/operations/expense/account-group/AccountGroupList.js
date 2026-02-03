@@ -3,8 +3,9 @@ import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaEye, FaPen, FaUserPlus } from "react-icons/fa";
+import { FaEye, FaPen, FaUserPlus , FaChartPie } from "react-icons/fa";
 import { EXPENSE_TYPE_ID } from "utility/Utility.js";
+
 
 export default function AccountGroupList() {
   const {
@@ -141,7 +142,7 @@ export default function AccountGroupList() {
 
   const actions = [
     {
-      icon: FaEye,
+      icon: FaChartPie,
       onClick: handleView,
       title: "Expense Accounts",
       className: "text-green-600",
@@ -158,7 +159,7 @@ export default function AccountGroupList() {
     <>
       <div>
         {/* Form  */}
-        <div className="relative flex flex-col min-w-0 break-words w-full mb-6 my-4 border-0">
+        {/* <div className="relative flex flex-col min-w-0 break-words w-full mb-6 my-4 border-0">
           <form
             onSubmit={handleSubmit}
             className="py-4 bg-white rounded-12 shadow-lg"
@@ -193,7 +194,7 @@ export default function AccountGroupList() {
               </div>
             </div>
           </form>
-        </div>
+        </div> */}
 
         {/* Table  */}
         <div>

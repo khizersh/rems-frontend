@@ -14,6 +14,7 @@ import {
   FaTrashAlt,
   FaSearch,
 } from "react-icons/fa";
+
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import { TbFileExport } from "react-icons/tb";
@@ -65,11 +66,12 @@ export default function ExpenseList() {
   });
 
   const [expenseList, setExpenseList] = useState([]);
+  const [expenseListReport, setExpenseListReport] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [isSearched, setIsSearched] = useState(false);
-  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [dateRange, setDateRange] = useState([null, null]);
   const [startDateObj, endDateObj] = dateRange;
   const [formattedDate, setFormattedDate] = useState({
     startDate: null,
@@ -369,6 +371,7 @@ export default function ExpenseList() {
   const handleEdit = (data) => {
     history.push(`/dashboard/expense-update/${data?.id}`);
   };
+
   const handleDelete = async (data) => {
     try {
       const confirmed = window.confirm("Are you sure to Delete this expense?");
@@ -386,6 +389,7 @@ export default function ExpenseList() {
       setLoading(false);
     }
   };
+
   const handleViewExpenseDetail = (data) => {
     if (!data) {
       return notifyError("Invalid Account!", 4000);
@@ -433,6 +437,188 @@ export default function ExpenseList() {
   const togglePaymentModal = () => {
     setBackdrop(!backdrop);
     setIsPaymentModalOpen(!isPaymentModalOpen);
+  };
+  const handlePrintReport = async () => {
+    setLoading(true);
+    try {
+      let id1 = projectFileteredId || vendorFileteredId || "";
+
+      let id2 =
+        projectFileteredId && vendorFileteredId ? vendorFileteredId : "";
+      let filteredByFinal =
+        projectFileteredId && vendorFileteredId
+          ? "project_vendor"
+          : filteredBy || "";
+
+      const requestBody = {
+        id: id1,
+        id2: id2,
+        filteredBy: filteredByFinal,
+        paymentStatus: selectedPaymentStatus,
+        expenseType: expenseType,
+        accountGroupId: accountGroupId,
+        coaId: coaId,
+        startDate: formattedDate.startDate,
+        endDate: formattedDate.endDate,
+        page: 0,
+        size: 999999,
+        sortBy: "id",
+        sortDir: "desc",
+      };
+
+      if (!id1) {
+        const organizationLocal = JSON.parse(
+          localStorage.getItem("organization"),
+        );
+        if (organizationLocal) {
+          requestBody.id = organizationLocal.organizationId;
+        }
+        requestBody.filteredBy = "organization";
+      }
+      const response = await httpService.post(
+        `/expense/getAllExpensesByIds`,
+        requestBody,
+      );
+
+      const rows = response?.data?.content || response?.data || [];
+
+      // compute totals
+      let totalPaid = 0;
+      let totalCredit = 0;
+      let totalAmount = 0;
+      rows.forEach((r) => {
+        totalPaid += Number(r.amountPaid) || 0;
+        totalCredit += Number(r.creditAmount) || 0;
+        totalAmount += Number(r.totalAmount) || 0;
+      });
+
+      const organization = JSON.parse(localStorage.getItem("organization")) || {};
+      const payload = {
+        data: rows,
+        organizationTitle: organization?.name,
+        address: organization?.address,
+        numbers: organization?.contactNo,
+        totalPaid,
+        totalCredit,
+        totalAmount,
+        startDate: formattedDate.startDate,
+        endDate: formattedDate.endDate,
+        endDate: formattedDate.endDate,
+      };
+
+      const html = generateExpenseReportHTML(payload);
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 500);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateExpenseReportHTML = (input) => {
+    const data = input.data || [];
+    const formattedDate = new Date().toLocaleString();
+
+    const formatDateString = (d) => {
+      if (!d) return "";
+      try {
+        if (d.includes("-")) {
+          const parts = d.split("-");
+          // YYYY-MM-DD
+          if (parts[0].length === 4) return new Date(d).toLocaleDateString();
+          // assume D-M-YYYY or M-D-YYYY -> try D-M-YYYY -> build ISO
+          if (parts.length === 3) {
+            const iso = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+            return new Date(iso).toLocaleDateString();
+          }
+        }
+        // fallback: try constructing Date directly
+        return new Date(d).toLocaleDateString();
+      } catch (e) {
+        return d;
+      }
+    };
+
+    const formattedStart = formatDateString(input.startDate);
+    const formattedEnd = formatDateString(input.endDate);
+
+    return `
+    <html>
+      <head>
+        <title>Expense Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+          .container { width: 1000px; margin: auto; }
+          .header { text-align: center; }
+          .header h2 { margin: 0; font-size: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 13px; }
+          .totals { margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>${input.organizationTitle || ""}</h2>
+            <p>${input.address || ""}</p>
+            <p>${input.numbers || ""}</p>
+            <div style="font-weight:bold;margin-top:10px;">EXPENSE REPORT</div>
+          </div>
+
+          <div class="totals">
+            <p><strong>Total Paid:</strong> ${parseFloat(input.totalPaid || 0).toLocaleString()}</p>
+            <p><strong>Total Credit:</strong> ${parseFloat(input.totalCredit || 0).toLocaleString()}</p>
+            <p><strong>Total Amount:</strong> ${parseFloat(input.totalAmount || 0).toLocaleString()}</p>
+            <p><strong>Print Date:</strong> ${formattedDate}</p>
+            ${input.startDate && input.endDate ? `<p><strong>Date Range:</strong> ${input.startDate} to ${input.endDate}</p>` : ""}
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Sr#</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Vendor</th>
+                <th>Expense Account</th>
+                <th>Org Account</th>
+                <th>Payment Status</th>
+                <th>Amount Paid</th>
+                <th>Credit Amount</th>
+                <th>Total Amount</th>
+                <th>Created Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data
+                .map((row, idx) => {
+                  return `
+                    <tr>
+                      <td>${idx + 1}</td>
+                      <td>${row.expenseTitle || "-"}</td>
+                      <td>${row.expenseType || "-"}</td>
+                      <td>${row.vendorName || "-"}</td>
+                      <td>${row.expenseAccountName || "-"}</td>
+                      <td>${row.orgAccountTitle || "-"}</td>
+                      <td>${row.paymentStatus || "-"}</td>
+                      <td>${parseFloat(row.amountPaid || 0).toLocaleString()}</td>
+                      <td>${parseFloat(row.creditAmount || 0).toLocaleString()}</td>
+                      <td>${parseFloat(row.totalAmount || 0).toLocaleString()}</td>
+                      <td>${row.createdDate ? row.createdDate.split("T")[0] : ""}</td>
+                    </tr>
+                  `;
+                })
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+    `;
   };
   const handleAddExpense = () => {
     history.push("/dashboard/add-expense");
@@ -752,6 +938,12 @@ export default function ExpenseList() {
           firstButton={{
             title: "Add Expense",
             onClick: handleAddExpense,
+            icon: TbFileExport,
+            className: "bg-emerald-500",
+          }}
+          secondButton={{
+            title: "Print Report",
+            onClick: handlePrintReport,
             icon: TbFileExport,
             className: "bg-emerald-500",
           }}

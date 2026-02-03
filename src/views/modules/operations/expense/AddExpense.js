@@ -132,7 +132,7 @@ const AddExpense = () => {
     e.preventDefault();
     setSubmitting(true);
     setResponseMessage("");
-     setLoading(true);
+    setLoading(true);
 
     try {
       const organization =
@@ -150,23 +150,23 @@ const AddExpense = () => {
         totalAmount: parseFloat(formData.totalAmount || 0),
       };
 
-
       if (requestBody.totalAmount <= 0) {
         setSubmitting(false);
         return notifyError(
           "Expense is empty!",
           "Please enter any amount",
-          4000
+          4000,
         );
       }
 
       const response = await httpService.post(
         "/expense/addExpense",
-        requestBody
+        requestBody,
       );
       await notifySuccess(response.responseMessage, 4000);
       setSubmitting(false);
       resetForm();
+      setLoading(false);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
       setLoading(false);

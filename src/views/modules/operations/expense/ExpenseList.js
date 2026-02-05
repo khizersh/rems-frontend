@@ -77,6 +77,7 @@ export default function ExpenseList() {
     startDate: null,
     endDate: null,
   });
+  const organizationLocal = JSON.parse(localStorage.getItem("organization")) || {};
 
   const fetchProjects = async () => {
     try {
@@ -319,7 +320,11 @@ export default function ExpenseList() {
     { header: "Vendor ", field: "vendorName" },
     { header: "Expense Account", field: "expenseAccountName" },
     { header: "Account", field: "orgAccountTitle" },
-    {
+  ];
+
+  // Add State column only when paybackByVendor is NOT enabled for the organization
+  if (!organizationLocal.paybackByVendor) {
+    tableColumns.push({
       header: "State",
       field: "paymentStatus",
       render: (value) => {
@@ -332,11 +337,35 @@ export default function ExpenseList() {
           return <span className={`${baseClass} text-red-600`}>{value}</span>;
         return <span className={`${baseClass} text-gray-600`}>{value}</span>;
       },
+    });
+  }
+
+  tableColumns.push(
+    {
+      header: "Paid",
+      field: "amountPaid",
+      render: (value) => (
+        <span className="font-semibold text-green-600">{parseFloat(value || 0).toLocaleString()}</span>
+      ),
     },
-    { header: "Paid", field: "amountPaid" },
-    { header: "Credit", field: "creditAmount" },
-    { header: "Total", field: "totalAmount" },
-  ];
+    {
+      header: "Credit",
+      field: "creditAmount",
+      render: (value) => (
+        <span className="font-semibold text-blue-600">{parseFloat(value || 0).toLocaleString()}</span>
+      ),
+    },
+    // { header: "Total", field: "totalAmount" },
+  );
+
+  // Show Comments column only when paybackByVendor is NOT enabled for the organization
+  if (!organizationLocal.paybackByVendor) {
+    tableColumns.push({
+      header: "Comments",
+      field: "comments",
+      render: (v) => (v ? v : "-"),
+    });
+  }
 
   const handleView = (data) => {
     const formattedExpenseDetails = {
@@ -410,16 +439,21 @@ export default function ExpenseList() {
       title: "View Payment Detail",
       className: "text-blue-600",
     },
-    {
-      icon: FaDownload,
-      onClick: handlePayback,
-      title: "Pay Back",
-      className: "text-green-600",
-    },
+    // show Pay Back action only when organization.paybackByVendor is NOT true
+    ...(!organizationLocal.paybackByVendor
+      ? [
+          {
+            icon: FaDownload,
+            onClick: handlePayback,
+            title: "Pay Back",
+            className: "text-green-600",
+          },
+        ]
+      : []),
     {
       icon: FaPen,
       onClick: handleEdit,
-      title: "Pay Back",
+      title: "Edit",
       className: "text-green-600",
     },
     {
@@ -569,14 +603,6 @@ export default function ExpenseList() {
             <div style="font-weight:bold;margin-top:10px;">EXPENSE REPORT</div>
           </div>
 
-          <div class="totals">
-            <p><strong>Total Paid:</strong> ${parseFloat(input.totalPaid || 0).toLocaleString()}</p>
-            <p><strong>Total Credit:</strong> ${parseFloat(input.totalCredit || 0).toLocaleString()}</p>
-            <p><strong>Total Amount:</strong> ${parseFloat(input.totalAmount || 0).toLocaleString()}</p>
-            <p><strong>Print Date:</strong> ${formattedDate}</p>
-            ${input.startDate && input.endDate ? `<p><strong>Date Range:</strong> ${input.startDate} to ${input.endDate}</p>` : ""}
-          </div>
-
           <table>
             <thead>
               <tr>
@@ -614,6 +640,21 @@ export default function ExpenseList() {
                 })
                 .join("")}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="11" style="text-align:right;padding-top:10px;font-weight:normal;">Print Date: ${formattedDate}</td>
+              </tr>
+              ${input.startDate && input.endDate ? `<tr><td colspan="11" style="text-align:right;font-weight:normal;">Date Range: ${input.startDate} to ${input.endDate}</td></tr>` : ``}
+              <tr>
+                <td colspan="11" style="text-align:right;padding-top:10px;font-weight:bold;">Total Paid: ${parseFloat(input.totalPaid || 0).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colspan="11" style="text-align:right;font-weight:bold;">Total Credit: ${parseFloat(input.totalCredit || 0).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colspan="11" style="text-align:right;font-weight:bold;">Total Amount: ${parseFloat(input.totalAmount || 0).toLocaleString()}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </body>
@@ -763,19 +804,21 @@ export default function ExpenseList() {
                     </div>
                   </div>
 
-                  <div className="w-full lg:w-12/12 px-2 text-left">
-                    <button
-                      type="submit"
-                      onClick={handleSubmit}
-                      className="mt-3 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                    >
-                      <FaDownload
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                      />
-                      Pay Back
-                    </button>
-                  </div>
+                  {!organizationLocal.paybackByVendor ? (
+                    <div className="w-full lg:w-12/12 px-2 text-left">
+                      <button
+                        type="submit"
+                        onClick={handleSubmit}
+                        className="mt-3 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                      >
+                        <FaDownload
+                          className="w-5 h-5 inline-block "
+                          style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                        />
+                        Pay Back
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>

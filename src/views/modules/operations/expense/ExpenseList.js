@@ -14,6 +14,7 @@ import {
   FaTrashAlt,
   FaSearch,
 } from "react-icons/fa";
+
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import { TbFileExport } from "react-icons/tb";
@@ -65,16 +66,18 @@ export default function ExpenseList() {
   });
 
   const [expenseList, setExpenseList] = useState([]);
+  const [expenseListReport, setExpenseListReport] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [isSearched, setIsSearched] = useState(false);
-  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [dateRange, setDateRange] = useState([null, null]);
   const [startDateObj, endDateObj] = dateRange;
   const [formattedDate, setFormattedDate] = useState({
     startDate: null,
     endDate: null,
   });
+  const organizationLocal = JSON.parse(localStorage.getItem("organization")) || {};
 
   const fetchProjects = async () => {
     try {
@@ -195,6 +198,20 @@ export default function ExpenseList() {
     }
   };
 
+    const fetchVendors = async () => {
+      try {
+        const sidebarData =
+          JSON.parse(localStorage.getItem("organization")) || {};
+
+        const response = await httpService.get(
+          `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`,
+        );
+        setVendorList(response.data || []);
+      } catch (err) {
+        notifyError(err.message, err.data, 4000);
+      }
+    };
+
   useEffect(() => {
     if (isSearched) fetchExpenseList();
   }, [page, pageSize, formattedDate]);
@@ -233,6 +250,22 @@ export default function ExpenseList() {
     await fetchExpenseList();
   };
 
+  const clearFilters = async () => {
+    setExpenseType("ALL");
+    setAccountGroupId(null);
+    setCoaId(null);
+    setFilterProject("");
+    setFilterVendor("");
+    setProjectFilteredId("");
+    setVendorFilteredId("");
+    setSelectedPaymentStatus("ALL");
+    setFormattedDate({ startDate: null, endDate: null });
+    setDateRange([null, null]);
+    setIsSearched(true);
+    setPage(0);
+    await fetchExpenseList();
+  };
+
   const handleDateRangeChange = (update) => {
     setDateRange(update);
     if (update[0] != null && update[1] != null) {
@@ -253,12 +286,6 @@ export default function ExpenseList() {
     }
   };
 
-  // Run initial search on mount (uses default date range)
-  useEffect(() => {
-    handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const changeSelectedProjected = (projectId) => {
     setProjectFilteredId(projectId);
     setFilterProject(projectId);
@@ -266,20 +293,6 @@ export default function ExpenseList() {
       setFilteredBy("project");
     } else {
       setFilteredBy(vendorFileteredId ? "vendor" : "");
-    }
-  };
-
-  const fetchVendors = async () => {
-    try {
-      const sidebarData =
-        JSON.parse(localStorage.getItem("organization")) || {};
-
-      const response = await httpService.get(
-        `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`,
-      );
-      setVendorList(response.data || []);
-    } catch (err) {
-      notifyError(err.message, err.data, 4000);
     }
   };
 
@@ -295,15 +308,12 @@ export default function ExpenseList() {
 
   const handleSubmit = async () => {
     setLoading(true);
-
     try {
-      let requestBody = { ...expenseDetail, expenseId: selectedExpense.id };
-
+      let requestBody = { ...expenseDetail, expenseId: selectedExpense?.id };
       const data = await httpService.post(
         "/expense/addExpenseDetail",
         requestBody,
       );
-
       notifySuccess(data.responseMessage, 3000);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -317,7 +327,10 @@ export default function ExpenseList() {
     { header: "Vendor ", field: "vendorName" },
     { header: "Expense Account", field: "expenseAccountName" },
     { header: "Account", field: "orgAccountTitle" },
-    {
+  ];
+
+  if (!organizationLocal.paybackByVendor) {
+    tableColumns.push({
       header: "State",
       field: "paymentStatus",
       render: (value) => {
@@ -330,11 +343,33 @@ export default function ExpenseList() {
           return <span className={`${baseClass} text-red-600`}>{value}</span>;
         return <span className={`${baseClass} text-gray-600`}>{value}</span>;
       },
+    });
+  }
+
+  tableColumns.push(
+    {
+      header: "Paid",
+      field: "amountPaid",
+      render: (value) => {
+        const num = Number(value);
+        const safe = Number.isFinite(num) ? num : 0;
+        return <span className="font-semibold text-green-600">{safe.toLocaleString()}</span>;
+      },
     },
-    { header: "Paid", field: "amountPaid" },
-    { header: "Credit", field: "creditAmount" },
-    { header: "Total", field: "totalAmount" },
-  ];
+    {
+      header: "Credit",
+      field: "creditAmount",
+      render: (value) => {
+        const num = Number(value);
+        const safe = Number.isFinite(num) ? num : 0;
+        return <span className="font-semibold text-blue-600">{safe.toLocaleString()}</span>;
+      },
+    },
+  );
+
+  if (!organizationLocal.paybackByVendor) {
+    tableColumns.push({ header: "Comments", field: "comments", render: (v) => (v ? v : "-") });
+  }
 
   const handleView = (data) => {
     const formattedExpenseDetails = {
@@ -369,6 +404,7 @@ export default function ExpenseList() {
   const handleEdit = (data) => {
     history.push(`/dashboard/expense-update/${data?.id}`);
   };
+
   const handleDelete = async (data) => {
     try {
       const confirmed = window.confirm("Are you sure to Delete this expense?");
@@ -386,6 +422,7 @@ export default function ExpenseList() {
       setLoading(false);
     }
   };
+
   const handleViewExpenseDetail = (data) => {
     if (!data) {
       return notifyError("Invalid Account!", 4000);
@@ -406,16 +443,21 @@ export default function ExpenseList() {
       title: "View Payment Detail",
       className: "text-blue-600",
     },
-    {
-      icon: FaDownload,
-      onClick: handlePayback,
-      title: "Pay Back",
-      className: "text-green-600",
-    },
+    // show Pay Back action only when organization.paybackByVendor is NOT true
+    ...(!organizationLocal.paybackByVendor
+      ? [
+          {
+            icon: FaDownload,
+            onClick: handlePayback,
+            title: "Pay Back",
+            className: "text-green-600",
+          },
+        ]
+      : []),
     {
       icon: FaPen,
       onClick: handleEdit,
-      title: "Pay Back",
+      title: "Edit",
       className: "text-green-600",
     },
     {
@@ -433,6 +475,195 @@ export default function ExpenseList() {
   const togglePaymentModal = () => {
     setBackdrop(!backdrop);
     setIsPaymentModalOpen(!isPaymentModalOpen);
+  };
+  const handlePrintReport = async () => {
+    setLoading(true);
+    try {
+      let id1 = projectFileteredId || vendorFileteredId || "";
+
+      let id2 =
+        projectFileteredId && vendorFileteredId ? vendorFileteredId : "";
+      let filteredByFinal =
+        projectFileteredId && vendorFileteredId
+          ? "project_vendor"
+          : filteredBy || "";
+
+      const requestBody = {
+        id: id1,
+        id2: id2,
+        filteredBy: filteredByFinal,
+        paymentStatus: selectedPaymentStatus,
+        expenseType: expenseType,
+        accountGroupId: accountGroupId,
+        coaId: coaId,
+        startDate: formattedDate.startDate,
+        endDate: formattedDate.endDate,
+        page: 0,
+        size: 999999,
+        sortBy: "id",
+        sortDir: "desc",
+      };
+
+      if (!id1) {
+        const organizationLocal = JSON.parse(
+          localStorage.getItem("organization"),
+        );
+        if (organizationLocal) {
+          requestBody.id = organizationLocal.organizationId;
+        }
+        requestBody.filteredBy = "organization";
+      }
+      const response = await httpService.post(
+        `/expense/getAllExpensesByIds`,
+        requestBody,
+      );
+
+      const rows = response?.data?.content || response?.data || [];
+
+      // compute totals
+      let totalPaid = 0;
+      let totalCredit = 0;
+      let totalAmount = 0;
+      rows.forEach((r) => {
+        totalPaid += Number(r.amountPaid) || 0;
+        totalCredit += Number(r.creditAmount) || 0;
+        totalAmount += Number(r.totalAmount) || 0;
+      });
+
+      const organization = JSON.parse(localStorage.getItem("organization")) || {};
+      const payload = {
+        data: rows,
+        organizationTitle: organization?.name,
+        address: organization?.address,
+        numbers: organization?.contactNo,
+        totalPaid,
+        totalCredit,
+        totalAmount,
+        startDate: formattedDate.startDate,
+        endDate: formattedDate.endDate,
+        endDate: formattedDate.endDate,
+      };
+
+      const html = generateExpenseReportHTML(payload);
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => win.print(), 500);
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateExpenseReportHTML = (input) => {
+    const data = input.data || [];
+    const formattedDate = new Date().toLocaleString();
+
+    const formatDateString = (d) => {
+      if (!d) return "";
+      try {
+        if (d.includes("-")) {
+          const parts = d.split("-");
+          // YYYY-MM-DD
+          if (parts[0].length === 4) return new Date(d).toLocaleDateString();
+          // assume D-M-YYYY or M-D-YYYY -> try D-M-YYYY -> build ISO
+          if (parts.length === 3) {
+            const iso = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+            return new Date(iso).toLocaleDateString();
+          }
+        }
+        // fallback: try constructing Date directly
+        return new Date(d).toLocaleDateString();
+      } catch (e) {
+        return d;
+      }
+    };
+
+    const formattedStart = formatDateString(input.startDate);
+    const formattedEnd = formatDateString(input.endDate);
+
+    return `
+    <html>
+      <head>
+        <title>Expense Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; font-size: 14px; margin: 20px; }
+          .container { width: 1000px; margin: auto; }
+          .header { text-align: center; }
+          .header h2 { margin: 0; font-size: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 13px; }
+          .totals { margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>${input.organizationTitle || ""}</h2>
+            <p>${input.address || ""}</p>
+            <p>${input.numbers || ""}</p>
+            <div style="font-weight:bold;margin-top:10px;">EXPENSE REPORT</div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Sr#</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Vendor</th>
+                <th>Expense Account</th>
+                <th>Org Account</th>
+                <th>Payment Status</th>
+                <th>Amount Paid</th>
+                <th>Credit Amount</th>
+                <th>Total Amount</th>
+                <th>Created Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data
+                .map((row, idx) => {
+                  return `
+                    <tr>
+                      <td>${idx + 1}</td>
+                      <td>${row.expenseTitle || "-"}</td>
+                      <td>${row.expenseType || "-"}</td>
+                      <td>${row.vendorName || "-"}</td>
+                      <td>${row.expenseAccountName || "-"}</td>
+                      <td>${row.orgAccountTitle || "-"}</td>
+                      <td>${row.paymentStatus || "-"}</td>
+                      <td>${parseFloat(row.amountPaid || 0).toLocaleString()}</td>
+                      <td>${parseFloat(row.creditAmount || 0).toLocaleString()}</td>
+                      <td>${parseFloat(row.totalAmount || 0).toLocaleString()}</td>
+                      <td>${row.createdDate ? row.createdDate.split("T")[0] : ""}</td>
+                    </tr>
+                  `;
+                })
+                .join("")}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="11" style="text-align:right;padding-top:10px;font-weight:normal;">Print Date: ${formattedDate}</td>
+              </tr>
+              ${input.startDate && input.endDate ? `<tr><td colspan="11" style="text-align:right;font-weight:normal;">Date Range: ${input.startDate} to ${input.endDate}</td></tr>` : ``}
+              <tr>
+                <td colspan="11" style="text-align:right;padding-top:10px;font-weight:bold;">Total Paid: ${parseFloat(input.totalPaid || 0).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colspan="11" style="text-align:right;font-weight:bold;">Total Credit: ${parseFloat(input.totalCredit || 0).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td colspan="11" style="text-align:right;font-weight:bold;">Total Amount: ${parseFloat(input.totalAmount || 0).toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </body>
+    </html>
+    `;
   };
   const handleAddExpense = () => {
     history.push("/dashboard/add-expense");
@@ -577,19 +808,21 @@ export default function ExpenseList() {
                     </div>
                   </div>
 
-                  <div className="w-full lg:w-12/12 px-2 text-left">
-                    <button
-                      type="submit"
-                      onClick={handleSubmit}
-                      className="mt-3 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                    >
-                      <FaDownload
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                      />
-                      Pay Back
-                    </button>
-                  </div>
+                  {!organizationLocal.paybackByVendor ? (
+                    <div className="w-full lg:w-12/12 px-2 text-left">
+                      <button
+                        type="submit"
+                        onClick={handleSubmit}
+                        className="mt-3 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                      >
+                        <FaDownload
+                          className="w-5 h-5 inline-block "
+                          style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                        />
+                        Pay Back
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -752,6 +985,12 @@ export default function ExpenseList() {
           firstButton={{
             title: "Add Expense",
             onClick: handleAddExpense,
+            icon: TbFileExport,
+            className: "bg-emerald-500",
+          }}
+          secondButton={{
+            title: "Print Report",
+            onClick: handlePrintReport,
             icon: TbFileExport,
             className: "bg-emerald-500",
           }}

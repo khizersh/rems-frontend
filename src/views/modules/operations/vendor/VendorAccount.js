@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
+import { BiSolidDetail } from "react-icons/bi";
 import {
   useHistory,
   useParams,
@@ -175,7 +176,7 @@ export default function VendorAccount() {
       icon: FaEye,
       onClick: handleView,
       title: "View Detail",
-      className: "text-green-600",
+      className: "text-grey-600",
     },
     // include Pay Back action only when organization allows payback by vendor
     ...(organizationLocal.paybackByVendor
@@ -200,10 +201,10 @@ export default function VendorAccount() {
         ]
       : []),
     {
-      icon: FaEye,
+      icon: BiSolidDetail,
       onClick: handleViewAccountDetail,
-      title: "View Account Detail",
-      className: "text-green-600",
+      title: "View Payment History",
+      className: "text-blue-600",
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {

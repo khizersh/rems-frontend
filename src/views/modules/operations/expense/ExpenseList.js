@@ -198,6 +198,20 @@ export default function ExpenseList() {
     }
   };
 
+    const fetchVendors = async () => {
+      try {
+        const sidebarData =
+          JSON.parse(localStorage.getItem("organization")) || {};
+
+        const response = await httpService.get(
+          `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`,
+        );
+        setVendorList(response.data || []);
+      } catch (err) {
+        notifyError(err.message, err.data, 4000);
+      }
+    };
+
   useEffect(() => {
     if (isSearched) fetchExpenseList();
   }, [page, pageSize, formattedDate]);
@@ -236,6 +250,22 @@ export default function ExpenseList() {
     await fetchExpenseList();
   };
 
+  const clearFilters = async () => {
+    setExpenseType("ALL");
+    setAccountGroupId(null);
+    setCoaId(null);
+    setFilterProject("");
+    setFilterVendor("");
+    setProjectFilteredId("");
+    setVendorFilteredId("");
+    setSelectedPaymentStatus("ALL");
+    setFormattedDate({ startDate: null, endDate: null });
+    setDateRange([null, null]);
+    setIsSearched(true);
+    setPage(0);
+    await fetchExpenseList();
+  };
+
   const handleDateRangeChange = (update) => {
     setDateRange(update);
     if (update[0] != null && update[1] != null) {
@@ -256,12 +286,6 @@ export default function ExpenseList() {
     }
   };
 
-  // Run initial search on mount (uses default date range)
-  useEffect(() => {
-    handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const changeSelectedProjected = (projectId) => {
     setProjectFilteredId(projectId);
     setFilterProject(projectId);
@@ -269,20 +293,6 @@ export default function ExpenseList() {
       setFilteredBy("project");
     } else {
       setFilteredBy(vendorFileteredId ? "vendor" : "");
-    }
-  };
-
-  const fetchVendors = async () => {
-    try {
-      const sidebarData =
-        JSON.parse(localStorage.getItem("organization")) || {};
-
-      const response = await httpService.get(
-        `/vendorAccount/getVendorByOrg/${sidebarData.organizationId}`,
-      );
-      setVendorList(response.data || []);
-    } catch (err) {
-      notifyError(err.message, err.data, 4000);
     }
   };
 
@@ -298,15 +308,12 @@ export default function ExpenseList() {
 
   const handleSubmit = async () => {
     setLoading(true);
-
     try {
-      let requestBody = { ...expenseDetail, expenseId: selectedExpense.id };
-
+      let requestBody = { ...expenseDetail, expenseId: selectedExpense?.id };
       const data = await httpService.post(
         "/expense/addExpenseDetail",
         requestBody,
       );
-
       notifySuccess(data.responseMessage, 3000);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -322,7 +329,6 @@ export default function ExpenseList() {
     { header: "Account", field: "orgAccountTitle" },
   ];
 
-  // Add State column only when paybackByVendor is NOT enabled for the organization
   if (!organizationLocal.paybackByVendor) {
     tableColumns.push({
       header: "State",
@@ -344,27 +350,25 @@ export default function ExpenseList() {
     {
       header: "Paid",
       field: "amountPaid",
-      render: (value) => (
-        <span className="font-semibold text-green-600">{parseFloat(value || 0).toLocaleString()}</span>
-      ),
+      render: (value) => {
+        const num = Number(value);
+        const safe = Number.isFinite(num) ? num : 0;
+        return <span className="font-semibold text-green-600">{safe.toLocaleString()}</span>;
+      },
     },
     {
       header: "Credit",
       field: "creditAmount",
-      render: (value) => (
-        <span className="font-semibold text-blue-600">{parseFloat(value || 0).toLocaleString()}</span>
-      ),
+      render: (value) => {
+        const num = Number(value);
+        const safe = Number.isFinite(num) ? num : 0;
+        return <span className="font-semibold text-blue-600">{safe.toLocaleString()}</span>;
+      },
     },
-    // { header: "Total", field: "totalAmount" },
   );
 
-  // Show Comments column only when paybackByVendor is NOT enabled for the organization
   if (!organizationLocal.paybackByVendor) {
-    tableColumns.push({
-      header: "Comments",
-      field: "comments",
-      render: (v) => (v ? v : "-"),
-    });
+    tableColumns.push({ header: "Comments", field: "comments", render: (v) => (v ? v : "-") });
   }
 
   const handleView = (data) => {

@@ -83,7 +83,7 @@ export default function DynamicTableComponent({
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
-      <div className="px-4 py-3 border-b flex justify-between items-center">
+      <div className="px-4 py-3 border-b flex justify-between items-center max-sm-flex-col max-sm-items-stretch g-2">
         <h3 className="font-semibold text-base text-gray-700">
           <span>
             <button className="">
@@ -96,11 +96,11 @@ export default function DynamicTableComponent({
           </span>
           {title}
         </h3>
-        <div>
+        <div className="flex g-2 max-sm-flex-col g-2">
           {firstButton && (
             <button
               onClick={firstButton.onClick}
-              className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
+              className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded`}
             >
               {firstButton.icon && (
                 <firstButton.icon
@@ -115,7 +115,7 @@ export default function DynamicTableComponent({
           {secondButton && (
             <button
               onClick={secondButton.onClick}
-              className={`${secondButton.className} text-white text-xs font-bold px-3 py-1 rounded mr-3`}
+              className={`${secondButton.className} text-white text-xs font-bold px-3 py-1 rounded`}
             >
               {secondButton.icon && (
                 <secondButton.icon

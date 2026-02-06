@@ -286,3 +286,38 @@ button:hover {
     justify-content: center;
   }
 }
+
+/* Some Custom Responsive Classes  */
+@media (max-width: 1024px) {
+  .max-lg-flex-col {
+    flex-direction: column;
+  }
+  .max-lg-items-center {
+    align-items: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .max-sm-flex-col {
+    flex-direction: column;
+  }
+  .max-sm-justify-center {
+    justify-content: center;
+  }
+  .max-sm-items-stretch {
+    align-items: stretch;
+  }
+  .max-sm-text-center {
+    text-align: center;
+  }
+  .max-sm-w-full {
+    width: 100%;
+  }
+  .max-sm-px-0 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .max-sm-pt-2 {
+    padding-top: 8px;
+  }
+}

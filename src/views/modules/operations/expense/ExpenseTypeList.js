@@ -171,7 +171,7 @@ export default function ExpenseTypeList() {
           >
             <div className="flex flex-wrap bg-white">
               <div className="w-full lg:w-6/12 px-4 mb-3">
-                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2 max-sm-pt-2">
                   Expense Type
                 </label>
                 <input

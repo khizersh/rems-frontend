@@ -13,7 +13,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
         onChange={onChange}
         isClearable
         placeholderText="Select date range"
-        className="px-3 py-2 border border-gray-300 rounded datepicker-size"
+        className="px-3 py-2 border border-gray-300 rounded datepicker-size max-sm-w-full max-sm-text-center"
       />
     </>
   );

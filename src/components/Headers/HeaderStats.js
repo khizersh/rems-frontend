@@ -245,7 +245,7 @@ export default function HeaderStats() {
   return (
     <>
       {/* Header */}
-      <div className="relative header-stats bg-lightBlue-600 md:py-16 sm:py-16 mb-12 w-full px-4 md:rounded-12 lg:rounded-none">
+      <div className="relative header-stats bg-lightBlue-600 md:py-16 sm:py-16 mb-12 w-full px-4 md:rounded-12 lg:rounded-none my-6">
         <div className="px-4 md:px-8 mx-auto w-full">
           <div>
             {/* Card stats */}

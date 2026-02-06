@@ -146,7 +146,7 @@ export default function ProjectListComponent() {
       />
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-12">
         <div className="rounded-t mb-0 px-4 py-3 border-0">
-          <div className="flex flex-wrap items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between max-sm-flex-col max-sm-items-stretch g-2">
             <h3 className="font-semibold text-base text-blueGray-700">
               <span>
                 <button className="">
@@ -159,10 +159,10 @@ export default function ProjectListComponent() {
               </span>
               Project List
             </h3>
-            <div className="flex flex-wrap items-center justify-end">
+            <div className="flex flex-wrap items-center justify-end max-sm-flex-col max-sm-items-stretch g-2">
               <button
                 onClick={addProject}
-                className="bg-emerald-500 text-white text-xs font-bold uppercase mr-4 px-3 py-1 rounded"
+                className="bg-emerald-500 text-white text-xs font-bold uppercase px-3 py-1 rounded"
               >
                 <BsBuildingFillAdd
                   className="w-5 h-5 inline-block "

@@ -2011,6 +2011,23 @@ select {
   overflow-x: hidden;
 }
 
+.justify-center{
+  justify-content: center;
+}
+.justify-end{
+  justify-content: end;
+}
+
+.g-1{
+  gap: 4px;
+}
+.g-2{
+  gap: 8px;
+}
+.g-3{
+  gap: 12px;
+}
+
 .p-2 {
   padding: 0.5rem;
 }

@@ -1100,7 +1100,7 @@ export default function CustomerPayment() {
       </div>
 
       <div className="container mx-auto px-5">
-        <div className="flex flex-wrap justify-between">
+        <div className="flex flex-wrap g-3 justify-center items-center">
           <div className="lg:w-3/12 pr-3">
             <Card
               props={{

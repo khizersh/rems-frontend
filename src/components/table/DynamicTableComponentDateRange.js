@@ -43,7 +43,6 @@ export default function DynamicTableComponent({
 }) {
   const history = useHistory();
 
-
   const handlePageSizeChange = (newSize) => {
     setPageSize(newSize);
     if (onPageSizeChange) {
@@ -91,7 +90,7 @@ export default function DynamicTableComponent({
   return (
     <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
       {/* Header */}
-      <div className="px-4 py-3 border-b flex justify-between items-center">
+      <div className="px-4 py-3 border-b flex justify-between items-center max-sm-flex-col max-sm-items-stretch g-2">
         <h3 className="font-semibold text-base text-gray-700">
           <span>
             <button className="">
@@ -104,13 +103,13 @@ export default function DynamicTableComponent({
           </span>
           {title}
         </h3>
-        <div className="flex flex-wrap justify-between">
+        <div className="flex max-lg-flex-col max-lg-items-center justify-end max-sm-g-2 max-sm-flex-col max-sm-items-stretch g-3">
           {selectTransactionType != null ? (
             <div>
               <select
                 value={selectTransactionType}
                 onChange={(e) => changeTransactionType(e.target.value)}
-                className="accountList rounded mr-2"
+                className="accountList rounded max-sm-w-full max-sm-text-center"
               >
                 {TRANSACTION_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -129,31 +128,33 @@ export default function DynamicTableComponent({
             onChange={(update) => onChangeDate(update)}
           />
 
-          {firstButton && (
-            <button
-              onClick={firstButton.onClick}
-              className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded ml-3 mr-3`}
-            >
-              {firstButton.icon && (
-                <firstButton.icon
-                  className="w-5 h-5 inline-block"
-                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                />
-              )}
-              {firstButton.title}
-            </button>
-          )}
+          <div className="flex g-3 max-sm-flex-col">
+            {firstButton && (
+              <button
+                onClick={firstButton.onClick}
+                className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded`}
+              >
+                {firstButton.icon && (
+                  <firstButton.icon
+                    className="w-5 h-5 inline-block"
+                    style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                  />
+                )}
+                {firstButton.title}
+              </button>
+            )}
 
-          <button
-            onClick={() => fetchDataFunction(null)}
-            className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded "
-          >
-            <RxReload
-              className="w-5 h-5 inline-block"
-              style={{ paddingBottom: "3px", paddingRight: "5px" }}
-            />
-            Refresh
-          </button>
+            <button
+              onClick={() => fetchDataFunction(null)}
+              className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded "
+            >
+              <RxReload
+                className="w-5 h-5 inline-block"
+                style={{ paddingBottom: "3px", paddingRight: "5px" }}
+              />
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
 

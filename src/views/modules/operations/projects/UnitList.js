@@ -170,19 +170,14 @@ export default function UnitList() {
       const onPossessionPayment =
         parseFloat(schedule?.onPossessionPayment) || 0;
 
-      const durationInMonths = parseInt(schedule?.durationInMonths) || 0;
-
-      // Calculate periods
+      const durationInMonths = schedule.durationInMonths;
       const quarterlyPeriods = Math.floor(durationInMonths / 3);
       const halfYearlyPeriods = Math.floor(durationInMonths / 6);
       const yearlyPeriods = Math.floor(durationInMonths / 12);
 
-      // ✅ Calculate month-wise total
-      let monthWiseTotal = calculateMonthlyPaymentSum(schedule);
-      let monthSpecificTotal = calculateMonthlySpecificPaymentSum(schedule);
-
-      // ✅ Totals
+      // Calculate totals
       const unitCost = actualAmount + miscellaneousAmount + developmentAmount;
+
       const customerCost =
         downPayment +
         (quarterlyPeriods > 0 ? quarterlyPayment * quarterlyPeriods : 0) +
@@ -190,10 +185,10 @@ export default function UnitList() {
         (yearlyPeriods > 0 ? yearlyPayment * yearlyPeriods : 0) +
         onPossessionPayment;
 
+      // Update schedule
+
       schedule.unitCost = unitCost;
       schedule.customerCost = customerCost;
-      schedule.monthWiseTotal = monthWiseTotal;
-      schedule.monthSpecificTotal = monthSpecificTotal;
 
       data.paymentSchedule = schedule;
 
@@ -282,6 +277,27 @@ export default function UnitList() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    const errors = {};
+
+    if (!unit.serialNo) {
+      errors.serialNo = "Serial No is required";
+    }
+    if (!unit.squareFoot || unit.squareFoot <= 0) {
+      errors.squareFoot = "Square Foot must be greater than 0";
+    }
+    if (!unit.roomCount || unit.roomCount <= 0) {
+      errors.roomCount = "Room Count must be greater than 0";
+    }
+    if (!unit.bathroomCount || unit.bathroomCount <= 0) {
+      errors.bathroomCount = "Bathroom Count must be greater than 0";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      notifyError("Please fix validation errors", errors, 4000);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await httpService.post(`/unit/addOrUpdate`, unit);
       const data = await response.data;

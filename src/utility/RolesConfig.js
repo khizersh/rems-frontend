@@ -42,6 +42,8 @@ export const FEATURE_ALIASES = {
     "/dashboard/expense-type",
     "/dashboard/expense-account-group",
     "/dashboard/expense-group-detail",
+    "/dashboard/material",
+    "/dashboard/material-unit",
   ],
 };
 

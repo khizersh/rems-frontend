@@ -142,8 +142,8 @@ export default function DynamicTableComponent({
 
       {/* Table */}
       <div className="block w-full overflow-x-auto min-half-screen">
-        <table className="w-full bg-transparent border-collapse">
-          <thead className="bg-gray-100">
+        <table className="w-full bg-transparent border-collapse border border-gray-200">
+          <thead className="bg-gray-100 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-xs font-semibold text-left">
                 S.No

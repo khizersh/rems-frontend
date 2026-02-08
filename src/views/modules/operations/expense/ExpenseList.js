@@ -838,7 +838,7 @@ export default function ExpenseList() {
         <div className="w-full mb-6 bg-white  shadow-lg rounded p-4">
           <div className=" flex flex-wrap  py-3 justify-between">
             <div className="w-full mb-4 flex justify-center">
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-6 max-sm-flex-col">
                 {["ALL", "MISCELLANEOUS", "CONSTRUCTION"].map((type) => (
                   <label key={type} className="flex items-center mx-4">
                     <input

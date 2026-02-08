@@ -202,7 +202,7 @@ const CustomerSchedule = () => {
             ))}
           </select>
         </div>
-        <div className="lg:w-6/12 md:w-6/12 sm:w-12/12 mb-3 px-4">
+        <div className="lg:w-6/12 md:w-6/12 sm:w-12/12 mb-3 px-4 max-sm-px-0">
           <label className="block text-sm font-medium mb-1">Floor</label>
           <select
             value={filterFloor}

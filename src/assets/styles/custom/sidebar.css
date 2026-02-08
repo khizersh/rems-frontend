@@ -297,7 +297,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .sidebar-collapsed,
   .sidebar-expanded {
     width: 100% !important;
@@ -363,10 +363,10 @@
 }
 
 /* Mobile navbar header - ensures horizontal layout */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .mobile-navbar-header {
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;

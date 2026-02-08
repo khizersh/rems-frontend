@@ -499,8 +499,8 @@ export default function CustomerLedger() {
       <div className="container mx-auto p-4 mt-5">
         <div className="relative flex flex-col min-w-0 bg-white w-full mb-6 shadow-lg rounded-12">
           {/* Header */}
-          <div className="px-4 py-3 border-b flex justify-between items-center">
-            <div>
+          <div className="px-4 py-3 border-b flex justify-between items-center max-sm-flex-col g-2">
+            <div className="w-full">
               <h3 className="font-semibold text-base text-gray-700">
                 <span>
                   <button className="">
@@ -514,10 +514,10 @@ export default function CustomerLedger() {
                 {customerName ? customerName + " - Payments" : ""}
               </h3>
             </div>
-            <div>
+            <div className="flex max-sm-flex-col g-2 w-full justify-end">
               <button
                 onClick={handlePrintSlip}
-                className="bg-lightBlue-500 text-white text-xs font-bold px-3 py-1 rounded mx-4"
+                className="bg-lightBlue-500 flex justify-center items-center text-white text-xs font-bold px-3 py-1 rounded"
               >
                 <MdPrint
                   className="w-5 h-5 inline-block "

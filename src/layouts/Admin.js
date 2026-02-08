@@ -56,6 +56,8 @@ import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
 import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
+import ItemsList from "views/modules/operations/purchasemanagement/items/ItemsList";
+import UnitsList from "views/modules/operations/purchasemanagement/units/UnitsList";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -202,6 +204,8 @@ export default function Admin() {
               { path: "/dashboard/map", component: Maps },
               { path: "/dashboard/settings", component: Settings },
               { path: "/dashboard/tables", component: Tables },
+              { path: "/dashboard/material", component: ItemsList },
+              { path: "/dashboard/material-unit", component: UnitsList },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

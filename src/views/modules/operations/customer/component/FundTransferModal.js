@@ -19,6 +19,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
   const [originalToAccountAmount, setOriginalToAccountAmount] = useState(0);
   const [accountList, setAccountList] = useState([]);
   const [accountListTo, setAccountListTo] = useState([]);
+  const [errors, setErrors] = useState({});
   const [updateRequest, setUpdateRequest] = useState({
     amount: 0,
     fromAccountId: null,
@@ -60,6 +61,9 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
         ...prev,
         [name]: numericValue,
       }));
+      if (errors.amount) {
+        setErrors((prev) => ({ ...prev, amount: "" }));
+      }
 
       if (!isNaN(numericValue)) {
         const updatedFrom = originalFromAccountAmount - numericValue;
@@ -71,16 +75,18 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
   };
 
   const handleUpdate = async () => {
+    // Validate inputs
+    const newErrors = {};
+    if (!updateRequest.fromAccountId) newErrors.fromAccountId = "Please select From account";
+    if (!updateRequest.toAccountId) newErrors.toAccountId = "Please select To account";
+    if (updateRequest.amount <= 0) newErrors.amount = "Please enter a valid amount";
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
-      if (updateRequest.fromAccountId == null)
-        return notifyError("Please select From account", "", 4000);
-
-      if (updateRequest.toAccountId == null)
-        return notifyError("Please select To account", "", 4000);
-
-      if (updateRequest.amount == 0)
-        return notifyError("Please enter amount", 4000);
-
       await httpService.post(
         "/organizationAccount/transferAmount",
         updateRequest
@@ -94,6 +100,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
       });
       setFromAccountAmount(null);
       setToAccountAmount(null);
+      setErrors({});
     } catch (error) {
       notifyError(error.message, error.data, 4000);
     }
@@ -105,6 +112,9 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
       ...prev,
       [name]: value,
     }));
+    if (errors.fromAccountId) {
+      setErrors((prev) => ({ ...prev, fromAccountId: "" }));
+    }
 
     const currentAccount = accountList.find((account) => account.id == value);
     setFromAccountAmount(currentAccount.totalAmount);
@@ -119,6 +129,9 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
       ...prev,
       [name]: value,
     }));
+    if (errors.toAccountId) {
+      setErrors((prev) => ({ ...prev, toAccountId: "" }));
+    }
 
     const currentAccount = accountList.find((account) => account.id == value);
     setToAccountAmount(currentAccount.totalAmount);
@@ -160,7 +173,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
                     <select
                       id="fromAccountId"
                       name="fromAccountId"
-                      className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                      className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 ${errors.fromAccountId ? "border-red-500" : ""}`}
                       value={updateRequest.fromAccountId}
                       onChange={(e) => onChangeFromAccount(e)}
                     >
@@ -171,6 +184,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
                         </option>
                       ))}
                     </select>
+                    {errors.fromAccountId && <p className="text-red-500 text-xs mt-1">{errors.fromAccountId}</p>}
                   </div>
                 </div>
                 <div className="w-full lg:w-1/12">
@@ -211,7 +225,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
                     <select
                       id="toAccountId"
                       name="toAccountId"
-                      className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                      className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 ${errors.toAccountId ? "border-red-500" : ""}`}
                       value={updateRequest.toAccountId}
                       onChange={(e) => onChangeToAccount(e)}
                     >
@@ -222,6 +236,7 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
                         </option>
                       ))}
                     </select>
+                    {errors.toAccountId && <p className="text-red-500 text-xs mt-1">{errors.toAccountId}</p>}
                   </div>
                 </div>
                 <div className="w-full lg:w-12/12">
@@ -242,9 +257,10 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
                             updateRequest.toAccountId &&
                             onChangeAmount(e)
                           }
-                          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                          className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 ${errors.amount ? "border-red-500" : ""}`}
                           required
                         />
+                        {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
                       </div>
                     </div>
                     <div className="w-full lg:w-4/12"></div>

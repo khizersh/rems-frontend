@@ -4,6 +4,7 @@ import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { FaTools, FaReceipt, FaMoneyBillAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
@@ -70,6 +71,21 @@ const AddExpense = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleTabChange = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      expenseType: type,
+      // reset expenseCOAId for construction to match existing submit logic
+      expenseCOAId: type === "CONSTRUCTION" ? 0 : prev.expenseCOAId,
+    }));
+  };
+
+  const getIconForType = (type) => {
+    if (type === "CONSTRUCTION") return FaTools;
+    if (type === "MISCELLANEOUS") return FaReceipt;
+    return FaMoneyBillAlt;
   };
 
   useEffect(() => {
@@ -284,18 +300,29 @@ const AddExpense = () => {
               <div className="w-full lg:w-3/12 "></div>
               <div className="w-full lg:w-6/12 px-5">
                 {" "}
-                <SelectField
-                  label={"Select Expense Type"}
-                  name={"expenseType"}
-                  value={formData["expenseType"]}
-                  onChange={handleChange}
-                  options={EXPENSE_TYPE.map((type) => {
-                    return {
-                      id: type,
-                      name: type,
-                    };
-                  })}
-                />
+                <div>
+                  <label className="block text-xs font-small mb-1">Expense Type</label>
+                  <div className="flex space-x-3">
+                    {EXPENSE_TYPE.map((type) => {
+                      const Icon = getIconForType(type);
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => handleTabChange(type)}
+                          className={`w-36 flex items-center justify-center space-x-2 px-3 py-2 mx-2 rounded-lg border transform hover:-translate-y-1 transition-all duration-200 ${
+                            formData.expenseType === type
+                              ? "bg-lightBlue-500 text-white border-lightBlue-600 scale-105 shadow-md"
+                              : "bg-white text-gray-700"
+                          }`}
+                        >
+                          <Icon className={`w-4 h-4 ${formData.expenseType === type ? 'text-white' : 'text-gray-600'}`} />
+                          <span className="text-sm font-medium">{type}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <div className="w-full lg:w-3/12 "></div>
             </div>

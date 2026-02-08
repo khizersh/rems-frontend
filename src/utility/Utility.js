@@ -20,7 +20,7 @@ export const PAYMENT_PLANS_TYPE = [
   "INSTALLMENT_SPECIFIC",
 ];
 export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
-export const EXPENSE_TYPE = ["CONSTRUCTION", "MISCELLANEOUS"];
+export const EXPENSE_TYPE = ["MISCELLANEOUS" ,"CONSTRUCTION", "PURCHASE_ORDER"];
 export const MONTH_LABELS = [
   "January",
   "February",

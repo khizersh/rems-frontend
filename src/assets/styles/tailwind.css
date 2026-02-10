@@ -1921,6 +1921,14 @@ select {
   max-height: 860px;
 }
 
+.max-h-250-px {
+  max-height: 250px;
+}
+
+.w-95-p{
+  width: 95%;
+}
+
 .max-w-full {
   max-width: 100%;
 }
@@ -1971,6 +1979,10 @@ select {
 
 .min-w-140-px {
   min-width: 140px;
+}
+
+.overflow-auto{
+  overflow: auto;
 }
 
 .opacity-50 {

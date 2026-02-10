@@ -4,7 +4,7 @@ import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { FaTools, FaReceipt, FaMoneyBillAlt } from "react-icons/fa";
+import { FaTools, FaReceipt, FaMoneyBillAlt, FaSitemap } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
@@ -35,12 +35,20 @@ const AddExpense = () => {
   const [ExpenseAccountDropdown, setExpenseAccountDropdown] = useState([]);
   const [expenseAccountGroupId, setExpenseAccountGroupId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [purchaseOrderItemList, setPurchaseOrderItemList] = useState([
+    {
+      itemsId: 0,
+      rate: 0,
+      quantity: 0,
+    },
+  ]);
   const [dropdowns, setDropdowns] = useState({
     projects: [],
     vendors: [],
     accounts: [],
     expenseTypes: [],
     expenseAccountGroups: [],
+    itemList: [],
   });
 
   const resetForm = () => {
@@ -58,6 +66,13 @@ const AddExpense = () => {
       expenseCOAId: 0,
       createdDate: new Date().toISOString().slice(0, 16),
     });
+    setPurchaseOrderItemList([
+      {
+        itemsId: 0,
+        rate: 0,
+        quantity: 0,
+      },
+    ]);
   };
 
   const handleChange = (e) => {
@@ -89,15 +104,22 @@ const AddExpense = () => {
   };
 
   useEffect(() => {
-    const paid = parseFloat(formData.amountPaid) || 0;
-    const credit = parseFloat(formData.creditAmount) || 0;
-    const total = paid + credit;
+    if (formData.expenseType === "CONSTRUCTION") {
+      const paid = parseFloat(formData.amountPaid) || 0;
+      const credit = parseFloat(formData.creditAmount) || 0;
+      const total = paid + credit;
 
-    setFormData((prev) => ({
-      ...prev,
-      totalAmount: total.toFixed(2),
-    }));
-  }, [formData.amountPaid, formData.creditAmount]);
+      setFormData((prev) => ({
+        ...prev,
+        totalAmount: total.toFixed(2),
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        totalAmount: prev.totalAmount,
+      }));
+    }
+  }, [formData.amountPaid, formData.creditAmount, formData.expenseType]);
 
   const fetchDropdownData = async () => {
     try {
@@ -106,22 +128,27 @@ const AddExpense = () => {
 
       setLoading(true);
 
-      const [projects, vendors, accounts, expenseTypes, expenseAccountGroups] =
-        await Promise.all([
-          httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
-          httpService.get(
-            `/vendorAccount/getVendorByOrg/${org.organizationId}`,
-          ),
-          httpService.get(
-            `/organizationAccount/getAccountByOrgId/${org.organizationId}`,
-          ),
-          httpService.get(
-            `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`,
-          ),
-          httpService.get(
-            `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
-          ),
-        ]);
+      const [
+        projects,
+        vendors,
+        accounts,
+        expenseTypes,
+        expenseAccountGroups,
+        itemList,
+      ] = await Promise.all([
+        httpService.get(`/project/getAllProjectByOrg/${org.organizationId}`),
+        httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
+        httpService.get(
+          `/organizationAccount/getAccountByOrgId/${org.organizationId}`,
+        ),
+        httpService.get(
+          `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`,
+        ),
+        httpService.get(
+          `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+        ),
+        httpService.get(`/items/${org.organizationId}/list`),
+      ]);
 
       let accountList = accounts.data?.map((account) => {
         return {
@@ -136,6 +163,7 @@ const AddExpense = () => {
         accounts: accountList || [],
         expenseTypes: expenseTypes.data || [],
         expenseAccountGroups: expenseAccountGroups.data.data || [],
+        itemList: itemList.data || [],
       });
       setLoading(false);
     } catch (err) {
@@ -158,7 +186,7 @@ const AddExpense = () => {
         formData.expenseCOAId = 0;
       }
 
-      const requestBody = {
+      let requestBody = {
         ...formData,
         organizationId: Number(organization?.organizationId),
         amountPaid: parseFloat(formData.amountPaid || 0),
@@ -168,6 +196,7 @@ const AddExpense = () => {
 
       if (requestBody.totalAmount <= 0) {
         setSubmitting(false);
+        setLoading(false);
         return notifyError(
           "Expense is empty!",
           "Please enter any amount",
@@ -175,18 +204,43 @@ const AddExpense = () => {
         );
       }
 
-      const response = await httpService.post(
-        "/expense/addExpense",
-        requestBody,
-      );
+      if (
+        (formData.expenseType === "CONSTRUCTION" ||
+          formData.expenseType === "PURCHASE_ORDER") &&
+        (!formData.vendorAccountId || !formData.projectId)
+      ) {
+        setSubmitting(false);
+        setLoading(false);
+        return notifyError(
+          "Missing fields",
+          "Please select project and vendor",
+          4000,
+        );
+      }
+
+      if (formData.expenseType === "PURCHASE_ORDER") {
+        requestBody = {
+          orgId: Number(organization?.organizationId),
+          projectId: formData.projectId,
+          vendorId: formData.vendorAccountId,
+          totalAmount: formData.totalAmount,
+          purchaseOrderItemList,
+        };
+      }
+
+      const response =
+        formData.expenseType !== "PURCHASE_ORDER"
+          ? await httpService.post("/expense/addExpense", requestBody)
+          : await httpService.post("/purchaseOrder/createPO", requestBody);
       await notifySuccess(response.responseMessage, 4000);
-      setSubmitting(false);
+      // setSubmitting(false);
       resetForm();
-      setLoading(false);
+      // setLoading(false);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
-      setLoading(false);
     } finally {
+      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -223,6 +277,49 @@ const AddExpense = () => {
   useEffect(() => {
     fetchDropdownData();
   }, []);
+
+  useEffect(() => {
+    if (formData.expenseType === "PURCHASE_ORDER") {
+      const poTotal = purchaseOrderItemList.reduce(
+        (sum, item) => sum + item.rate * item.quantity,
+        0,
+      );
+      setFormData((prev) => ({
+        ...prev,
+        totalAmount: poTotal,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        totalAmount: prev.totalAmount,
+      }));
+    }
+  }, [purchaseOrderItemList, formData.expenseType]);
+
+  const handleItemChange = (e, index) => {
+    const { name, value } = e.target;
+
+    setPurchaseOrderItemList((prev) => {
+      let updated = [...prev];
+      updated[index] = { ...updated[index], [name]: Number(value) };
+      return updated;
+    });
+  };
+
+  const handleAddMoreItem = () => {
+    setPurchaseOrderItemList((prev) => [
+      ...prev,
+      {
+        itemsId: "",
+        quantity: "",
+        rate: "",
+      },
+    ]);
+  };
+
+  const handleItemDelete = (index) => {
+    setPurchaseOrderItemList((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const selectFields = [
     {
@@ -299,10 +396,11 @@ const AddExpense = () => {
             <div className="flex flex-wrap">
               <div className="w-full lg:w-3/12 "></div>
               <div className="w-full lg:w-6/12 px-5">
-                {" "}
                 <div>
-                  <label className="block text-xs font-small mb-1">Expense Type</label>
-                  <div className="flex space-x-3">
+                  <label className="block text-xs font-small mb-1">
+                    Expense Type
+                  </label>
+                  <div className="flex space-x-3 max-sm-flex-col g-2">
                     {EXPENSE_TYPE.map((type) => {
                       const Icon = getIconForType(type);
                       return (
@@ -316,7 +414,9 @@ const AddExpense = () => {
                               : "bg-white text-gray-700"
                           }`}
                         >
-                          <Icon className={`w-4 h-4 ${formData.expenseType === type ? 'text-white' : 'text-gray-600'}`} />
+                          <Icon
+                            className={`w-4 h-4 ${formData.expenseType === type ? "text-white" : "text-gray-600"}`}
+                          />
                           <span className="text-sm font-medium">{type}</span>
                         </button>
                       );
@@ -440,119 +540,250 @@ const AddExpense = () => {
                 </div>
               </div>
             </>
+          ) : formData.expenseType == "MISCELLANEOUS" ? (
+            <>
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <SelectField
+                  label={"Select Account"}
+                  name={"organizationAccountId"}
+                  value={formData["organizationAccountId"]}
+                  onChange={handleChange}
+                  options={dropdowns.accounts}
+                />
+              </div>
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <InputField
+                  label={"Amount"}
+                  name={"amountPaid"}
+                  value={formData["amountPaid"]}
+                  onChange={handleChange}
+                  type={"number"}
+                  readOnly={false}
+                />
+              </div>
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <SelectField
+                  label={"Payment Type"}
+                  name={"paymentType"}
+                  value={formData["paymentType"]}
+                  onChange={handleChange}
+                  options={getPaymentTypes()}
+                />
+              </div>
+              {formData.paymentType == "CHEQUE" ||
+              formData.paymentType == "PAY_ORDER" ? (
+                <>
+                  <div className="w-full lg:w-4/12 px-4 mt-3">
+                    <InputField
+                      label={
+                        formData.paymentType == "CHEQUE"
+                          ? "Cheque No"
+                          : formData.paymentType == "PAY_ORDER"
+                            ? "Pay Order No"
+                            : ""
+                      }
+                      name={"paymentDocNo"}
+                      value={formData.paymentDocNo}
+                      onChange={handleChange}
+                      type={"text"}
+                      readOnly={false}
+                    />
+                  </div>
+                  <div className="w-full lg:w-4/12 px-4 mt-3">
+                    <InputField
+                      label={
+                        formData.paymentType == "CHEQUE"
+                          ? "Cheque Date"
+                          : formData.paymentType == "PAY_ORDER"
+                            ? "Pay Order Date"
+                            : ""
+                      }
+                      type="datetime-local"
+                      name="paymentDocDate"
+                      value={formData["paymentDocDate"]}
+                      onChange={handleChange}
+                      readOnly={false}
+                    />
+                  </div>
+                </>
+              ) : (
+                ""
+              )}
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <InputField
+                  label={"Created Date"}
+                  type="datetime-local"
+                  name="createdDate"
+                  value={formData["createdDate"]}
+                  onChange={handleChange}
+                  readOnly={false}
+                />
+              </div>
+              {/* Expense Account Group Dropdown */}
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <SelectField
+                  label={"Select Expense Account Group"}
+                  name={"expenseAccountGroupId"}
+                  value={expenseAccountGroupId}
+                  onChange={handleChange}
+                  options={dropdowns.expenseAccountGroups}
+                />
+              </div>
+              {/* Expense Account Dropdown */}
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <SelectField
+                  label={"Select Expense Account"}
+                  name={"expenseCOAId"}
+                  value={formData["expenseCOAId"]}
+                  onChange={handleChange}
+                  options={ExpenseAccountDropdown}
+                />
+              </div>
+              <div className="w-full lg:w-12/12 px-4 mt-3 ">
+                <InputField
+                  label={"Narrations"}
+                  name={"comments"}
+                  value={formData["comments"]}
+                  onChange={handleChange}
+                  type={"text"}
+                  readOnly={false}
+                />
+              </div>
+            </>
           ) : (
-            formData.expenseType == "MISCELLANEOUS" && (
+            formData.expenseType == "PURCHASE_ORDER" && (
               <>
-                {" "}
+                {/* PURCHASE ORDER FORM */}
+
+                {/* Project */}
                 <div className="w-full lg:w-4/12 px-4 mt-3">
                   <SelectField
-                    label={"Select Account"}
-                    name={"organizationAccountId"}
-                    value={formData["organizationAccountId"]}
+                    label="Select Project"
+                    name="projectId"
+                    value={formData.projectId}
                     onChange={handleChange}
-                    options={dropdowns.accounts}
+                    options={dropdowns.projects}
                   />
                 </div>
+
+                {/* Vendor */}
+                <div className="w-full lg:w-4/12 px-4 mt-3">
+                  <SelectField
+                    label="Select Vendor"
+                    name="vendorAccountId"
+                    value={formData.vendorAccountId}
+                    onChange={handleChange}
+                    options={dropdowns.vendors}
+                  />
+                </div>
+
+                {/* Total Amount */}
                 <div className="w-full lg:w-4/12 px-4 mt-3">
                   <InputField
-                    label={"Amount"}
-                    name={"amountPaid"}
-                    value={formData["amountPaid"]}
+                    readOnly={true}
+                    label="Total Amount"
+                    name="totalAmount"
+                    type="number"
+                    value={formData.totalAmount}
                     onChange={handleChange}
-                    type={"number"}
-                    readOnly={false}
-                  />
-                </div>
-                <div className="w-full lg:w-4/12 px-4 mt-3">
-                  <SelectField
-                    label={"Payment Type"}
-                    name={"paymentType"}
-                    value={formData["paymentType"]}
-                    onChange={handleChange}
-                    options={getPaymentTypes()}
-                  />
-                </div>
-                {formData.paymentType == "CHEQUE" ||
-                formData.paymentType == "PAY_ORDER" ? (
-                  <>
-                    <div className="w-full lg:w-4/12 px-4 mt-3">
-                      <InputField
-                        label={
-                          formData.paymentType == "CHEQUE"
-                            ? "Cheque No"
-                            : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order No"
-                              : ""
-                        }
-                        name={"paymentDocNo"}
-                        value={formData.paymentDocNo}
-                        onChange={handleChange}
-                        type={"text"}
-                        readOnly={false}
-                      />
-                    </div>
-                    <div className="w-full lg:w-4/12 px-4 mt-3">
-                      <InputField
-                        label={
-                          formData.paymentType == "CHEQUE"
-                            ? "Cheque Date"
-                            : formData.paymentType == "PAY_ORDER"
-                              ? "Pay Order Date"
-                              : ""
-                        }
-                        type="datetime-local"
-                        name="paymentDocDate"
-                        value={formData["paymentDocDate"]}
-                        onChange={handleChange}
-                        readOnly={false}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  ""
-                )}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
-                  <InputField
-                    label={"Created Date"}
-                    type="datetime-local"
-                    name="createdDate"
-                    value={formData["createdDate"]}
-                    onChange={handleChange}
-                    readOnly={false}
-                  />
-                </div>
-                {/* Expense Account Group Dropdown */}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
-                  <SelectField
-                    label={"Select Expense Account Group"}
-                    name={"expenseAccountGroupId"}
-                    value={expenseAccountGroupId}
-                    onChange={handleChange}
-                    options={dropdowns.expenseAccountGroups}
-                  />
-                </div>
-                {/* Expense Account Dropdown */}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
-                  <SelectField
-                    label={"Select Expense Account"}
-                    name={"expenseCOAId"}
-                    value={formData["expenseCOAId"]}
-                    onChange={handleChange}
-                    options={ExpenseAccountDropdown}
-                  />
-                </div>
-                <div className="w-full lg:w-12/12 px-4 mt-3 ">
-                  <InputField
-                    label={"Narrations"}
-                    name={"comments"}
-                    value={formData["comments"]}
-                    onChange={handleChange}
-                    type={"text"}
-                    readOnly={false}
                   />
                 </div>
               </>
             )
+          )}
+
+          {/* Item Form Listing  */}
+          {formData.expenseType === "PURCHASE_ORDER" && (
+            <>
+              <hr className="mt-6 border-b-1 border-blueGray-300 w-95-p mx-auto" />
+              <div className="w-full lg:w-12/12 px-12 mb-5 flex justify-end items-center">
+                <button
+                  type="button"
+                  onClick={handleAddMoreItem}
+                  className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                >
+                  <FaSitemap
+                    className="w-5 h-5 inline-block "
+                    style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                  />
+                  Add Item
+                </button>
+              </div>
+
+              <div className="px-4 w-full">
+                {purchaseOrderItemList.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-end justify-between items-center max-sm-flex-col"
+                  >
+                    {/* ITEM DROPDOWN */}
+                    <div className="w-full lg:w-4/12 px-4 mb-4">
+                      <SelectField
+                        label="Select Item"
+                        name="itemsId"
+                        value={item.itemsId}
+                        onChange={(e) => handleItemChange(e, index)}
+                        options={dropdowns.itemList}
+                      />
+                    </div>
+
+                    {/* RATE */}
+                    <div className="w-full lg:w-3/12 px-4 mb-4">
+                      <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                        Rate
+                      </label>
+                      <input
+                        onChange={(e) => handleItemChange(e, index)}
+                        name="rate"
+                        value={item.rate}
+                        type="number"
+                        placeholder="0"
+                        className="w-full p-2 border rounded-lg bg-gray-100"
+                      />
+                    </div>
+
+                    {/* QUANTITY */}
+                    <div className="w-full lg:w-3/12 px-4 mb-4">
+                      <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        onChange={(e) => handleItemChange(e, index)}
+                        name="quantity"
+                        value={item.quantity}
+                        type="number"
+                        placeholder="0"
+                        className="w-full p-2 border rounded-lg bg-gray-100"
+                      />
+                    </div>
+
+                    {/* Delete Item  */}
+                    <div className="">
+                      <button
+                        onClick={() => handleItemDelete(index)}
+                        type="button"
+                        className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                      >
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth="0"
+                          viewBox="0 0 24 24"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ fontSize: "25px", marginTop: "7px" }}
+                        >
+                          <path fill="none" d="M0 0h24v24H0z"></path>
+                          <path fill="none" d="M0 0h24v24H0V0z"></path>
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12 1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           <div className="w-full lg:w-12/12 px-4 text-right">

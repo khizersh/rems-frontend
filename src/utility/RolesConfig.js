@@ -44,6 +44,7 @@ export const FEATURE_ALIASES = {
     "/dashboard/expense-group-detail",
     "/dashboard/material",
     "/dashboard/material-unit",
+    "/dashboard/purchase-order-list",
   ],
 };
 

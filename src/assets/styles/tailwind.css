@@ -2316,6 +2316,10 @@ select {
   right: 0px;
 }
 
+.right-8 {
+  right: 16px;
+}
+
 .bottom-0 {
   bottom: 0px;
 }
@@ -2370,6 +2374,10 @@ select {
 
 .top-25-px {
   top: 25px;
+}
+
+.top-8 {
+  top: 16px;
 }
 
 .left-40-px {

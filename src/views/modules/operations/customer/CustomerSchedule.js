@@ -130,7 +130,6 @@ const CustomerSchedule = () => {
         `/paymentSchedule/getByUnit/${filterUnit}`
       );
 
-      console.log("response :: ", response);
 
       setLoading(false);
     } catch (err) {

@@ -5,6 +5,7 @@ import { formatPaymentSchedule } from "utility/Utility";
 import { MainContext } from "context/MainContext";
 import { FaPrint } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { getOrdinal } from "utility/Utility";
 
 const PaymentSchedule = ({ unitId }) => {
   const { setLoading, notifyError } = useContext(MainContext);
@@ -345,6 +346,9 @@ const PaymentSchedule = ({ unitId }) => {
         setbuilderScheduleBreakdown(obj);
       }
 
+      console.log("responsePayment :: ",responsePayment.data?.unit);
+      
+
       setCustomer(responsePayment?.data?.customerData);
       setUnit(responsePayment?.data?.unit);
       setLoading(false);
@@ -505,8 +509,8 @@ const PaymentSchedule = ({ unitId }) => {
               <h4>Payment Schedule Summary</h4>
               <p><strong>Customer:</strong> ${customer?.name || "-"}</p>
               <p><strong>Project:</strong> ${unit?.projectName || "-"}</p>
-              <p><strong>Floor:</strong> ${unit?.floorNo || "-"}</p>
-              <p><strong>Unit:</strong> ${unit?.unitSerial || "-"}</p>
+              <p><strong>Floor:</strong> ${getOrdinal(unit?.floorNo) || "-"}</p>
+              <p><strong>Unit:</strong> ${unit?.serialNo || "-"}</p>
               <p><strong>Payment Plan Type:</strong> ${data.paymentPlanType}</p>
               <p><strong>Created Date:</strong> ${new Date(
                 data.createdDate
@@ -736,8 +740,8 @@ const PaymentSchedule = ({ unitId }) => {
             <div class="schedule-box">
               <h4>Payment Schedule Summary</h4>
               <p><strong>Project:</strong> ${unit?.projectName || "-"}</p>
-              <p><strong>Floor:</strong> ${unit?.floorNo || "-"}</p>
-              <p><strong>Unit:</strong> ${unit?.unitSerial || "-"}</p>
+              <p><strong>Floor:</strong> ${getOrdinal(unit?.floorNo) || "-"}</p>
+              <p><strong>Unit:</strong> ${unit?.serialNo || "-"}</p>
               <p><strong>Payment Plan Type:</strong> ${data.paymentPlanType}</p>
               <p><strong>Created Date:</strong> ${new Date(
                 data.createdDate
@@ -862,10 +866,10 @@ const PaymentSchedule = ({ unitId }) => {
                       <strong>Project:</strong> {unit?.projectName}
                     </p>
                     <p>
-                      <strong>Floor:</strong> {unit?.floorNo}
+                      <strong>Floor:</strong> {getOrdinal(unit?.floorNo)}
                     </p>
                     <p>
-                      <strong>Unit:</strong> {unit?.unitSerial}
+                      <strong>Unit:</strong> {unit?.serialNo}
                     </p>
                     <p>
                       <strong>Payment Plan Type:</strong>{" "}
@@ -1017,10 +1021,10 @@ const PaymentSchedule = ({ unitId }) => {
                       <strong>Project:</strong> {unit?.projectName}
                     </p>
                     <p>
-                      <strong>Floor:</strong> {unit?.floorNo}
+                      <strong>Floor:</strong> {getOrdinal(unit?.floorNo)}
                     </p>
                     <p>
-                      <strong>Unit:</strong> {unit?.unitSerial}
+                      <strong>Unit:</strong> {unit?.serialNo}
                     </p>
                     <p>
                       <strong>Payment Plan Type:</strong>{" "}

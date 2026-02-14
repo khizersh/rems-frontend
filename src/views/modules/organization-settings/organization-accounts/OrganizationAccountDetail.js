@@ -99,7 +99,6 @@ export default function OrganizationAccountDetail() {
       );
 
       setAccountData(response?.data);
-      console.log("response :: ", response);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     }
@@ -223,8 +222,6 @@ export default function OrganizationAccountDetail() {
       response.organizationTitle = organization?.name;
       response.address = organization?.address;
       response.numbers = organization?.contactNo;
-
-      console.log("response :: ", response);
 
       const html = generateOrganizationLedgerHTML(response);
 

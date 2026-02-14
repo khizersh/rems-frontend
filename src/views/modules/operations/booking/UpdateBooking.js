@@ -452,7 +452,6 @@ export default function UpdateBooking() {
         `/unit/getAllIdSerialByFloorId/${floorId}`
       );
 
-      console.log("response :: ", response);
 
       setUnitList(response.data || []);
     } catch (err) {

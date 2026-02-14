@@ -1,9 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
-import httpService from "../../../../utility/httpService.js";
+import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
-import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
+import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import { RxCross2 } from "react-icons/rx";
-import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaEye,
+  FaPen,
+  FaTimesCircle,
+  FaTrashAlt,
+} from "react-icons/fa";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 
 export default function PurchaseOrderList() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -19,14 +26,17 @@ export default function PurchaseOrderList() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const history = useHistory();
 
   // Fetch Po List
   const fetchPurchaseOrderList = async () => {
-    setLoading(true);
     try {
       const organization =
-        JSON.parse(localStorage.getItem("organization")) || null;
-
+      JSON.parse(localStorage.getItem("organization")) || null;
+      if (!organization) return;
+      
+      setLoading(true);
+      
       const payload = {
         page: page,
         size: pageSize,
@@ -110,11 +120,43 @@ export default function PurchaseOrderList() {
   };
 
   const handleEdit = ({ id }) => {
-    // setExpenseTypeId(id);
+    history.push(`/dashboard/purchase-order-update/${id}`);
   };
 
-  const handleDelete = () => {
+  const handleDelete = ({ id }) => {
     // Implement delete logic
+  };
+
+  const handleApprove = async ({ id }) => {
+    let confirm = window.confirm(
+      "Are you sure you want to approve this purchase order?",
+    );
+    if (!confirm) return;
+    setLoading(true);
+    try {
+      const response = await httpService.post(`/purchaseOrder/approve/${id}`);
+      fetchPurchaseOrderList();
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async ({ id }) => {
+    let confirm = window.confirm(
+      "Are you sure you want to cancel this purchase order?",
+    );
+    if (!confirm) return;
+    setLoading(true);
+    try {
+      const response = await httpService.post(`/purchaseOrder/cancel/${id}`);
+      fetchPurchaseOrderList();
+    } catch (err) {
+      notifyError(err.message, err.data, 4000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const actions = [
@@ -124,7 +166,24 @@ export default function PurchaseOrderList() {
       title: "View",
       className: "text-blue-600",
     },
-    { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
+    {
+      icon: FaCheckCircle,
+      onClick: handleApprove,
+      title: "Approve",
+      className: "text-green-600",
+    },
+    {
+      icon: FaTimesCircle,
+      onClick: handleCancel,
+      title: "Cancel",
+      className: "text-red-600",
+    },
+    {
+      icon: FaPen,
+      onClick: handleEdit,
+      title: "Edit",
+      className: "yellow",
+    },
     {
       icon: FaTrashAlt,
       onClick: handleDelete,
@@ -176,7 +235,7 @@ export default function PurchaseOrderList() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6 max-h-860-px overflow-y-auto">
+            <div className="p-6 space-y-6 max-h-65-vh overflow-y-auto">
               {/* PO SUMMARY */}
               <div className="bg-gray-50 border rounded-lg p-4 m-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">

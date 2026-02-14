@@ -58,7 +58,8 @@ import AccountGroupList from "views/modules/operations/expense/account-group/Acc
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
 import ItemsList from "views/modules/operations/purchasemanagement/items/ItemsList";
 import UnitsList from "views/modules/operations/purchasemanagement/units/UnitsList";
-import PurchaseOrderList from "views/modules/operations/purchasemanagement/PurchaseOrderList";
+import PurchaseOrderList from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderList";
+import PurchaseOrderUpdate from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderUpdate";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -208,6 +209,7 @@ export default function Admin() {
               { path: "/dashboard/material", component: ItemsList },
               { path: "/dashboard/material-unit", component: UnitsList },
               { path: "/dashboard/purchase-order-list", component: PurchaseOrderList },
+              { path: "/dashboard/purchase-order-update/:purchaseOrderId", component: PurchaseOrderUpdate },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

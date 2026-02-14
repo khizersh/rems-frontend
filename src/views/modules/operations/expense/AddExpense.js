@@ -38,7 +38,7 @@ const AddExpense = () => {
   const [submitting, setSubmitting] = useState(false);
   const [purchaseOrderItemList, setPurchaseOrderItemList] = useState([
     {
-      itemsId: 0,
+      itemsId: "",
       rate: 0,
       quantity: 0,
     },
@@ -175,13 +175,15 @@ const AddExpense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setResponseMessage("");
-    setLoading(true);
 
     try {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
+        if (!organization) return;
+
+      setSubmitting(true);
+      setResponseMessage("");
+      setLoading(true);
 
       if (formData.expenseType === "CONSTRUCTION") {
         formData.expenseCOAId = 0;
@@ -205,16 +207,18 @@ const AddExpense = () => {
         );
       }
 
+      let itemsSelected = purchaseOrderItemList.every((item) => item.itemsId);
+
       if (
         (formData.expenseType === "CONSTRUCTION" ||
           formData.expenseType === "PURCHASE_ORDER") &&
-        (!formData.vendorAccountId || !formData.projectId)
+        (!formData.vendorAccountId || !formData.projectId || !itemsSelected)
       ) {
         setSubmitting(false);
         setLoading(false);
         return notifyError(
           "Missing fields",
-          "Please select project and vendor",
+          "Please select project, vendor and items",
           4000,
         );
       }
@@ -312,8 +316,8 @@ const AddExpense = () => {
       ...prev,
       {
         itemsId: "",
-        quantity: "",
-        rate: "",
+        quantity: 0,
+        rate: 0,
       },
     ]);
   };
@@ -689,91 +693,89 @@ const AddExpense = () => {
                     onChange={handleChange}
                   />
                 </div>
+
+                {/* Item Form Listing  */}
+                <div className="w-full">
+                  <hr className="mt-6 border-b-1 border-blueGray-300 w-95-p mx-auto" />
+                  <div className="w-full lg:w-12/12 px-12 mb-5 flex justify-end items-center">
+                    <button
+                      type="button"
+                      onClick={handleAddMoreItem}
+                      className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                    >
+                      <FaSitemap
+                        className="w-5 h-5 inline-block "
+                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
+                      />
+                      Add Item
+                    </button>
+                  </div>
+
+                  <div className="px-4 w-full">
+                    {purchaseOrderItemList.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-end justify-between items-center max-lg-flex-col"
+                      >
+                        {/* ITEM DROPDOWN */}
+                        <div className="w-full lg:w-3/12 px-4 mb-4">
+                          <SelectField
+                            label="Select Item"
+                            name="itemsId"
+                            value={item.itemsId}
+                            onChange={(e) => handleItemChange(e, index)}
+                            options={dropdowns.itemList}
+                          />
+                        </div>
+
+                        {/* RATE */}
+                        <div className="w-full lg:w-3/12 px-4 mb-4">
+                          <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                            Rate
+                          </label>
+                          <input
+                            onChange={(e) => handleItemChange(e, index)}
+                            name="rate"
+                            value={item.rate}
+                            type="number"
+                            placeholder="0"
+                            className="w-full p-2 border rounded-lg bg-gray-100"
+                          />
+                        </div>
+
+                        {/* QUANTITY */}
+                        <div className="w-full lg:w-3/12 px-4 mb-4">
+                          <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                            Quantity
+                          </label>
+                          <input
+                            onChange={(e) => handleItemChange(e, index)}
+                            name="quantity"
+                            value={item.quantity}
+                            type="number"
+                            placeholder="0"
+                            className="w-full p-2 border rounded-lg bg-gray-100"
+                          />
+                        </div>
+
+                        {/* Delete Item  */}
+                        <div className="">
+                          <button
+                            onClick={() => handleItemDelete(index)}
+                            type="button"
+                            className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
+                          >
+                            <MdDeleteForever
+                              style={{ fontSize: "25px", marginTop: "7px" }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </>
             )
-          )}
-
-          {/* Item Form Listing  */}
-          {formData.expenseType === "PURCHASE_ORDER" && (
-            <>
-              <hr className="mt-6 border-b-1 border-blueGray-300 w-95-p mx-auto" />
-              <div className="w-full lg:w-12/12 px-12 mb-5 flex justify-end items-center">
-                <button
-                  type="button"
-                  onClick={handleAddMoreItem}
-                  className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                >
-                  <FaSitemap
-                    className="w-5 h-5 inline-block "
-                    style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                  />
-                  Add Item
-                </button>
-              </div>
-
-              <div className="px-4 w-full">
-                {purchaseOrderItemList.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-end justify-between items-center max-sm-flex-col"
-                  >
-                    {/* ITEM DROPDOWN */}
-                    <div className="w-full lg:w-4/12 px-4 mb-4">
-                      <SelectField
-                        label="Select Item"
-                        name="itemsId"
-                        value={item.itemsId}
-                        onChange={(e) => handleItemChange(e, index)}
-                        options={dropdowns.itemList}
-                      />
-                    </div>
-
-                    {/* RATE */}
-                    <div className="w-full lg:w-3/12 px-4 mb-4">
-                      <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                        Rate
-                      </label>
-                      <input
-                        onChange={(e) => handleItemChange(e, index)}
-                        name="rate"
-                        value={item.rate}
-                        type="number"
-                        placeholder="0"
-                        className="w-full p-2 border rounded-lg bg-gray-100"
-                      />
-                    </div>
-
-                    {/* QUANTITY */}
-                    <div className="w-full lg:w-3/12 px-4 mb-4">
-                      <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                        Quantity
-                      </label>
-                      <input
-                        onChange={(e) => handleItemChange(e, index)}
-                        name="quantity"
-                        value={item.quantity}
-                        type="number"
-                        placeholder="0"
-                        className="w-full p-2 border rounded-lg bg-gray-100"
-                      />
-                    </div>
-
-                    {/* Delete Item  */}
-                    <div className="">
-                      <button
-                        onClick={() => handleItemDelete(index)}
-                        type="button"
-                        className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
-                      >
-                        <MdDeleteForever
-                          style={{ fontSize: "25px", marginTop: "7px" }}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
           )}
 
           <div className="w-full lg:w-12/12 px-4 text-right">

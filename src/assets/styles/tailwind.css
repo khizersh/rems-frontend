@@ -1925,6 +1925,10 @@ select {
   max-height: 250px;
 }
 
+.max-h-65-vh{
+  max-height: 65vh;
+}
+
 .w-95-p{
   width: 95%;
 }

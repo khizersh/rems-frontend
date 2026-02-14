@@ -53,6 +53,7 @@ export default function UpdateBooking() {
   const [floorOptions, setFloorOptions] = useState([]);
   const [booking, setBooking] = useState({
     customerId: null,
+    id: null,
     unitId: null,
     floorId: null,
     projectId: null,
@@ -399,6 +400,7 @@ export default function UpdateBooking() {
     updatedBooking.floorId = filterFloor;
     updatedBooking.organizationId = organization.organizationId;
     updatedBooking.paymentSchedule = paymentSchedule;
+    updatedBooking.id = bookingId;
 
     console.log("updatedBooking :: ", updatedBooking);
 
@@ -1094,7 +1096,6 @@ export default function UpdateBooking() {
                           </button>
                         </div>
 
-                        {console.log("schedule inner :: ", paymentSchedule)}
                         {paymentSchedule?.monthSpecificPaymentList?.map(
                           (monthly, mIndex) => (
                             <div className="mt-6 flex flex-wrap justify-between">
@@ -1223,7 +1224,7 @@ export default function UpdateBooking() {
               className="w-5 h-5 inline-block "
               style={{ paddingBottom: "3px", paddingRight: "5px" }}
             />
-            Add Booking
+            Update Booking
           </button>
         </form>
       </div>

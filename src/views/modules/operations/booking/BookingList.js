@@ -132,7 +132,8 @@ export default function BookingList() {
   };
 
   const handleSchedule = async (unit) => {
-    history.push("/dashboard/customer-schedule/" + unit?.id);
+
+    history.push("/dashboard/customer-schedule/" + unit?.unitId);
   };
   const tableColumns = [
     {

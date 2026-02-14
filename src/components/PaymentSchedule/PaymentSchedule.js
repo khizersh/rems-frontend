@@ -139,7 +139,6 @@ const PaymentSchedule = ({ unitId }) => {
         `/paymentSchedule/getByUnit/${unitId}`
       );
 
-      console.log("responsePayment :: ", responsePayment);
 
       setCustomerScheduleBreakdown([]);
       setCustomerSchedule(null);

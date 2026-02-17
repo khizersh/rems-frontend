@@ -179,7 +179,7 @@ const AddExpense = () => {
     try {
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
-        if (!organization) return;
+      if (!organization) return;
 
       setSubmitting(true);
       setResponseMessage("");
@@ -238,9 +238,7 @@ const AddExpense = () => {
           ? await httpService.post("/expense/addExpense", requestBody)
           : await httpService.post("/purchaseOrder/createPO", requestBody);
       await notifySuccess(response.responseMessage, 4000);
-      // setSubmitting(false);
       resetForm();
-      // setLoading(false);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -306,7 +304,7 @@ const AddExpense = () => {
 
     setPurchaseOrderItemList((prev) => {
       let updated = [...prev];
-      updated[index] = { ...updated[index], [name]: Number(value) };
+      updated[index] = { ...updated[index], [name]: value === "" ? "" : Number(value) };
       return updated;
     });
   };
@@ -738,7 +736,6 @@ const AddExpense = () => {
                             name="rate"
                             value={item.rate}
                             type="number"
-                            placeholder="0"
                             className="w-full p-2 border rounded-lg bg-gray-100"
                           />
                         </div>
@@ -753,7 +750,6 @@ const AddExpense = () => {
                             name="quantity"
                             value={item.quantity}
                             type="number"
-                            placeholder="0"
                             className="w-full p-2 border rounded-lg bg-gray-100"
                           />
                         </div>

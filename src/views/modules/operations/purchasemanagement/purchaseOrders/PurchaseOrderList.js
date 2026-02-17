@@ -11,6 +11,8 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import { MdFactCheck } from "react-icons/md";
+import { RiFileAddFill, RiFileListFill } from "react-icons/ri";
 
 export default function PurchaseOrderList() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -32,11 +34,11 @@ export default function PurchaseOrderList() {
   const fetchPurchaseOrderList = async () => {
     try {
       const organization =
-      JSON.parse(localStorage.getItem("organization")) || null;
+        JSON.parse(localStorage.getItem("organization")) || null;
       if (!organization) return;
-      
+
       setLoading(true);
-      
+
       const payload = {
         page: page,
         size: pageSize,
@@ -114,19 +116,23 @@ export default function PurchaseOrderList() {
     { header: "Status", field: "status" },
   ];
 
+  // Handle View Po Details
   const handleView = ({ id }) => {
     setPurchaseOrderId(id);
     setIsModalOpen(true);
   };
 
+  // Handle Edit Po
   const handleEdit = ({ id }) => {
     history.push(`/dashboard/purchase-order-update/${id}`);
   };
 
+  // Handle Delete Po
   const handleDelete = ({ id }) => {
     // Implement delete logic
   };
 
+  // Handle Approve PO
   const handleApprove = async ({ id }) => {
     let confirm = window.confirm(
       "Are you sure you want to approve this purchase order?",
@@ -135,6 +141,7 @@ export default function PurchaseOrderList() {
     setLoading(true);
     try {
       const response = await httpService.post(`/purchaseOrder/approve/${id}`);
+      await notifySuccess(response.responseMessage, 4000);
       fetchPurchaseOrderList();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -143,6 +150,7 @@ export default function PurchaseOrderList() {
     }
   };
 
+  // Handle Cancel Po
   const handleCancel = async ({ id }) => {
     let confirm = window.confirm(
       "Are you sure you want to cancel this purchase order?",
@@ -151,12 +159,23 @@ export default function PurchaseOrderList() {
     setLoading(true);
     try {
       const response = await httpService.post(`/purchaseOrder/cancel/${id}`);
+      await notifySuccess(response.responseMessage, 4000);
       fetchPurchaseOrderList();
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle Add Grn
+  const handleAddGrn = ({ id }) => {
+    
+  };
+
+  // Handle View Grn
+  const handleViewGrn = ({ id }) => {
+    // Implement delete logic
   };
 
   const actions = [
@@ -177,6 +196,18 @@ export default function PurchaseOrderList() {
       onClick: handleCancel,
       title: "Cancel",
       className: "text-red-600",
+    },
+    {
+      icon: RiFileListFill,
+      onClick: handleViewGrn,
+      title: "View GRN",
+      className: "text-blue-600",
+    },
+    {
+      icon: RiFileAddFill,
+      onClick: handleAddGrn,
+      title: "Add GRN",
+      className: "text-green-600",
     },
     {
       icon: FaPen,

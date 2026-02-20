@@ -295,6 +295,9 @@ button:hover {
   .max-lg-items-center {
     align-items: center;
   }
+  .max-lg-w-full {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {

@@ -123,7 +123,14 @@ export default function PurchaseOrderList() {
   };
 
   // Handle Edit Po
-  const handleEdit = ({ id }) => {
+  const handleEdit = ({ id, status }) => {
+    if (status !== "OPEN") {
+      return notifyError(
+        "Edit Not Allowed",
+        "Only open purchase orders can be edited",
+        4000,
+      );
+    }
     history.push(`/dashboard/purchase-order-update/${id}`);
   };
 
@@ -133,7 +140,14 @@ export default function PurchaseOrderList() {
   };
 
   // Handle Approve PO
-  const handleApprove = async ({ id }) => {
+  const handleApprove = async ({ id, status }) => {
+    if (status !== "OPEN") {
+      return notifyError(
+        "Approve Not Allowed",
+        "Only open purchase orders can be approved",
+        4000,
+      );
+    }
     let confirm = window.confirm(
       "Are you sure you want to approve this purchase order?",
     );
@@ -151,7 +165,14 @@ export default function PurchaseOrderList() {
   };
 
   // Handle Cancel Po
-  const handleCancel = async ({ id }) => {
+  const handleCancel = async ({ id, status }) => {
+    if (status !== "OPEN") {
+      return notifyError(
+        "Cancel Not Allowed",
+        "Only open purchase orders can be cancelled",
+        4000,
+      );
+    }
     let confirm = window.confirm(
       "Are you sure you want to cancel this purchase order?",
     );
@@ -169,13 +190,27 @@ export default function PurchaseOrderList() {
   };
 
   // Handle Add Grn
-  const handleAddGrn = ({ id }) => {
-    
+  const handleAddGrn = ({ id, status }) => {
+    if (status !== "PARTIAL") {
+      return notifyError(
+        "Add GRN Not Allowed",
+        "GRN can only be added for partial purchase orders",
+        4000,
+      );
+    }
+    history.push(`/dashboard/add-good-receiving-notes/?poId=${id}`);
   };
 
   // Handle View Grn
-  const handleViewGrn = ({ id }) => {
-    // Implement delete logic
+  const handleViewGrn = ({ id, status }) => {
+    if (status !== "PARTIAL") {
+      return notifyError(
+        "View GRN Not Allowed",
+        "GRN can only be viewed for partial purchase orders",
+        4000,
+      );
+    }
+    history.push(`/dashboard/good-receiving-notes-list/?poId=${id}`);
   };
 
   const actions = [

@@ -3,24 +3,28 @@ import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { FaSitemap } from "react-icons/fa";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import {
+  useHistory,
+  useLocation,
+} from "react-router-dom/cjs/react-router-dom.min";
 import { IoArrowBackOutline } from "react-icons/io5";
 
 const AddGoodReceivingNotes = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
     useContext(MainContext);
-
+  const [submitting, setSubmitting] = useState(false);
+  const [grnItemsList, setGrnItemsList] = useState([]);
+  const [purchaseOrderList, setPurchaseOrderList] = useState([]);
+  const history = useHistory();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const poId = queryParams.get("poId");
   const [formData, setFormData] = useState({
     poId: "",
     receivedDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
       .toISOString()
       .slice(0, 16),
   });
-
-  const [submitting, setSubmitting] = useState(false);
-  const [grnItemsList, setGrnItemsList] = useState([]);
-  const [purchaseOrderList, setPurchaseOrderList] = useState([]);
-  const history = useHistory();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,8 +92,10 @@ const AddGoodReceivingNotes = () => {
       };
 
       const response = await httpService.post("/grn/create", requestBody);
-      await notifySuccess(response.responseMessage, 4000);
-      // history.goBack();
+      notifySuccess(response.responseMessage, 4000);
+      setTimeout(() => {
+        history.push("/dashboard/good-receiving-notes-list");
+      }, 200);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -109,9 +115,8 @@ const AddGoodReceivingNotes = () => {
       const response = await httpService.get(
         `/purchaseOrder/${org.organizationId}/getByStatus?status=PARTIAL`,
       );
-      console.log(response);
-
       setPurchaseOrderList(response?.data || []);
+      poId && setFormData((prev) => ({ ...prev, poId }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -124,11 +129,21 @@ const AddGoodReceivingNotes = () => {
   }, []);
 
   useEffect(() => {
-    if (!formData.poId) {
+    if (purchaseOrderList.length === 0) return;
+
+    if (!formData.poId && !poId) {
       return setGrnItemsList([]);
     }
 
     let selectedPO = purchaseOrderList.find((item) => item.id == formData.poId);
+    if (poId && !selectedPO) {
+      return notifyError(
+        "Invalid Purchase Order",
+        "This purchase order is not partial or invalid",
+        4000,
+      );
+    }
+
     let grnItems = selectedPO?.purchaseOrderItemList.map((item) => ({
       poItemId: item?.id,
       quantityReceived: 0,
@@ -175,13 +190,14 @@ const AddGoodReceivingNotes = () => {
       </div>
       {/* Add Grn Form */}
       <form onSubmit={handleSubmit}>
-        <div className="flex max-lg-flex-col items-center">
+        <div className="flex max-lg-flex-col items-center shadow-lg py-5">
           {/* Po Dropdown */}
           <div className="w-full lg:w-5/12 px-4 mt-3">
             <SelectField
               label="Select Purchase Order"
               name="poId"
               value={formData.poId}
+              disabled={poId}
               onChange={handleChange}
               options={purchaseOrderList}
             />
@@ -222,8 +238,8 @@ const AddGoodReceivingNotes = () => {
                     <input
                       value={item.name}
                       type="text"
-                      readOnly={true}
-                      className="w-full p-2 border rounded-lg"
+                      disabled={true}
+                      className="w-full p-2 border rounded-lg no-disabled-styles"
                     />
                   </div>
 
@@ -235,8 +251,8 @@ const AddGoodReceivingNotes = () => {
                     <input
                       value={item.quantity}
                       type="text"
-                      readOnly={true}
-                      className="w-full p-2 border rounded-lg"
+                      disabled={true}
+                      className="w-full p-2 border rounded-lg no-disabled-styles"
                     />
                   </div>
 
@@ -248,8 +264,8 @@ const AddGoodReceivingNotes = () => {
                     <input
                       value={item.quantity - item.receivedQuantity}
                       type="text"
-                      readOnly={true}
-                      className="w-full p-2 border rounded-lg"
+                      disabled={true}
+                      className="w-full p-2 border rounded-lg no-disabled-styles"
                     />
                   </div>
 
@@ -276,7 +292,7 @@ const AddGoodReceivingNotes = () => {
         <div className="w-full lg:w-12/12 px-4 text-right">
           <button
             type="submit"
-            disabled={loading || submitting}
+            disabled={loading || submitting || grnItemsList.length === 0}
             className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
           >
             <TbFileExport
@@ -318,14 +334,15 @@ const InputField = ({
   </div>
 );
 
-const SelectField = ({ label, name, value, onChange, options }) => (
+const SelectField = ({ label, name, value, onChange, options, disabled }) => (
   <div>
     <label className="block text-xs font-small mb-1">{label}</label>
     <select
+      disabled={disabled}
       name={name}
       value={value}
       onChange={onChange}
-      className="border rounded-lg px-3 w-full"
+      className="border rounded-lg px-3 w-full no-disabled-styles"
     >
       <option value="">Select</option>
       {options.map((opt) => (

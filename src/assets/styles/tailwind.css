@@ -2727,6 +2727,16 @@ select {
   z-index: 50;
 }
 
+.cursor-n-allowed{
+  cursor: not-allowed;
+}
+
+.no-disabled-styles:disabled {
+  background-color: white !important;
+  color: #544e4e !important;
+  cursor: not-allowed;
+}
+
 .transform {
   --tw-translate-x: 0;
   --tw-translate-y: 0;

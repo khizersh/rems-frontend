@@ -24,6 +24,7 @@ const PurchaseOrderUpdate = () => {
   const [responseMessage, setResponseMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [purchaseOrderItemList, setPurchaseOrderItemList] = useState([]);
+  const [poStatus, setPoStatus] = useState(null);
   const { purchaseOrderId } = useParams();
   const history = useHistory();
   const [dropdowns, setDropdowns] = useState({
@@ -42,16 +43,16 @@ const PurchaseOrderUpdate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const organization =
-      JSON.parse(localStorage.getItem("organization")) || null;
+        JSON.parse(localStorage.getItem("organization")) || null;
       if (!organization) return;
-      
+
       setSubmitting(true);
       setResponseMessage("");
       setLoading(true);
-      
+
       if (formData.totalAmount <= 0) {
         setSubmitting(false);
         setLoading(false);
@@ -131,21 +132,31 @@ const PurchaseOrderUpdate = () => {
       let items = response?.data?.items;
       let po = response?.data?.po;
 
+      if (po?.status !== "OPEN") {
+        setPoStatus(po?.status);
+        notifyError(
+          "Update Not Allowed",
+          "Only open purchase orders can be updated",
+          4000,
+        );
+        return;
+      }
+
       let itemsList = items.map((item) => ({
-        itemsId: item?.items?.id || 0,
-        rate: item?.rate || 0,
-        quantity: item?.quantity || 0,
-        id: item?.id || 0,
+        itemsId: item?.items?.id,
+        rate: item?.rate,
+        quantity: item?.quantity,
+        id: item?.id,
       }));
 
       setPurchaseOrderItemList(itemsList);
 
       setFormData((prev) => ({
         ...prev,
-        projectId: po?.projectId || 0,
-        vendorId: po?.vendorId || 0,
-        totalAmount: po?.totalAmount || 0,
-        id: po?.id || 0,
+        projectId: po?.projectId,
+        vendorId: po?.vendorId,
+        totalAmount: po?.totalAmount,
+        id: po?.id,
       }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -195,6 +206,29 @@ const PurchaseOrderUpdate = () => {
     setPurchaseOrderItemList((prev) => prev.filter((_, i) => i !== index));
   };
 
+  if (poStatus && poStatus !== "OPEN") {
+    return (
+      <div className="mb-0 py-6">
+        <h6 className="text-blueGray-700 font-bold uppercase">
+          <span>
+            <button className="">
+              <IoArrowBackOutline
+                onClick={() => history.goBack()}
+                className="back-button-icon inline-block back-button"
+                style={{
+                  paddingBottom: "3px",
+                  paddingRight: "7px",
+                  marginBottom: "3px",
+                }}
+              />
+            </button>
+          </span>
+          This purchase order is no longer open for updates
+        </h6>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="mb-0 py-6">
@@ -217,7 +251,7 @@ const PurchaseOrderUpdate = () => {
       </div>
       {/* PURCHASE ORDER UPDATE FORM */}
       <form onSubmit={handleSubmit}>
-        <div className="flex max-lg-flex-col">
+        <div className="flex max-lg-flex-col shadow-lg py-5">
           {/* Project */}
           <div className="w-full lg:w-4/12 px-4 mt-3">
             <SelectField

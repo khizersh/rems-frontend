@@ -10,7 +10,8 @@ import FooterAdmin from "components/Footers/FooterAdmin.js";
 
 // views
 
-import Dashboard from "views/modules/homepages/AdminHomepage";
+import AdminDashboard from "views/modules/homepages/AdminHomepage";
+import UserDashboard from "views/modules/homepages/UserHomepage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -102,7 +103,8 @@ export default function Admin() {
 
           <Switch>
             {[
-              { path: "/dashboard", exact: true, component: Dashboard },
+              { path: "/admin-dashboard", exact: true, component: AdminDashboard },
+              { path: "/user-dashboard", exact: true, component: UserDashboard },
               {
                 path: "/dashboard/project-analysis/:projectId",
                 component: ProjectAnalytics,

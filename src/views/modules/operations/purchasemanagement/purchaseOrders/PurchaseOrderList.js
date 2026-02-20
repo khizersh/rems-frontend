@@ -11,7 +11,6 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
-import { MdFactCheck } from "react-icons/md";
 import { RiFileAddFill, RiFileListFill } from "react-icons/ri";
 
 export default function PurchaseOrderList() {
@@ -19,7 +18,6 @@ export default function PurchaseOrderList() {
     useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [purchaseOrderList, setPurchaseOrderList] = useState([]);
-  const [purchaseOrderId, setPurchaseOrderId] = useState(null);
   const [purchaseOrderItem, setPurchaseOrderItem] = useState({
     item: [],
     po: {},
@@ -79,13 +77,6 @@ export default function PurchaseOrderList() {
   };
 
   useEffect(() => {
-    if (purchaseOrderId) {
-      setPurchaseOrderItem({ item: [], po: {} });
-      fetchPoDetails(purchaseOrderId);
-    }
-  }, [purchaseOrderId]);
-
-  useEffect(() => {
     fetchPurchaseOrderList();
   }, [page, pageSize]);
 
@@ -118,8 +109,9 @@ export default function PurchaseOrderList() {
 
   // Handle View Po Details
   const handleView = ({ id }) => {
-    setPurchaseOrderId(id);
     setIsModalOpen(true);
+    setPurchaseOrderItem({ item: [], po: {} });
+    fetchPoDetails(id);
   };
 
   // Handle Edit Po

@@ -286,7 +286,7 @@ export default function AddCustomer() {
                 </div>
 
                 {/* Username */}
-                <div className="w-full lg:w-4/12 px-4 mt-5">
+                <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Username
                   </label>
@@ -300,19 +300,6 @@ export default function AddCustomer() {
                   />
                 </div>
 
-                {/* Created Date */}
-                <div className="w-full lg:w-4/12 px-4 mb-3">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Created Date
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="createdDate"
-                    value={customer.createdDate}
-                    onChange={changeCustomerFields}
-                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
-                  />
-                </div>
                 <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                     Contact No

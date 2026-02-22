@@ -38,6 +38,12 @@ import VendorHome from "views/modules/operations/vendor/VendorHome";
 import VendorPaymentHistory from "views/modules/operations/vendor/VendorPaymentHistory";
 import AddOrganizationComponent from "views/modules/organization-settings/organization-accounts/AddOrganizationAccount";
 import AddVendorComponent from "views/modules/operations/vendor/AddVendorAccount";
+
+// Customer Module Pages
+import CustomerAccounts from "views/modules/customer/CustomerAccounts";
+import CustomerPayments from "views/modules/customer/CustomerPayments";
+import CustomerLedgerPage from "views/modules/customer/CustomerLedger";
+import AccountDetails from "views/modules/customer/AccountDetails";
 import ExpenseList from "views/modules/operations/expense/ExpenseList";
 import AddExpense from "views/modules/operations/expense/AddExpense";
 import ExpenseDetailList from "views/modules/operations/expense/ExpenseDetailList";
@@ -103,8 +109,12 @@ export default function Admin() {
 
           <Switch>
             {[
-              { path: "/admin-dashboard", exact: true, component: AdminDashboard },
-              { path: "/user-dashboard", exact: true, component: UserDashboard },
+              { path: "/dashboard/admin-dashboard", exact: true, component: AdminDashboard },
+              { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
+              { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
+              { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },
+              { path: "/dashboard/user-dashboard/payments", exact: true, component: CustomerPayments },
+              { path: "/dashboard/user-dashboard/ledger", exact: true, component: CustomerLedgerPage },
               {
                 path: "/dashboard/project-analysis/:projectId",
                 component: ProjectAnalytics,

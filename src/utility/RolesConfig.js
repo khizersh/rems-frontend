@@ -48,27 +48,27 @@ export const FEATURE_ALIASES = {
 export const ROLE_DASHBOARD_PRIORITY = {
   FULL_ADMIN_ROLE: {
     priority: 1,
-    path: "/admin-dashboard",
+    path: "/dashboard/admin-dashboard",
   },
   ADMIN_ROLE: {
     priority: 2,
-    path: "/admin-dashboard",
+    path: "/dashboard/admin-dashboard",
   },
   OPERATIONS_ROLE: {
     priority: 3,
-    path: "/operations",
+    path: "/dashboard/operations",
   },
   ACCOUNTANT_ROLE: {
     priority: 4,
-    path: "/accounts",
+    path: "/dashboard/accounts",
   },
   HR_PAYROLL_ROLE: {
     priority: 5,
-    path: "/hr",
+    path: "/dashboard/hr",
   },
   USER_ROLE: {
     priority: 6,
-    path: "/user-dashboard",
+    path: "/dashboard/user-dashboard",
   },
 };
 

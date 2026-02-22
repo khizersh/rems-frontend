@@ -285,6 +285,21 @@ export default function AddCustomer() {
                   />
                 </div>
 
+                {/* Username */}
+                <div className="w-full lg:w-4/12 px-4 mt-5">
+                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={customer.username}
+                    onChange={changeCustomerFields}
+                    className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                    placeholder="Enter username"
+                  />
+                </div>
+
                 {/* Created Date */}
                 <div className="w-full lg:w-4/12 px-4 mb-3">
                   <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">

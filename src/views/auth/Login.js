@@ -45,6 +45,10 @@ export default function Login() {
 
       const homePath = resolveHomepageByRole(role);
 
+      console.log("role", role);
+      console.log("homePath", homePath);
+      
+
 
       history.replace(homePath);
     } catch (err) {

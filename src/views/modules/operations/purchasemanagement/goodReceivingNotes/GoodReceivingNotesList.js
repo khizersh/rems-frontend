@@ -33,7 +33,7 @@ export default function GoodReceivingNotesList() {
   const [payloadData, setPayloadData] = useState({
     poId: null,
     vendorId: null,
-    status: null,
+    status: "RECEIVED",
   });
   const [dropdowns, setDropdowns] = useState({
     purchaseOrders: [],
@@ -267,7 +267,7 @@ export default function GoodReceivingNotesList() {
               <SelectField
                 label="Select Status"
                 name="status"
-                value={payloadData.status || "RECEIVED"}
+                value={payloadData.status}
                 disabled={poId}
                 onChange={handleChange}
                 options={dropdowns.status}

@@ -48,6 +48,7 @@ export const FEATURE_ALIASES = {
     "/dashboard/purchase-order-update",
     "/dashboard/add-good-receiving-notes",
     "/dashboard/good-receiving-notes-list",
+    "/dashboard/update-good-receiving-notes",
   ],
 };
 

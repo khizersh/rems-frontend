@@ -60,8 +60,9 @@ import ItemsList from "views/modules/operations/purchasemanagement/items/ItemsLi
 import UnitsList from "views/modules/operations/purchasemanagement/units/UnitsList";
 import PurchaseOrderList from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderList";
 import PurchaseOrderUpdate from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderUpdate";
-import AddGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/AddGoodReceivingNotes";
 import GoodReceivingNotesList from "views/modules/operations/purchasemanagement/goodReceivingNotes/GoodReceivingNotesList";
+import AddGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/AddGoodReceivingNotes";
+import UpdateGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/UpdateGoodReceivingNotes";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -214,6 +215,7 @@ export default function Admin() {
               { path: "/dashboard/purchase-order-update/:purchaseOrderId", component: PurchaseOrderUpdate },
               { path: "/dashboard/add-good-receiving-notes", component: AddGoodReceivingNotes },
               { path: "/dashboard/good-receiving-notes-list", component: GoodReceivingNotesList },
+              { path: "/dashboard/update-good-receiving-notes/:grnId", component: UpdateGoodReceivingNotes },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

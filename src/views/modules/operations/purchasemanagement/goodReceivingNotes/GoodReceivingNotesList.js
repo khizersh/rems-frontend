@@ -182,16 +182,17 @@ export default function GoodReceivingNotesList() {
     { header: "createdBy", field: "createdBy" },
   ];
 
-  // Handle View Po Details
+  // Handle View GRN Details
   const handleView = ({ id }) => {
     fetchGrnDetails(id);
     setIsModalOpen(true);
   };
 
-  // Handle Edit Po
-  const handleEdit = ({ id }) => {};
+  // Handle Edit GRN
+  const handleEdit = ({ id }) => {
+    history.push(`/dashboard/update-good-receiving-notes/${id}`);
+  };
 
-  // Handle Delete Po
   const handleDelete = ({ id }) => {
     // Implement delete logic
   };
@@ -374,7 +375,7 @@ const SelectField = ({ label, name, value, onChange, options, disabled }) => (
       value={value || ""}
       onChange={onChange}
       disabled={disabled}
-      className="border rounded-lg px-3 py-2 w-full no-disabled-styles"
+      className="border rounded-lg px-3 py-2 w-full disabled-styles"
     >
       <option value="">Select</option>
       {options.map((opt) => (

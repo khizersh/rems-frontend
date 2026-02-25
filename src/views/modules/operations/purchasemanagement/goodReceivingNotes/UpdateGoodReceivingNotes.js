@@ -5,25 +5,23 @@ import { TbFileExport } from "react-icons/tb";
 import { FaSitemap } from "react-icons/fa";
 import {
   useHistory,
-  useLocation,
+  useParams,
 } from "react-router-dom/cjs/react-router-dom.min";
 import { IoArrowBackOutline } from "react-icons/io5";
 
-const AddGoodReceivingNotes = () => {
+const UpdateGoodReceivingNotes = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
     useContext(MainContext);
   const [submitting, setSubmitting] = useState(false);
-  const [grnItemsList, setGrnItemsList] = useState([]);
-  const [purchaseOrderList, setPurchaseOrderList] = useState([]);
+  const [grn, setGrn] = useState({});
+  const [grnItems, setGrnItems] = useState([]);
   const history = useHistory();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const poId = queryParams.get("poId");
+  const { grnId } = useParams();
   const [formData, setFormData] = useState({
     poId: "",
-    receivedDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16),
+    receivedDate: "",
+    receiptType: null,
+    warehouseId: null,
   });
 
   const handleChange = (e) => {
@@ -45,17 +43,7 @@ const AddGoodReceivingNotes = () => {
       setSubmitting(true);
       setLoading(true);
 
-      if (!formData.poId || !formData.receivedDate) {
-        setSubmitting(false);
-        setLoading(false);
-        return notifyError(
-          "Missing field",
-          "Please select Purchase Order and Received Date",
-          4000,
-        );
-      }
-
-      let ReceivedQuantity = grnItemsList.every(
+      let ReceivedQuantity = grnItems.every(
         (item) => item.quantityReceived !== "" && item.quantityReceived >= 0,
       );
       if (!ReceivedQuantity) {
@@ -68,30 +56,18 @@ const AddGoodReceivingNotes = () => {
         );
       }
 
-      let checkReceivedQuantity = grnItemsList.every(
-        (item) =>
-          item.quantityReceived <= item.quantity - item.receivedQuantity,
-      );
-
-      if (!checkReceivedQuantity) {
-        setSubmitting(false);
-        setLoading(false);
-        return notifyError(
-          "Invalid Received Quantity",
-          "Received quantity cannot be greater than pending quantity",
-          4000,
-        );
-      }
-
       let requestBody = {
         ...formData,
-        grnItemsList: grnItemsList.map((item) => ({
+        grnItemsList: grnItems.map((item) => ({
           poItemId: item.poItemId,
           quantityReceived: item.quantityReceived,
         })),
       };
 
-      const response = await httpService.post("/grn/create", requestBody);
+      const response = await httpService.post(
+        `/grn/update/${grnId}`,
+        requestBody,
+      );
       notifySuccess(response.responseMessage, 4000);
       setTimeout(() => {
         history.push("/dashboard/good-receiving-notes-list");
@@ -104,19 +80,41 @@ const AddGoodReceivingNotes = () => {
     }
   };
 
-  // Fetch Purchase Order List For Dropdown
-  const fetchPurchaseOrderList = async () => {
+  // Fetch Grn Items & Purchase Orders
+  const fetchAllData = async () => {
     try {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
 
       setLoading(true);
 
-      const response = await httpService.get(
-        `/purchaseOrder/${org.organizationId}/getByStatus?status=PARTIAL`,
-      );
-      setPurchaseOrderList(response?.data || []);
-      poId && setFormData((prev) => ({ ...prev, poId }));
+      const [grn, purchaseOrders, items] = await Promise.all([
+        httpService.get(`/grn/getById/${grnId}`),
+        httpService.get(
+          `/purchaseOrder/${org.organizationId}/getByStatus?status=PARTIAL`,
+        ),
+        httpService.get(`/items/${org.organizationId}/list`),
+      ]);
+
+      let poNo = purchaseOrders?.data.find((po) => po.id === grn?.data?.poId);
+      setGrn({ ...grn?.data, poNumber: poNo?.poNumber });
+
+      const formatedItems = items?.data?.reduce((acc, i) => {
+        acc[i.id] = i.name;
+        return acc;
+      }, {});
+
+      let grnItemsWithNames = grn?.data?.grnItemsList?.map((item) => ({
+        ...item,
+        itemName: formatedItems?.[item.itemId] || "",
+      }));
+      setGrnItems(grnItemsWithNames);
+
+      setFormData((prev) => ({
+        ...prev,
+        poId: grn?.data?.poId,
+        receivedDate: grn?.data?.receivedDate,
+      }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -125,46 +123,20 @@ const AddGoodReceivingNotes = () => {
   };
 
   useEffect(() => {
-    fetchPurchaseOrderList();
+    fetchAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (purchaseOrderList.length === 0) return;
-
-    if (!formData.poId && !poId) {
-      return setGrnItemsList([]);
-    }
-
-    let selectedPO = purchaseOrderList.find((item) => item.id == formData.poId);
-    if (poId && !selectedPO) {
-      return notifyError(
-        "Invalid Purchase Order",
-        "This purchase order is not partial or invalid",
-        4000,
-      );
-    }
-
-    let grnItems = selectedPO?.purchaseOrderItemList.map((item) => ({
-      poItemId: item?.id,
-      quantityReceived: 0,
-      name: item?.items?.name,
-      quantity: item?.quantity,
-      receivedQuantity: item?.receivedQuantity,
-    }));
-
-    setGrnItemsList(grnItems || []);
-  }, [formData.poId]);
 
   const handleItemChange = (e, index) => {
     const { name, value } = e.target;
 
-    setGrnItemsList((prev) => {
-      let updated = [...prev];
-      updated[index] = {
-        ...updated[index],
+    setGrnItems((prev) => {
+      let updatedGrnItems = [...prev];
+      updatedGrnItems[index] = {
+        ...updatedGrnItems[index],
         [name]: value === "" ? "" : Number(value),
       };
-      return updated;
+      return updatedGrnItems;
     });
   };
 
@@ -185,21 +157,32 @@ const AddGoodReceivingNotes = () => {
               />
             </button>
           </span>
-          ADD GOOD RECEIVING NOTES
+          UPDATE GOOD RECEIVING NOTES
         </h6>
       </div>
       {/* Add Grn Form */}
-      <form onSubmit={handleSubmit}>
-        <div className="flex max-lg-flex-col items-center shadow-lg py-5">
-          {/* Po Dropdown */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-12 shadow-lg p-5"
+      >
+        <div className="flex max-lg-flex-col items-center">
+          {/* Grn Number  */}
           <div className="w-full lg:w-5/12 px-4 mt-3">
-            <SelectField
-              label="Select Purchase Order"
-              name="poId"
-              value={formData.poId}
-              disabled={poId}
-              onChange={handleChange}
-              options={purchaseOrderList}
+            <InputField
+              label="GRN No"
+              type="text"
+              value={grn.grnNumber}
+              disabled={true}
+            />
+          </div>
+
+          {/* Purchase Order */}
+          <div className="w-full lg:w-5/12 px-4 mt-3">
+            <InputField
+              label="Purchase Order"
+              type="text"
+              value={grn.poNumber}
+              disabled={true}
             />
           </div>
 
@@ -216,53 +199,40 @@ const AddGoodReceivingNotes = () => {
         </div>
 
         <hr className="mt-6 mb-2 border-b-1 border-blueGray-300 w-full mx-auto" />
-        {/* Po Item Listing  */}
+
         <div className="w-full">
           <div className="flex items-center g-1 py-3 px-4">
             <FaSitemap />
             <h6 className="text-blueGray-600 text-sm font-bold uppercase">
-              {formData.poId ? "Items List" : "Select po to view items"}
+              Items List
             </h6>
           </div>
 
           <div className="px-4 w-full">
             {/* ITEMS LISTING  */}
-            {grnItemsList.map((item, index) => (
+            {grnItems.map((item, index) => (
               <div key={index}>
-                <div className="flex items-end items-center max-lg-flex-col">
+                <div className="flex items-end items-center max-lg-flex-col hover:shadow-md">
                   {/* ITEM NAME */}
                   <div className="w-full lg:w-4/12 px-4 mb-4">
                     <label className="block text-blueGray-500 text-xs font-bold mb-1">
                       Purchase Order Item
                     </label>
                     <input
-                      value={item.name}
+                      value={item.itemName}
                       type="text"
                       disabled={true}
                       className="w-full p-2 border rounded-lg disabled-styles"
                     />
                   </div>
 
-                  {/* ORDERED QUANTITY  */}
+                  {/* Invoiced QUANTITY  */}
                   <div className="w-full lg:w-4/12 px-4 mb-4">
                     <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Ordered Quantity
+                      Invoiced Quantity
                     </label>
                     <input
-                      value={item.quantity}
-                      type="text"
-                      disabled={true}
-                      className="w-full p-2 border rounded-lg disabled-styles"
-                    />
-                  </div>
-
-                  {/* PENDING QUANTITY  */}
-                  <div className="w-full lg:w-4/12 px-4 mb-4">
-                    <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Pending Quantity
-                    </label>
-                    <input
-                      value={item.quantity - item.receivedQuantity}
+                      value={item.quantityInvoiced}
                       type="text"
                       disabled={true}
                       className="w-full p-2 border rounded-lg disabled-styles"
@@ -292,14 +262,14 @@ const AddGoodReceivingNotes = () => {
         <div className="w-full lg:w-12/12 px-4 text-right">
           <button
             type="submit"
-            disabled={loading || submitting || grnItemsList.length === 0}
+            disabled={loading || submitting}
             className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
           >
             <TbFileExport
               className="w-5 h-5 inline-block "
               style={{ paddingBottom: "3px", paddingRight: "5px" }}
             />
-            {submitting ? "Submitting..." : "Add Grn"}
+            {submitting ? "Submitting..." : "Update Grn"}
           </button>
         </div>
       </form>
@@ -307,7 +277,7 @@ const AddGoodReceivingNotes = () => {
   );
 };
 
-export default AddGoodReceivingNotes;
+export default UpdateGoodReceivingNotes;
 
 const InputField = ({
   label,
@@ -316,6 +286,7 @@ const InputField = ({
   onChange,
   type = "text",
   readOnly = false,
+  disabled = false,
 }) => (
   <div>
     <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -324,32 +295,13 @@ const InputField = ({
     <input
       type={type}
       name={name}
-      value={value}
+      value={value ?? ""}
       onChange={onChange}
       readOnly={readOnly}
+      disabled={disabled}
       className={`w-full p-2 border rounded-lg ${
-        readOnly ? "bg-gray-100 cursor-not-allowed" : ""
+        disabled ? "disabled-styles" : ""
       }`}
     />
-  </div>
-);
-
-const SelectField = ({ label, name, value, onChange, options, disabled }) => (
-  <div>
-    <label className="block text-xs font-small mb-1">{label}</label>
-    <select
-      disabled={disabled}
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="border rounded-lg px-3 w-full disabled-styles"
-    >
-      <option value="">Select</option>
-      {options.map((opt) => (
-        <option key={opt.id} value={opt.id}>
-          {opt.poNumber || opt.name}
-        </option>
-      ))}
-    </select>
   </div>
 );

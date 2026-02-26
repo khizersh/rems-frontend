@@ -94,7 +94,8 @@ const AddGoodReceivingNotes = () => {
       const response = await httpService.post("/grn/create", requestBody);
       notifySuccess(response.responseMessage, 4000);
       setTimeout(() => {
-        history.push("/dashboard/good-receiving-notes-list");
+        // history.push("/dashboard/good-receiving-notes-list");
+        history.goBack();
       }, 200);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -189,10 +190,10 @@ const AddGoodReceivingNotes = () => {
         </h6>
       </div>
       {/* Add Grn Form */}
-      <form onSubmit={handleSubmit}>
-        <div className="flex max-lg-flex-col items-center shadow-lg py-5">
+      <form onSubmit={handleSubmit} className="bg-white rounded-12 shadow-lg p-5">
+        <div className="flex max-lg-flex-col items-center justify-center">
           {/* Po Dropdown */}
-          <div className="w-full lg:w-5/12 px-4 mt-3">
+          <div className="w-full lg:w-6/12 px-4 mt-3">
             <SelectField
               label="Select Purchase Order"
               name="poId"
@@ -204,7 +205,7 @@ const AddGoodReceivingNotes = () => {
           </div>
 
           {/* Received Date */}
-          <div className="w-full lg:w-5/12 px-4 mt-3">
+          {/* <div className="w-full lg:w-5/12 px-4 mt-3">
             <InputField
               label="Received Date"
               name="receivedDate"
@@ -212,82 +213,99 @@ const AddGoodReceivingNotes = () => {
               value={formData.receivedDate}
               onChange={handleChange}
             />
-          </div>
+          </div> */}
         </div>
 
         <hr className="mt-6 mb-2 border-b-1 border-blueGray-300 w-full mx-auto" />
-        {/* Po Item Listing  */}
-        <div className="w-full">
-          <div className="flex items-center g-1 py-3 px-4">
-            <FaSitemap />
-            <h6 className="text-blueGray-600 text-sm font-bold uppercase">
-              {formData.poId ? "Items List" : "Select po to view items"}
-            </h6>
-          </div>
 
-          <div className="px-4 w-full">
-            {/* ITEMS LISTING  */}
-            {grnItemsList.map((item, index) => (
-              <div key={index}>
-                <div className="flex items-end items-center max-lg-flex-col">
-                  {/* ITEM NAME */}
-                  <div className="w-full lg:w-4/12 px-4 mb-4">
-                    <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Purchase Order Item
-                    </label>
-                    <input
-                      value={item.name}
-                      type="text"
-                      disabled={true}
-                      className="w-full p-2 border rounded-lg disabled-styles"
-                    />
-                  </div>
-
-                  {/* ORDERED QUANTITY  */}
-                  <div className="w-full lg:w-4/12 px-4 mb-4">
-                    <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Ordered Quantity
-                    </label>
-                    <input
-                      value={item.quantity}
-                      type="text"
-                      disabled={true}
-                      className="w-full p-2 border rounded-lg disabled-styles"
-                    />
-                  </div>
-
-                  {/* PENDING QUANTITY  */}
-                  <div className="w-full lg:w-4/12 px-4 mb-4">
-                    <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Pending Quantity
-                    </label>
-                    <input
-                      value={item.quantity - item.receivedQuantity}
-                      type="text"
-                      disabled={true}
-                      className="w-full p-2 border rounded-lg disabled-styles"
-                    />
-                  </div>
-
-                  {/* RECEIVED QUANTITY */}
-                  <div className="w-full lg:w-4/12 px-4 mb-4">
-                    <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                      Received Quantity
-                    </label>
-                    <input
-                      onChange={(e) => handleItemChange(e, index)}
-                      name="quantityReceived"
-                      value={item.quantityReceived}
-                      type="number"
-                      className="w-full p-2 border rounded-lg"
-                    />
-                  </div>
-                </div>
-                <hr className="py-2 border-b-1 border-blueGray-300 w-full mx-auto" />
+        {formData.poId && (
+          <>
+            {/* Received Date */}
+            <div className="flex justify-center mb-2">
+              <div className="w-full lg:w-4/12 px-4 mt-3">
+                <InputField
+                  label="Received Date"
+                  name="receivedDate"
+                  type="datetime-local"
+                  value={formData.receivedDate}
+                  onChange={handleChange}
+                />
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+            {/* Po Item Listing  */}
+            <div className="w-full">
+              <div className="flex items-center g-1 py-3 px-4">
+                <FaSitemap />
+                <h6 className="text-blueGray-600 text-sm font-bold uppercase">
+                  Items List
+                </h6>
+              </div>
+
+              <div className="px-4 w-full">
+                {/* ITEMS LISTING  */}
+                {grnItemsList.map((item, index) => (
+                  <div key={index}>
+                    <div className="flex items-end items-center max-lg-flex-col hover:shadow-lg">
+                      {/* ITEM NAME */}
+                      <div className="w-full lg:w-4/12 px-4 mb-4">
+                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                          Purchase Order Item
+                        </label>
+                        <input
+                          value={item.name}
+                          type="text"
+                          disabled={true}
+                          className="w-full p-2 border rounded-lg disabled-styles"
+                        />
+                      </div>
+
+                      {/* ORDERED QUANTITY  */}
+                      <div className="w-full lg:w-4/12 px-4 mb-4">
+                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                          Ordered Quantity
+                        </label>
+                        <input
+                          value={item.quantity}
+                          type="text"
+                          disabled={true}
+                          className="w-full p-2 border rounded-lg disabled-styles"
+                        />
+                      </div>
+
+                      {/* PENDING QUANTITY  */}
+                      <div className="w-full lg:w-4/12 px-4 mb-4">
+                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                          Pending Quantity
+                        </label>
+                        <input
+                          value={item.quantity - item.receivedQuantity}
+                          type="text"
+                          disabled={true}
+                          className="w-full p-2 border rounded-lg disabled-styles"
+                        />
+                      </div>
+
+                      {/* RECEIVED QUANTITY */}
+                      <div className="w-full lg:w-4/12 px-4 mb-4">
+                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
+                          Received Quantity
+                        </label>
+                        <input
+                          onChange={(e) => handleItemChange(e, index)}
+                          name="quantityReceived"
+                          value={item.quantityReceived}
+                          type="number"
+                          className="w-full p-2 border rounded-lg"
+                        />
+                      </div>
+                    </div>
+                    <hr className="py-2 border-b-1 border-blueGray-300 w-full mx-auto" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="w-full lg:w-12/12 px-4 text-right">
           <button

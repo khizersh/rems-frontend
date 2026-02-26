@@ -2769,6 +2769,22 @@ select {
   opacity: 1;
 }
 
+.text-green-600 {
+  color: #16a34a;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.text-blue-600 {
+  color: #2563eb;
+}
+
+.text-red-600 {
+  color: #dc2626;
+}
+
 .transform {
   --tw-translate-x: 0;
   --tw-translate-y: 0;

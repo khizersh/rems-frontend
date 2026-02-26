@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicTableComponentDateRange from "components/table/DynamicTableComponentDateRange.js";
+import { TbFileExport } from "react-icons/tb";
 
 export default function GoodReceivingNotesList() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -159,19 +160,8 @@ export default function GoodReceivingNotesList() {
   const tableColumns = [
     { header: "GRN Number", field: "grnNumber" },
     { header: "Status", field: "status" },
-    // { header: "Received Date", field: "receivedDate" },
     { header: "Created By", field: "createdBy" },
-    // { header: "Updated By", field: "updatedBy" },
     { header: "Created Date", field: "createdDate" },
-    // { header: "Updated Date", field: "updatedDate" },
-  ];
-
-  const grnTableColumn = [
-    { header: "GRN Number", field: "grnNumber" },
-    { header: "Status", field: "status" },
-    { header: "ProjectId", field: "projectId" },
-    { header: "VendorId", field: "vendorId" },
-    { header: "PoId", field: "poId" },
   ];
 
   const grnItemsTableColumn = [
@@ -237,60 +227,68 @@ export default function GoodReceivingNotesList() {
     }
   };
 
+  const handleAddGrn = () => {
+    history.push(`/dashboard/add-good-receiving-notes/?poId=${poId}`)
+  }
+
   return (
     <>
       <div className="container mx-auto p-4">
-        <div className="w-full mb-6 bg-white shadow-lg rounded p-4">
-          <div className=" flex max-lg-flex-col items-center">
-            <div className="p-5 rounded w-47 max-lg-w-full">
-              <SelectField
-                label="Select Purchase Order"
-                name="poId"
-                value={payloadData.poId}
-                disabled={poId}
-                onChange={handleChange}
-                options={dropdowns.purchaseOrders}
-              />
-            </div>
+        {poId && grnList.length === 0 ? (
+          ""
+        ) : (
+          <div className="w-full mb-6 bg-white shadow-lg rounded p-4">
+            <div className=" flex max-lg-flex-col items-center">
+              <div className="p-5 rounded w-47 max-lg-w-full">
+                <SelectField
+                  label="Select Purchase Order"
+                  name="poId"
+                  value={payloadData.poId}
+                  disabled={poId}
+                  onChange={handleChange}
+                  options={dropdowns.purchaseOrders}
+                />
+              </div>
 
-            <div className="p-5 rounded w-47 max-lg-w-full">
-              <SelectField
-                label="Select Vendor"
-                name="vendorId"
-                value={payloadData.vendorId}
-                disabled={poId}
-                onChange={handleChange}
-                options={dropdowns.vendors}
-              />
-            </div>
+              <div className="p-5 rounded w-47 max-lg-w-full">
+                <SelectField
+                  label="Select Vendor"
+                  name="vendorId"
+                  value={payloadData.vendorId}
+                  disabled={poId}
+                  onChange={handleChange}
+                  options={dropdowns.vendors}
+                />
+              </div>
 
-            <div className="p-5 rounded w-47 max-lg-w-full">
-              <SelectField
-                label="Select Status"
-                name="status"
-                value={payloadData.status}
-                disabled={poId}
-                onChange={handleChange}
-                options={dropdowns.status}
-              />
-            </div>
-          </div>
-
-          <div className="w-full flex items-center justify-between gap-4">
-            <div className="w-full flex justify-center my-2">
-              <div className="space-x-3">
-                <button
-                  onClick={() => !poId && fetchGrnList()}
-                  type="button"
-                  className="bg-emerald-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow-sm hover:shadow-lg"
-                >
-                  <FaSearch className="w-4 h-4 inline-block mr-2" />
-                  Search
-                </button>
+              <div className="p-5 rounded w-47 max-lg-w-full">
+                <SelectField
+                  label="Select Status"
+                  name="status"
+                  value={payloadData.status}
+                  disabled={poId}
+                  onChange={handleChange}
+                  options={dropdowns.status}
+                />
               </div>
             </div>
+
+            {!poId && (<div className="w-full flex items-center justify-between gap-4">
+              <div className="w-full flex justify-center my-2">
+                <div className="space-x-3">
+                  <button
+                    onClick={() => !poId && fetchGrnList()}
+                    type="button"
+                    className="bg-emerald-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow-sm hover:shadow-lg"
+                  >
+                    <FaSearch className="w-4 h-4 inline-block mr-2" />
+                    Search
+                  </button>
+                </div>
+              </div>
+            </div>)}
           </div>
-        </div>
+        )}
 
         {/* TABLE  */}
         <div>
@@ -310,6 +308,12 @@ export default function GoodReceivingNotesList() {
             onChangeDate={handleDateRangeChange}
             startDate={startDateObj}
             endDate={endDateObj}
+            firstButton={{
+              title: "ADD GRN",
+              onClick: handleAddGrn,
+              icon: TbFileExport,
+              className: "bg-emerald-500",
+            }}
           />
         </div>
       </div>
@@ -339,14 +343,6 @@ export default function GoodReceivingNotesList() {
             </div>
 
             <div className="p-6 space-y-6 max-h-65-vh overflow-y-auto">
-              {/* GRN SUMMARY */}
-              {/* <div className="bg-gray-50 border rounded-lg p-4 m-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  GRN Summary
-                </h3>
-
-                <ItemTable data={[grnItems.grn]} column={grnTableColumn} />
-              </div> */}
 
               {/* GRN ITEMS SECTION */}
               <div className="bg-gray-50 border rounded-lg p-4 m-4">

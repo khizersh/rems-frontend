@@ -70,7 +70,8 @@ const UpdateGoodReceivingNotes = () => {
       );
       notifySuccess(response.responseMessage, 4000);
       setTimeout(() => {
-        history.push("/dashboard/good-receiving-notes-list");
+        // history.push("/dashboard/good-receiving-notes-list");
+        history.goBack();
       }, 200);
     } catch (err) {
       notifyError(err.message, err.data, 4000);

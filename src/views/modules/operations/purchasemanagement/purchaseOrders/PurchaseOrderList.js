@@ -41,7 +41,7 @@ export default function PurchaseOrderList() {
         page: page,
         size: pageSize,
         sortBy: "createdDate",
-        sortDir: "asc",
+        sortDir: "dsc",
       };
 
       const response = await httpService.post(
@@ -83,7 +83,24 @@ export default function PurchaseOrderList() {
   const tableColumns = [
     { header: "Po No", field: "poNumber" },
     { header: "Total Amount", field: "totalAmount" },
-    { header: "Status", field: "status" },
+    {
+      header: "Status",
+      field: "status",
+      render: (status) => {
+        return (
+          <span
+            className={
+              status === "OPEN" ? "text-gray-600" :
+              status === "PARTIAL" ? "text-blue-600" :
+              status === "CLOSED" ? "text-green-600" :
+              status === "CANCELLED" && "text-red-600"
+            }
+          >
+            {status}
+          </span>
+        );
+      },
+    },
     { header: "Created By", field: "createdBy" },
     { header: "Updated By", field: "updatedBy" },
     { header: "Created Date", field: "createdDate" },
@@ -104,7 +121,21 @@ export default function PurchaseOrderList() {
     { header: "ProjectId", field: "projectId" },
     { header: "VendorId", field: "vendorId" },
     { header: "TotalAmount", field: "totalAmount" },
-    { header: "Status", field: "status" },
+    { header: "Status", field: "status", render: (status) => {
+        return (
+          <span
+            className={
+              status === "OPEN" ? "text-gray-600" :
+              status === "PARTIAL" ? "text-blue-600" :
+              status === "CLOSED" ? "text-green-600" :
+              status === "CANCELLED" && "text-red-600"
+            }
+          >
+            {status}
+          </span>
+        );
+      },
+     },
   ];
 
   // Handle View Po Details
@@ -361,7 +392,7 @@ const ItemTable = ({ data, column }) => {
                     key={colIndex}
                     className="px-6 py-3 text-sm text-gray-900"
                   >
-                    {value}
+                    {col.render ? col.render(value, item) : value}
                   </td>
                 );
               })}

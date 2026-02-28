@@ -7,6 +7,7 @@ import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
+import { IoShareSocial } from "react-icons/io5";
 import "../../../../assets/styles/custom/uploadImage.css";
 
 export default function CustomerList() {
@@ -369,7 +370,7 @@ export default function CustomerList() {
     },
     { icon: FaPen, onClick: handleEdit, title: "Edit", className: "yellow" },
     {
-      icon: FaTrashAlt,
+      icon: IoShareSocial,
       onClick: handleSendEmail,
       title: "Send Credential Email",
       className: "text-green-600",

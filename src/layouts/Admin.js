@@ -63,6 +63,13 @@ import PurchaseOrderUpdate from "views/modules/operations/purchasemanagement/pur
 import GoodReceivingNotesList from "views/modules/operations/purchasemanagement/goodReceivingNotes/GoodReceivingNotesList";
 import AddGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/AddGoodReceivingNotes";
 import UpdateGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/UpdateGoodReceivingNotes";
+import {
+  VendorInvoiceDashboard,
+  VendorInvoiceList,
+  CreateVendorInvoice,
+  VendorInvoiceDetails,
+  VendorInvoicePendingSummary
+} from "views/modules/operations/purchasemanagement/vendorinvoice";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -216,6 +223,11 @@ export default function Admin() {
               { path: "/dashboard/add-good-receiving-notes", component: AddGoodReceivingNotes },
               { path: "/dashboard/good-receiving-notes-list", component: GoodReceivingNotesList },
               { path: "/dashboard/update-good-receiving-notes/:grnId", component: UpdateGoodReceivingNotes },
+              { path: "/dashboard/vendor-invoice-dashboard", component: VendorInvoiceDashboard },
+              { path: "/dashboard/vendor-invoices", component: VendorInvoiceList },
+              { path: "/dashboard/create-vendor-invoice", component: CreateVendorInvoice },
+              { path: "/dashboard/vendor-invoice-details/:invoiceId", component: VendorInvoiceDetails },
+              { path: "/dashboard/vendor-invoice-pending-summary", component: VendorInvoicePendingSummary },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

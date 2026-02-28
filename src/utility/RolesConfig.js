@@ -49,6 +49,11 @@ export const FEATURE_ALIASES = {
     "/dashboard/add-good-receiving-notes",
     "/dashboard/good-receiving-notes-list",
     "/dashboard/update-good-receiving-notes",
+    "/dashboard/vendor-invoice-dashboard",
+    "/dashboard/vendor-invoices",
+    "/dashboard/create-vendor-invoice",
+    "/dashboard/vendor-invoice-details",
+    "/dashboard/vendor-invoice-pending-summary",
   ],
 };
 

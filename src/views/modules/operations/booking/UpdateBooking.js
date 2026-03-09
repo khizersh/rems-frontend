@@ -15,6 +15,7 @@ import {
 import { IoArrowBackOutline } from "react-icons/io5";
 import { MONTH_LABELS } from "utility/Utility.js";
 import { generateYears } from "utility/Utility.js";
+import { FaCalendarCheck, FaUser, FaBuilding, FaMoneyBillWave, FaCreditCard } from "react-icons/fa";
 
 export default function UpdateBooking() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -53,6 +54,7 @@ export default function UpdateBooking() {
   const [floorOptions, setFloorOptions] = useState([]);
   const [booking, setBooking] = useState({
     customerId: null,
+    id: null,
     unitId: null,
     floorId: null,
     projectId: null,
@@ -399,6 +401,7 @@ export default function UpdateBooking() {
     updatedBooking.floorId = filterFloor;
     updatedBooking.organizationId = organization.organizationId;
     updatedBooking.paymentSchedule = paymentSchedule;
+    updatedBooking.id = bookingId;
 
     console.log("updatedBooking :: ", updatedBooking);
 
@@ -450,7 +453,6 @@ export default function UpdateBooking() {
         `/unit/getAllIdSerialByFloorId/${floorId}`
       );
 
-      console.log("response :: ", response);
 
       setUnitList(response.data || []);
     } catch (err) {
@@ -491,742 +493,560 @@ export default function UpdateBooking() {
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className=" mb-0 py-6">
-        <div className="flex justify-between">
-          <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            <span>
-              <button className="">
-                <IoArrowBackOutline
-                  onClick={() => history.goBack()}
-                  className="back-button-icon inline-block back-button"
-                  style={{ paddingBottom: "3px", paddingRight: "7px" }}
-                />
-              </button>
-            </span>
-            Update Booking
-          </h6>
-        </div>
+      {/* Header */}
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button onClick={() => history.goBack()} className="mr-3">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaCalendarCheck className="mr-2" style={{ color: "#10b981" }} />
+          Update Booking
+        </h6>
       </div>
-      <div className="flex-auto px-4 py-5 bg-white rounded-12 shadow-lg">
-        <form>
-          <div className="flex flex-wrap border-bottom-grey py-3 mb-5">
-            <div className="w-full lg:w-12/12  mt-2 md:px-0">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase">
-                Basic Details
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-12/12 px-4 md:px-0">
-                  <div className="flex flex-wrap">
-                    <div className="w-full lg:w-4/12 px-4 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <div className="w-72">
-                          <DebounceSearch
-                            search={search}
-                            setSearch={onChangeCustomerSearch}
-                            setData={onChangeCustomer}
-                            dataList={customerList}
-                            placeholder="Search customers..."
-                            label="Select Customer"
-                            delay={1500}
-                            defaultSelection={selectedCustomer?.name}
-                            noChange={true}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-full lg:w-4/12 px-4 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Select Project
-                        </label>
-                        <select
-                          value={filterProject}
-                          className="border rounded-lg px-3 py-2 w-full"
-                        >
-                          <option value="">All Projects</option>
-                          {projects.map((project) => (
-                            <option key={project.id} value={project.id}>
-                              {project.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
 
-                    <div className="w-full lg:w-4/12 px-4 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Select Floor
-                        </label>
-                        <select
-                          value={filterFloor}
-                          className="border rounded-lg px-3 py-2 w-full"
-                        >
-                          <option value="">All Floors</option>
-                          {floorOptions.map((floor) => (
-                            <option key={floor.id} value={floor.id}>
-                              {floor.floorNo}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+      <form onSubmit={(e) => createBooking(e)} className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="p-6 space-y-4">
 
-                    <div className="w-full lg:w-4/12 px-4 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Select Unit
-                        </label>
-                        <select
-                          value={selectedUnit}
-                          className="border rounded-lg px-3 py-2 w-full"
-                        >
-                          <option value="">All Units</option>
-                          {unitList.map((unit) => (
-                            <option key={unit.id} value={unit.id}>
-                              {unit.serialNo}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="w-full lg:w-4/12 px-4 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="projectType"
-                        >
-                          Payment Plan Type
-                        </label>
-                        <select
-                          id="projectType"
-                          name="paymentPlanType"
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          value={paymentSchedule?.paymentPlanType}
-                          onChange={(e) => changePaymentScheduleFields(e)}
-                        >
-                          <option value="">NONE</option>
-                          {PAYMENT_PLANS_TYPE.map((type, index) => (
-                            <option key={index} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {/* Created Date */}
-                    <div className="w-full lg:w-4/12 px-4 mb-3">
-                      <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                        Created Date
-                      </label>
+          {/* Basic Details Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaUser className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+              Basic Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Select Customer</label>
+                <div className="w-full">
+                  <DebounceSearch
+                    search={search}
+                    setSearch={onChangeCustomerSearch}
+                    setData={onChangeCustomer}
+                    dataList={customerList}
+                    placeholder="Search customers..."
+                    label=""
+                    delay={1500}
+                    defaultSelection={selectedCustomer?.name}
+                    noChange={true}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Payment Plan Type</label>
+                <select
+                  id="projectType"
+                  name="paymentPlanType"
+                  className="w-full p-2 border rounded-lg text-sm"
+                  value={paymentSchedule?.paymentPlanType}
+                  onChange={(e) => changePaymentScheduleFields(e)}
+                >
+                  <option value="">NONE</option>
+                  {PAYMENT_PLANS_TYPE.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Created Date</label>
+                <input
+                  type="datetime-local"
+                  name="createdDate"
+                  value={booking.createdDate}
+                  onChange={onChangeCreatedDate}
+                  className="w-full p-2 border rounded-lg text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Unit/Property Info Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+              Unit / Property Info
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Select Project</label>
+                <select
+                  value={filterProject}
+                  className="w-full p-2 border rounded-lg text-sm"
+                >
+                  <option value="">All Projects</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Select Floor</label>
+                <select
+                  value={filterFloor}
+                  className="w-full p-2 border rounded-lg text-sm"
+                >
+                  <option value="">All Floors</option>
+                  {floorOptions.map((floor) => (
+                    <option key={floor.id} value={floor.id}>
+                      {floor.floorNo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Select Unit</label>
+                <select
+                  value={selectedUnit}
+                  className="w-full p-2 border rounded-lg text-sm"
+                >
+                  <option value="">All Units</option>
+                  {unitList.map((unit) => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.serialNo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Unit Costing Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaMoneyBillWave className="mr-2" style={{ fontSize: "14px", color: "#f59e0b" }} />
+              Unit Costing
+              <span className="ml-3 text-green-600 font-bold">
+                ({parseFloat(paymentSchedule?.unitCost).toLocaleString()})
+              </span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Duration In Months</label>
+                <input
+                  id="durationInMonths"
+                  type="text"
+                  name="durationInMonths"
+                  className="w-full p-2 border rounded-lg text-sm"
+                  onChange={(e) => changePaymentScheduleFields(e)}
+                  value={paymentSchedule.durationInMonths}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Actual Amount</label>
+                <input
+                  id="actualAmount"
+                  type="text"
+                  name="actualAmount"
+                  className="w-full p-2 border rounded-lg text-sm"
+                  onChange={(e) => changePaymentScheduleFields(e)}
+                  value={paymentSchedule.actualAmount}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Miscellaneous Amount</label>
+                <input
+                  id="miscellaneousAmount"
+                  type="text"
+                  name="miscellaneousAmount"
+                  className="w-full p-2 border rounded-lg text-sm"
+                  onChange={(e) => changePaymentScheduleFields(e)}
+                  value={paymentSchedule.miscellaneousAmount}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Development Amount</label>
+                <input
+                  id="developmentAmount"
+                  type="text"
+                  name="developmentAmount"
+                  className="w-full p-2 border rounded-lg text-sm"
+                  onChange={(e) => changePaymentScheduleFields(e)}
+                  value={paymentSchedule.developmentAmount}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Total Amount</label>
+                <input
+                  id="totalAmount"
+                  type="text"
+                  name="totalAmount"
+                  disabled
+                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                  value={
+                    Number(paymentSchedule.actualAmount) +
+                    Number(paymentSchedule.miscellaneousAmount) +
+                    Number(paymentSchedule.developmentAmount)
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Payment Schedule - INSTALLMENT_RANGE */}
+          {paymentSchedule?.paymentPlanType === "INSTALLMENT_RANGE" && (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                <FaCreditCard
+                  className="mr-2"
+                  style={{
+                    fontSize: "12px",
+                    color: "#ffffff",
+                    backgroundColor: "#6366f1",
+                    borderRadius: "9999px",
+                    padding: "4px",
+                  }}
+                />
+                Customer Payment Schedule
+                {(() => {
+                  const unitCost = paymentSchedule.unitCost;
+                  const customerCost =
+                    paymentSchedule?.customerCost +
+                    paymentSchedule?.monthWiseTotal;
+                  const classColor =
+                    unitCost === customerCost
+                      ? "text-green-600"
+                      : unitCost > customerCost
+                      ? "text-blue-600"
+                      : "text-red-600";
+                  return (
+                    <span className={`ml-3 font-bold ${classColor}`}>
+                      ({parseFloat(customerCost).toLocaleString()})
+                    </span>
+                  );
+                })()}
+              </h3>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Left Section - Fixed Payments */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-xs font-bold text-indigo-600 uppercase mb-4 flex items-center border-b border-gray-100 pb-2">
+                    <FaMoneyBillWave
+                      className="mr-2"
+                      style={{
+                        fontSize: "12px",
+                        color: "#4f46e5",
+                        backgroundColor: "#e0e7ff",
+                        borderRadius: "9999px",
+                        padding: "4px",
+                      }}
+                    />
+                    Fixed Payments
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Down Payment</label>
                       <input
-                        type="datetime-local"
-                        name="createdDate"
-                        value={booking.createdDate}
-                        onChange={onChangeCreatedDate}
-                        className=" px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full"
+                        id="downPayment"
+                        type="text"
+                        name="downPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.downPayment}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Quarterly Payment</label>
+                      <input
+                        id="quarterlyPayment"
+                        type="text"
+                        name="quarterlyPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.quarterlyPayment}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Half-Yearly Payment</label>
+                      <input
+                        id="halfYearlyPayment"
+                        type="text"
+                        name="halfYearlyPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.halfYearlyPayment}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Yearly Payment</label>
+                      <input
+                        id="yearlyPayment"
+                        type="text"
+                        name="yearlyPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.yearlyPayment}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">On Possession</label>
+                      <input
+                        id="onPossessionPayment"
+                        type="text"
+                        name="onPossessionPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.onPossessionPayment}
                       />
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full lg:w-12/12 px-4 md:px-0">
-                  <div className="relative w-full mb-3">
-                    <p className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                      Unit Information
-                    </p>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full text-sm border border-gray-200 rounded-lg w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2 text-left font-medium text-gray-600">
-                              Project Name
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-gray-600">
-                              Floor No
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-gray-600">
-                              Unit Serial
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-gray-600">
-                              Total Amount
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="">
-                            <td className="px-4 py-2 font-semibold text-green-600">
-                              {project}
-                            </td>
-                            <td className="px-4 py-2 font-semibold text-green-600">
-                              {floor}
-                            </td>
-                            <td className="px-4 py-2 font-semibold text-green-600">
-                              {unit}
-                            </td>
-                            <td className="px-4 py-2 font-semibold text-green-600">
-                              {totalAmount}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+
+                {/* Right Section - Month Wise Payment */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                    <h4 className="text-xs font-bold text-purple-600 uppercase flex items-center">
+                      <FaCalendarCheck
+                        className="mr-2"
+                        style={{
+                          fontSize: "12px",
+                          color: "#7c3aed",
+                          backgroundColor: "#ede9fe",
+                          borderRadius: "9999px",
+                          padding: "4px",
+                        }}
+                      />
+                      Monthly Installments
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => addRow()}
+                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+                    >
+                      <IoMdAddCircle className="mr-1" />
+                      Row
+                    </button>
                   </div>
-                </div> */}
-              </div>
-            </div>
-          </div>
 
-          <div className="">
-            <div className=" flex flex-wrap">
-              <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
-                {/* Payment Schedule Heading */}
-                <div className="mt-3 mb-8 text-blueGray-600 text-md uppercase font-bold">
-                  Unit Costing
-                  <text className="ml-3 text-green-600">
-                    ({parseFloat(paymentSchedule?.unitCost).toLocaleString()})
-                  </text>
-                </div>
-
-                <div className="flex flex-wrap">
-                  {/* === First Section: Payment Overview === */}
-                  <div className="w-full flex flex-wrap  border-bottom-grey border-blueGray-200 pb-4 mb-4">
-                    {/* Duration In Months */}
-                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="durationInMonths"
-                        >
-                          Duration In Months
-                        </label>
-                        <input
-                          id="durationInMonths"
-                          type="text"
-                          name="durationInMonths"
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          onChange={(e) => changePaymentScheduleFields(e)}
-                          value={paymentSchedule.durationInMonths}
-                        />
+                  <div className="space-y-3">
+                    {paymentSchedule?.monthWisePaymentList?.map((monthly, mIndex) => (
+                      <div key={mIndex} className="bg-gray-50 rounded-lg px-3 py-2">
+                        <div className="grid grid-cols-4 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">From</label>
+                            <input
+                              type="text"
+                              name="fromMonth"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlyPaymentFields(mIndex, e)}
+                              value={monthly.fromMonth}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">To</label>
+                            <input
+                              type="text"
+                              name="toMonth"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlyPaymentFields(mIndex, e)}
+                              value={monthly.toMonth}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                            <input
+                              type="text"
+                              name="amount"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlyPaymentFields(mIndex, e)}
+                              value={monthly.amount}
+                            />
+                          </div>
+                          <div className="flex items-end justify-center pb-1 mt-5">
+                            <button
+                              type="button"
+                              onClick={() => removeMonthWisePayment(mIndex)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <MdDeleteForever style={{ fontSize: "20px" }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Actual Amount */}
-                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="actualAmount"
-                        >
-                          Actual Amount
-                        </label>
-                        <input
-                          id="actualAmount"
-                          type="text"
-                          name="actualAmount"
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          onChange={(e) => changePaymentScheduleFields(e)}
-                          value={paymentSchedule.actualAmount}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Miscellaneous Amount */}
-                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="miscellaneousAmount"
-                        >
-                          Miscellaneous Amount
-                        </label>
-                        <input
-                          id="miscellaneousAmount"
-                          type="number"
-                          name="miscellaneousAmount"
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          onChange={(e) => changePaymentScheduleFields(e)}
-                          value={paymentSchedule.miscellaneousAmount}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Development Amount */}
-                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="developmentAmount"
-                        >
-                          Development Amount
-                        </label>
-                        <input
-                          id="developmentAmount"
-                          type="number"
-                          name="developmentAmount"
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          onChange={(e) => changePaymentScheduleFields(e)}
-                          value={paymentSchedule.developmentAmount}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Total Amount */}
-                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                      <div className="relative w-full mb-3">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="totalAmount"
-                        >
-                          Total Amount
-                        </label>
-                        <input
-                          id="totalAmount"
-                          type="text"
-                          name="totalAmount"
-                          disabled
-                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                          value={
-                            Number(paymentSchedule.actualAmount) +
-                            Number(paymentSchedule.miscellaneousAmount) +
-                            Number(paymentSchedule.developmentAmount)
-                          }
-                        />
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
-
-              {paymentSchedule?.paymentPlanType == "INSTALLMENT_RANGE" ? (
-                <div className="w-full lg:w-6/12 ">
-                  <div className="relative w-full">
-                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
-                      Customer Payment Schedule
-                      {(() => {
-                        const unitCost = paymentSchedule?.unitCost;
-                        const customerCost =
-                          paymentSchedule?.customerCost +
-                          paymentSchedule?.monthWiseTotal;
-
-                        const classColor =
-                          unitCost == customerCost
-                            ? "text-green-600"
-                            : unitCost > customerCost
-                            ? "text-blue-600"
-                            : "text-red-600";
-                        return (
-                          <text className={`ml-3 ${classColor}`}>
-                            ({parseFloat(customerCost).toLocaleString()})
-                          </text>
-                        );
-                      })()}
-                    </div>
-                    <div className="mt-6 flex flex-wrap">
-                      <>
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="downPayment"
-                            >
-                              Down Payment
-                            </label>
-                            <input
-                              id="downPayment"
-                              type="text"
-                              name="downPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.downPayment}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Quarterly Payment */}
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="quarterlyPayment"
-                            >
-                              Quarterly Payment
-                            </label>
-                            <input
-                              id="quarterlyPayment"
-                              type="text"
-                              name="quarterlyPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.quarterlyPayment}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Half-Yearly Payment */}
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="halfYearlyPayment"
-                            >
-                              Half-Yearly Payment
-                            </label>
-                            <input
-                              id="halfYearlyPayment"
-                              type="text"
-                              name="halfYearlyPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.halfYearlyPayment}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="yearlyPayment"
-                            >
-                              Yearly Payment
-                            </label>
-                            <input
-                              id="yearlyPayment"
-                              type="text"
-                              name="yearlyPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.yearlyPayment}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="onPossessionPayment"
-                            >
-                              On Possession Payment
-                            </label>
-                            <input
-                              id="onPossessionPayment"
-                              type="text"
-                              name="onPossessionPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.onPossessionPayment}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    </div>
-                    <div>
-                      <div className="px-4 mt-3 mb-3 rounded md:px-0">
-                        <div className="flex justify-between">
-                          <div className="uppercase text-blueGray-600 font-bold text-sm text-left">
-                            Month Wise Payment
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => addRow()}
-                            className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
-                          >
-                            <IoMdAddCircle
-                              className="inline-block w-3 h-3"
-                              style={{ paddingRight: "0px" }}
-                            />{" "}
-                            Row
-                          </button>
-                        </div>
-
-                        {paymentSchedule?.monthWisePaymentList?.map(
-                          (monthly, mIndex) => (
-                            <div className="mt-6 flex flex-wrap justify-between">
-                              <div className="mt-6 text-left pt-4">
-                                {mIndex + 1} -
-                              </div>
-                              <div className="w-full lg:w-3/12 ">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    From Month
-                                  </label>
-                                  <input
-                                    id="name"
-                                    type="text"
-                                    name="fromMonth"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlyPaymentFields(mIndex, e)
-                                    }
-                                    value={monthly.fromMonth}
-                                  />
-                                </div>
-                              </div>
-                              <div className="w-full lg:w-3/12 px-2 md:px-0">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    To Month
-                                  </label>
-                                  <input
-                                    id="name"
-                                    type="text"
-                                    name="toMonth"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlyPaymentFields(mIndex, e)
-                                    }
-                                    value={monthly.toMonth}
-                                  />
-                                </div>
-                              </div>
-                              <div className="w-full lg:w-3/12">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    Amount
-                                  </label>
-                                  <input
-                                    id="name"
-                                    type="text"
-                                    name="amount"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlyPaymentFields(mIndex, e)
-                                    }
-                                    value={monthly.amount}
-                                  />
-                                </div>
-                              </div>
-                              <div className="mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
-                                <button
-                                  type="button"
-                                  onClick={() => removeMonthWisePayment(mIndex)}
-                                  className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
-                                >
-                                  <MdDeleteForever
-                                    style={{
-                                      fontSize: "25px",
-                                      marginTop: "9px",
-                                    }}
-                                  />
-                                </button>
-                              </div>
-                              <hr className="mt-6 border-b-1 border-blueGray-300" />
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : paymentSchedule?.paymentPlanType == "INSTALLMENT_SPECIFIC" ? (
-                <div className="w-full lg:w-6/12 ">
-                  <div className="relative w-full">
-                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
-                      Customer Payment Schedule
-                      {(() => {
-                        const unitCost = paymentSchedule.unitCost;
-
-                        const customerCost =
-                          paymentSchedule?.customerCost +
-                          paymentSchedule?.monthSpecificTotal;
-
-                        const classColor =
-                          unitCost == customerCost
-                            ? "text-green-600"
-                            : unitCost > customerCost
-                            ? "text-blue-600"
-                            : "text-red-600";
-                        return (
-                          <text className={`ml-3 ${classColor}`}>
-                            ({parseFloat(customerCost).toLocaleString()})
-                          </text>
-                        );
-                      })()}
-                    </div>
-                    <div className="mt-6 flex flex-wrap">
-                      <>
-                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                          <div className="relative w-full mb-3">
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="downPayment"
-                            >
-                              Down Payment
-                            </label>
-                            <input
-                              id="downPayment"
-                              type="text"
-                              name="downPayment"
-                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                              onChange={(e) => changePaymentScheduleFields(e)}
-                              value={paymentSchedule.downPayment}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    </div>
-                    <div>
-                      <div className="px-4 mt-3 mb-3 rounded md:px-0">
-                        <div className="flex justify-between">
-                          <div className="uppercase text-blueGray-600 font-bold text-sm text-left">
-                            Month Specific Payment
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => addSpecificRow()}
-                            className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
-                          >
-                            <IoMdAddCircle
-                              className="inline-block w-3 h-3"
-                              style={{ paddingRight: "0px" }}
-                            />{" "}
-                            Row
-                          </button>
-                        </div>
-
-                        {console.log("schedule inner :: ", paymentSchedule)}
-                        {paymentSchedule?.monthSpecificPaymentList?.map(
-                          (monthly, mIndex) => (
-                            <div className="mt-6 flex flex-wrap justify-between">
-                              <div className="mt-6 text-left pt-4">
-                                {mIndex + 1} -
-                              </div>
-                              <div className="w-full lg:w-3/12 ">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    Month
-                                  </label>
-                                  <select
-                                    id="name"
-                                    type="text"
-                                    name="month"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlySpecificPaymentFields(
-                                        mIndex,
-                                        e
-                                      )
-                                    }
-                                    value={monthly.month}
-                                  >
-                                    <option>Select Month</option>
-                                    {MONTH_LABELS.map((month) => (
-                                      <option key={month} value={month}>
-                                        {month}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              </div>
-                              <div className="w-full lg:w-3/12 px-2 md:px-0">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    Year
-                                  </label>
-                                  <select
-                                    id="name"
-                                    type="text"
-                                    name="year"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlySpecificPaymentFields(
-                                        mIndex,
-                                        e
-                                      )
-                                    }
-                                    value={monthly.year}
-                                  >
-                                    <option>Select Year</option>
-                                    {generateYears(10, 10).map((year) => (
-                                      <option key={year} value={year}>
-                                        {year}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              </div>
-                              <div className="w-full lg:w-3/12">
-                                <div className="relative w-full mb-3">
-                                  <label
-                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                    htmlFor="name"
-                                  >
-                                    Amount
-                                  </label>
-                                  <input
-                                    id="name"
-                                    type="number"
-                                    name="amount"
-                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                    onChange={(e) =>
-                                      changeMonthlySpecificPaymentFields(
-                                        mIndex,
-                                        e
-                                      )
-                                    }
-                                    value={monthly.amount}
-                                  />
-                                </div>
-                              </div>
-                              <div className="mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeMonthSpecificPayment(mIndex)
-                                  }
-                                  className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
-                                >
-                                  <MdDeleteForever
-                                    style={{
-                                      fontSize: "25px",
-                                      marginTop: "9px",
-                                    }}
-                                  />
-                                </button>
-                              </div>
-                              <hr className="mt-6 border-b-1 border-blueGray-300" />
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <></>
-              )}
             </div>
-          </div>
+          )}
 
-          <button
-            onClick={(e) => createBooking(e)}
-            type="submit"
-            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 float-right"
-          >
-            <BsBuildingFillAdd
-              className="w-5 h-5 inline-block "
-              style={{ paddingBottom: "3px", paddingRight: "5px" }}
-            />
-            Add Booking
-          </button>
-        </form>
-      </div>
+          {/* Customer Payment Schedule - INSTALLMENT_SPECIFIC */}
+          {paymentSchedule?.paymentPlanType === "INSTALLMENT_SPECIFIC" && (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                <FaCreditCard
+                  className="mr-2"
+                  style={{
+                    fontSize: "12px",
+                    color: "#ffffff",
+                    backgroundColor: "#6366f1",
+                    borderRadius: "9999px",
+                    padding: "4px",
+                  }}
+                />
+                Customer Payment Schedule
+                {(() => {
+                  const unitCost = paymentSchedule.unitCost;
+                  const customerCost =
+                    paymentSchedule?.customerCost +
+                    paymentSchedule?.monthSpecificTotal;
+                  const classColor =
+                    unitCost === customerCost
+                      ? "text-green-600"
+                      : unitCost > customerCost
+                      ? "text-blue-600"
+                      : "text-red-600";
+                  return (
+                    <span className={`ml-3 font-bold ${classColor}`}>
+                      ({parseFloat(customerCost).toLocaleString()})
+                    </span>
+                  );
+                })()}
+              </h3>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Left Section - Fixed Payments */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-xs font-bold text-indigo-600 uppercase mb-4 flex items-center border-b border-gray-100 pb-2">
+                    <FaMoneyBillWave
+                      className="mr-2"
+                      style={{
+                        fontSize: "12px",
+                        color: "#4f46e5",
+                        backgroundColor: "#e0e7ff",
+                        borderRadius: "9999px",
+                        padding: "4px",
+                      }}
+                    />
+                    Fixed Payments
+                  </h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Down Payment</label>
+                      <input
+                        id="downPayment"
+                        type="number"
+                        name="downPayment"
+                        className="w-full p-1.5 border rounded-lg text-sm"
+                        onChange={(e) => changePaymentScheduleFields(e)}
+                        value={paymentSchedule.downPayment}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Section - Month Specific Payment */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                    <h4 className="text-xs font-bold text-purple-600 uppercase flex items-center">
+                      <FaCalendarCheck
+                        className="mr-2"
+                        style={{
+                          fontSize: "12px",
+                          color: "#7c3aed",
+                          backgroundColor: "#ede9fe",
+                          borderRadius: "9999px",
+                          padding: "4px",
+                        }}
+                      />
+                      Monthly Installments
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => addSpecificRow()}
+                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+                    >
+                      <IoMdAddCircle className="mr-1" />
+                      Row
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {paymentSchedule?.monthSpecificPaymentList?.map((monthly, mIndex) => (
+                      <div key={mIndex} className="bg-gray-50 rounded-lg px-3 py-2">
+                        <div className="grid grid-cols-4 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Month</label>
+                            <select
+                              name="month"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlySpecificPaymentFields(mIndex, e)}
+                              value={monthly.month}
+                            >
+                              <option>Select</option>
+                              {MONTH_LABELS.map((month) => (
+                                <option key={month} value={month}>
+                                  {month}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Year</label>
+                            <select
+                              name="year"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlySpecificPaymentFields(mIndex, e)}
+                              value={monthly.year}
+                            >
+                              <option>Select</option>
+                              {generateYears(10, 10).map((year) => (
+                                <option key={year} value={year}>
+                                  {year}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                            <input
+                              type="number"
+                              name="amount"
+                              className="w-full p-1.5 border rounded-lg text-sm"
+                              onChange={(e) => changeMonthlySpecificPaymentFields(mIndex, e)}
+                              value={monthly.amount}
+                            />
+                          </div>
+                          <div className="flex items-end justify-center pb-1">
+                            <button
+                              type="button"
+                              onClick={() => removeMonthSpecificPayment(mIndex)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <MdDeleteForever style={{ fontSize: "20px" }} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            >
+              <FaCalendarCheck className="mr-1" style={{ color: "white" }} />
+              {loading ? "Saving..." : "Update Booking"}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

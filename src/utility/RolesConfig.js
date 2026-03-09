@@ -52,35 +52,38 @@ export const FEATURE_ALIASES = {
     "/dashboard/vendor-invoice-dashboard",
     "/dashboard/vendor-invoices",
     "/dashboard/create-vendor-invoice",
+    "/dashboard/update-vendor-invoice",
     "/dashboard/vendor-invoice-details",
     "/dashboard/vendor-invoice-pending-summary",
+    "/dashboard/vendor-invoice-payments",
+    "/dashboard/create-vendor-invoice-payment",
   ],
 };
 
 export const ROLE_DASHBOARD_PRIORITY = {
   FULL_ADMIN_ROLE: {
     priority: 1,
-    path: "/dashboard",
+    path: "/dashboard/admin-dashboard",
   },
   ADMIN_ROLE: {
     priority: 2,
-    path: "/dashboard",
+    path: "/dashboard/admin-dashboard",
   },
   OPERATIONS_ROLE: {
     priority: 3,
-    path: "/operations",
+    path: "/dashboard/operations",
   },
   ACCOUNTANT_ROLE: {
     priority: 4,
-    path: "/accounts",
+    path: "/dashboard/accounts",
   },
   HR_PAYROLL_ROLE: {
     priority: 5,
-    path: "/hr",
+    path: "/dashboard/hr",
   },
-  CUSTOMER_ROLE: {
+  USER_ROLE: {
     priority: 6,
-    path: "/customer",
+    path: "/dashboard/user-dashboard",
   },
 };
 

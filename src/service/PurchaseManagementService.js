@@ -198,6 +198,17 @@ export const getVendorPendingAmount = async (vendorId) => {
   return response.data;
 };
 
+/**
+ * Update vendor invoice (only UNPAID invoices can be updated)
+ * @param {number|string} invoiceId - Invoice ID
+ * @param {Object} invoiceData - Updated invoice data
+ * @returns {Promise<Object>} - Updated invoice
+ */
+export const updateVendorInvoice = async (invoiceId, invoiceData) => {
+  const response = await httpService.put(`/vendorInvoice/update/${invoiceId}`, invoiceData);
+  return response.data;
+};
+
 // =====================
 // Vendor Payment APIs
 // =====================
@@ -278,6 +289,17 @@ export const getTotalPaidForInvoice = async (invoiceId) => {
   return response.data;
 };
 
+/**
+ * Update an existing vendor payment
+ * @param {number|string} paymentId - Payment ID
+ * @param {Object} paymentData - Updated payment data
+ * @returns {Promise<Object>} - Updated payment
+ */
+export const updateVendorPayment = async (paymentId, paymentData) => {
+  const response = await httpService.put(`/vendorPaymentPO/update/${paymentId}`, paymentData);
+  return response.data;
+};
+
 // =====================
 // Export all as default object (optional convenience)
 // =====================
@@ -310,6 +332,7 @@ const PurchaseManagementService = {
   getPaymentsByVendor,
   getAllVendorPayments,
   getTotalPaidForInvoice,
+  updateVendorPayment,
 };
 
 export default PurchaseManagementService;

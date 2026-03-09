@@ -12,7 +12,6 @@ import "../../assets/styles/custom/sidebar.css";
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = useState("hidden");
   const [expandedItems, setExpandedItems] = useState(() => {
-    // Load expanded items from localStorage
     const saved = localStorage.getItem("sidebarExpandedItems");
     return saved ? JSON.parse(saved) : [];
   });
@@ -26,12 +25,10 @@ export default function Sidebar() {
     setSidebarList(sidebarData);
   }, []);
 
-  // 👇 Automatically close sidebar whenever route changes (mobile only)
   useEffect(() => {
     setCollapseShow("hidden");
   }, [location]);
 
-  // Save expanded items to localStorage
   useEffect(() => {
     localStorage.setItem("sidebarExpandedItems", JSON.stringify(expandedItems));
   }, [expandedItems]);
@@ -40,28 +37,51 @@ export default function Sidebar() {
     setCollapseShow(classes);
   };
 
-  const toggleExpandItem = (itemId) => {
+  const toggleExpandItem = (itemKey) => {
     setExpandedItems((prev) =>
-      prev.includes(itemId)
-        ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
+      prev.includes(itemKey)
+        ? prev.filter((k) => k !== itemKey)
+        : [...prev, itemKey]
     );
   };
 
-  // Auto-expand parent if child is active
+  // Helper: check if any grandchild URL matches current path
+  const hasActiveGrandChild = (childItem) => {
+    return (
+      childItem.grandChildList &&
+      childItem.grandChildList.length > 0 &&
+      childItem.grandChildList.some((gc) => location.pathname === gc.url)
+    );
+  };
+
+  // Helper: check if any child or grandchild is active under a sidebar item
+  const hasActiveDescendant = (sidebarItem) => {
+    if (!sidebarItem.childList || sidebarItem.childList.length === 0) return false;
+    return sidebarItem.childList.some(
+      (child) =>
+        location.pathname === child.url || hasActiveGrandChild(child)
+    );
+  };
+
+  // Auto-expand parents when a descendant is active
   useEffect(() => {
+    const keysToExpand = [];
     sidebarList.forEach((item) => {
+      const sidebarKey = `sidebar-${item.id}`;
       if (item.childList && item.childList.length > 0) {
-        const hasActiveChild = item.childList.some(
-          (child) => location.pathname === child.url
-        );
-        if (hasActiveChild && !expandedItems.includes(item.id)) {
-          setExpandedItems((prev) => [...prev, item.id]);
-        }
+        item.childList.forEach((child) => {
+          const childKey = `child-${child.id}`;
+          if (location.pathname === child.url || hasActiveGrandChild(child)) {
+            if (!expandedItems.includes(sidebarKey)) keysToExpand.push(sidebarKey);
+            if (!expandedItems.includes(childKey)) keysToExpand.push(childKey);
+          }
+        });
       }
     });
+    if (keysToExpand.length > 0) {
+      setExpandedItems((prev) => [...new Set([...prev, ...keysToExpand])]);
+    }
   }, [location.pathname, sidebarList]);
-
 
   return (
     <>
@@ -155,141 +175,258 @@ export default function Sidebar() {
             {/* Sidebar Navigation */}
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
               {sidebarList.map((sidebar) => {
-                  const isActive = location.pathname === sidebar.url;
-                  const hasChildren =
-                    sidebar.childList && sidebar.childList.length > 0;
-                  const isExpanded = expandedItems.includes(sidebar.id);
-                  const hasActiveChild =
-                    hasChildren &&
-                    sidebar.childList.some(
-                      (child) => location.pathname === child.url
-                    );
+                const sidebarKey = `sidebar-${sidebar.id}`;
+                const isActive = sidebar.page && location.pathname === sidebar.url;
+                const hasChildren = sidebar.childList && sidebar.childList.length > 0;
+                const isExpanded = expandedItems.includes(sidebarKey);
+                const isDescendantActive = hasActiveDescendant(sidebar);
 
-                  return (
-                    <li
-                      className="items-center mt-1 sidebar-menu-item"
-                      key={sidebar.id}
-                    >
-                      <div className="relative group">
-                        <div className="flex items-center">
+                return (
+                  <li className="items-center mt-1 sidebar-menu-item" key={sidebar.id}>
+                    <div className="relative group">
+                      <div className="flex items-center">
+                        {/* Level 1: If page=true, render as Link; if page=false, render as dropdown toggle */}
+                        {sidebar.page ? (
                           <Link
                             className={`sidebar-link text-sm py-3 px-3 font-semibold block flex-1 ${
-                              isActive || hasActiveChild
+                              isActive || isDescendantActive
                                 ? "sidebar-link-active text-white"
                                 : "text-blueGray-700"
-                            } ${isCollapsed && !isActive && !hasActiveChild ? "justify-center" : ""}`}
+                            } ${isCollapsed && !isActive && !isDescendantActive ? "justify-center" : ""}`}
                             to={sidebar.url}
-                            onClick={() => {
-                              onClick("hidden");
-                            }}
+                            onClick={() => onClick("hidden")}
                           >
                             <div className="flex items-center">
                               <i
-                                className={`sidebar-icon ${
-                                  isCollapsed ? "mx-auto" : "mr-3"
-                                } text-sm ${
-                                  isActive || hasActiveChild
-                                    ? "opacity-100"
-                                    : "text-blueGray-400"
+                                className={`sidebar-icon ${isCollapsed ? "mx-auto" : "mr-3"} text-sm ${
+                                  isActive || isDescendantActive ? "opacity-100" : "text-blueGray-400"
                                 } ${sidebar.icon}`}
                               ></i>
                               {!isCollapsed && (
-                                <span className="sidebar-text flex-1">
-                                  {sidebar.title}
-                                </span>
+                                <span className="sidebar-text flex-1">{sidebar.title}</span>
                               )}
                             </div>
                           </Link>
-                          {hasChildren && !isCollapsed && (
-                            <button
-                              type="button"
-                              className={`ml-2 px-2 py-3 text-blueGray-400 hover:text-blueGray-600 transition-colors ${
-                                isExpanded ? "text-blueGray-600" : ""
-                              }`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleExpandItem(sidebar.id);
-                              }}
-                              aria-label={isExpanded ? "Collapse" : "Expand"}
-                            >
+                        ) : (
+                          <button
+                            type="button"
+                            className={`sidebar-link text-sm py-3 px-3 font-semibold block flex-1 text-left w-full ${
+                              isDescendantActive
+                                ? "sidebar-link-active text-white"
+                                : "text-blueGray-700"
+                            } ${isCollapsed ? "justify-center" : ""}`}
+                            onClick={() => toggleExpandItem(sidebarKey)}
+                          >
+                            <div className="flex items-center">
                               <i
-                                className={`fas fa-chevron-${
-                                  isExpanded ? "down" : "right"
-                                } text-xs transition-transform duration-200 ${
-                                  isExpanded ? "transform rotate-90" : ""
-                                }`}
+                                className={`sidebar-icon ${isCollapsed ? "mx-auto" : "mr-3"} text-sm ${
+                                  isDescendantActive ? "opacity-100" : "text-blueGray-400"
+                                } ${sidebar.icon}`}
                               ></i>
-                            </button>
-                          )}
-                        </div>
-                        {/* Tooltip for collapsed state */}
-                        {isCollapsed && (
-                          <div className="sidebar-tooltip">
-                            {sidebar.title}
-                          </div>
+                              {!isCollapsed && (
+                                <>
+                                  <span className="sidebar-text flex-1">{sidebar.title}</span>
+                                  <i
+                                    className={`fas ${isExpanded ? "fa-chevron-down" : "fa-chevron-right"} text-xs transition-all duration-200`}
+                                  ></i>
+                                </>
+                              )}
+                            </div>
+                          </button>
+                        )}
+                        {/* Separate expand button for page=true items that also have children */}
+                        {sidebar.page && hasChildren && !isCollapsed && (
+                          <button
+                            type="button"
+                            className={`ml-1 px-2 py-3 text-blueGray-400 hover:text-blueGray-600 transition-colors ${
+                              isExpanded ? "text-blueGray-600" : ""
+                            }`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleExpandItem(sidebarKey);
+                            }}
+                            aria-label={isExpanded ? "Collapse" : "Expand"}
+                          >
+                            <i
+                              className={`fas ${isExpanded ? "fa-chevron-down" : "fa-chevron-right"} text-xs transition-all duration-200`}
+                            ></i>
+                          </button>
                         )}
                       </div>
+                      {/* Tooltip for collapsed state */}
+                      {isCollapsed && (
+                        <div className="sidebar-tooltip">{sidebar.title}</div>
+                      )}
+                    </div>
 
-                      {/* Child Routes */}
-                      {hasChildren && (
-                        <div
-                          className={`sidebar-child-container ${
-                            isExpanded || hasActiveChild ? "expanded" : ""
-                          }`}
-                        >
-                          <ul className={`${isCollapsed ? "" : "ml-2 mt-1"}`}>
-                            {sidebar.childList.map((child) => {
-                              const isChildActive =
-                                location.pathname === child.url;
+                    {/* Level 2: Child Routes */}
+                    {hasChildren && (
+                      <div
+                        className={`sidebar-child-container ${
+                          isExpanded || isDescendantActive ? "expanded" : ""
+                        }`}
+                      >
+                        <ul className={`${isCollapsed ? "" : "ml-2 mt-1"}`}>
+                          {sidebar.childList.map((child) => {
+                            const childKey = `child-${child.id}`;
+                            const isChildActive = child.page && location.pathname === child.url;
+                            const hasGrandChildren =
+                              child.grandChildList && child.grandChildList.length > 0;
+                            const isChildExpanded = expandedItems.includes(childKey);
+                            const isGrandChildActive = hasActiveGrandChild(child);
 
-                              return (
-                                <li key={child.id} className="items-center">
-                                  <div className="relative group">
-                                    <Link
-                                      className={`sidebar-child-link text-sm py-2 px-3 block ${
-                                        isChildActive
+                            return (
+                              <li key={child.id} className="items-center">
+                                <div className="relative group">
+                                  {/* Level 2: If page=true, render as Link; if page=false, render as dropdown toggle */}
+                                  {child.page ? (
+                                    <div className="flex items-center">
+                                      <Link
+                                        className={`sidebar-child-link text-sm py-2 px-3 block flex-1 ${
+                                          isChildActive || isGrandChildActive
+                                            ? "sidebar-child-link-active text-blue-700"
+                                            : "text-blueGray-600"
+                                        } ${isCollapsed ? "justify-center" : ""}`}
+                                        to={child.url}
+                                        onClick={() => onClick("hidden")}
+                                      >
+                                        <div className="flex items-center">
+                                          {child.icon && (
+                                            <i
+                                              className={`sidebar-icon ${isCollapsed ? "mx-auto" : "mr-2"} text-xs ${
+                                                isChildActive || isGrandChildActive
+                                                  ? "text-blue-600"
+                                                  : "text-blueGray-400"
+                                              } ${child.icon}`}
+                                            ></i>
+                                          )}
+                                          {!isCollapsed && (
+                                            <span className="sidebar-text">{child.title}</span>
+                                          )}
+                                        </div>
+                                      </Link>
+                                      {hasGrandChildren && !isCollapsed && (
+                                        <button
+                                          type="button"
+                                          className={`ml-1 px-2 py-2 text-blueGray-400 hover:text-blueGray-600 transition-colors ${
+                                            isChildExpanded ? "text-blueGray-600" : ""
+                                          }`}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            toggleExpandItem(childKey);
+                                          }}
+                                          aria-label={isChildExpanded ? "Collapse" : "Expand"}
+                                        >
+                                          <i
+                                            className={`fas ${isChildExpanded ? "fa-chevron-down" : "fa-chevron-right"} text-xs transition-all duration-200`}
+                                          ></i>
+                                        </button>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className={`sidebar-child-link text-sm py-2 px-3 block w-full text-left ${
+                                        isGrandChildActive
                                           ? "sidebar-child-link-active text-blue-700"
                                           : "text-blueGray-600"
                                       } ${isCollapsed ? "justify-center" : ""}`}
-                                      to={child.url}
-                                      onClick={() => onClick("hidden")}
+                                      onClick={() => toggleExpandItem(childKey)}
                                     >
                                       <div className="flex items-center">
                                         {child.icon && (
                                           <i
-                                            className={`sidebar-icon ${
-                                              isCollapsed ? "mx-auto" : "mr-2"
-                                            } text-xs ${
-                                              isChildActive
+                                            className={`sidebar-icon ${isCollapsed ? "mx-auto" : "mr-2"} text-xs ${
+                                              isGrandChildActive
                                                 ? "text-blue-600"
                                                 : "text-blueGray-400"
                                             } ${child.icon}`}
                                           ></i>
                                         )}
                                         {!isCollapsed && (
-                                          <span className="sidebar-text">
-                                            {child.title}
-                                          </span>
+                                          <>
+                                            <span className="sidebar-text flex-1">{child.title}</span>
+                                            <i
+                                              className={`fas ${isChildExpanded || isGrandChildActive ? "fa-chevron-down" : "fa-chevron-right"} text-xs transition-all duration-200`}
+                                            ></i>
+                                          </>
                                         )}
                                       </div>
-                                    </Link>
-                                    {/* Tooltip for collapsed child */}
-                                    {isCollapsed && (
-                                      <div className="sidebar-tooltip">
-                                        {child.title}
-                                      </div>
-                                    )}
+                                    </button>
+                                  )}
+                                  {/* Tooltip for collapsed child */}
+                                  {isCollapsed && (
+                                    <div className="sidebar-tooltip">{child.title}</div>
+                                  )}
+                                </div>
+
+                                {/* Level 3: Grandchild Routes */}
+                                {hasGrandChildren && (
+                                  <div
+                                    className={`sidebar-grandchild-container ${
+                                      isChildExpanded || isGrandChildActive ? "expanded" : ""
+                                    }`}
+                                  >
+                                    <ul className={`${isCollapsed ? "" : "ml-3 mt-1"}`}>
+                                      {child.grandChildList.map((grandChild) => {
+                                        const isGCActive =
+                                          location.pathname === grandChild.url;
+
+                                        return (
+                                          <li key={grandChild.id} className="items-center">
+                                            <div className="relative group">
+                                              <Link
+                                                className={`sidebar-grandchild-link text-xs py-2 px-3 block ${
+                                                  isGCActive
+                                                    ? "sidebar-grandchild-link-active text-blue-700"
+                                                    : "text-blueGray-500"
+                                                } ${isCollapsed ? "justify-center" : ""}`}
+                                                to={grandChild.url}
+                                                onClick={() => onClick("hidden")}
+                                              >
+                                                <div className="flex items-center">
+                                                  {grandChild.icon && (
+                                                    <i
+                                                      className={`sidebar-icon ${
+                                                        isCollapsed ? "mx-auto" : "mr-2"
+                                                      } text-xs ${
+                                                        isGCActive
+                                                          ? "text-blue-600"
+                                                          : "text-blueGray-400"
+                                                      } ${grandChild.icon}`}
+                                                    ></i>
+                                                  )}
+                                                  {!isCollapsed && (
+                                                    <span className="sidebar-text">
+                                                      {grandChild.title}
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </Link>
+                                              {/* Tooltip for collapsed grandchild */}
+                                              {isCollapsed && (
+                                                <div className="sidebar-tooltip">
+                                                  {grandChild.title}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
                                   </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

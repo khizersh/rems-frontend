@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { projectTypes, unitTypes } from "utility/Utility";
-import { FaLayerGroup } from "react-icons/fa";
+import { FaLayerGroup, FaBuilding, FaMapMarkerAlt, FaCalendarAlt, FaInfoCircle, FaMoneyBillAlt } from "react-icons/fa";
 import { HiMiniBuildingStorefront } from "react-icons/hi2";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
@@ -416,110 +416,44 @@ export default function AddProject() {
     Number(project.registrationAmount || 0);
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 bg-blueGray-50 mt-12">
-      {/* Page header */}
-      <div className="mb-0 px-6 py-6">
-        <div className="flex justify-between items-center">
-          <h6 className="text-blueGray-700 text-xl font-bold uppercase flex items-center gap-2">
-            <button className="">
-              <IoArrowBackOutline
-                onClick={() => history.goBack()}
-                className="back-button-icon inline-block back-button"
-                style={{
-                  paddingBottom: "3px",
-                  paddingRight: "7px",
-                  marginBottom: "3px",
-                }}
-              />
-            </button>
-            Create Project
-          </h6>
-        </div>
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
+      {/* Header */}
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button onClick={() => history.goBack()} className="mr-3">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaBuilding className="mr-2" style={{ color: "#6366f1" }} />
+          Create Project
+        </h6>
       </div>
 
-      {/* Project summary strip */}
-      <div className="bg-white rounded-12 shadow-md px-4 md:px-6 -mt-2">
-        <div className="  px-4 py-3 flex flex-wrap gap-4 md:gap-8">
-          <div className="flex items-center gap-3 mr-4">
-            <PiBuildingsLight className="text-lightBlue-500 w-5 h-5 mb-5" />
-            <div className="ml-2">
-              <div className="text-sm text-blueGray-400 uppercase">Project</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {project.name || "--"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mr-4">
-            <FaLayerGroup className="text-emerald-500 w-4 h-4 mb-5" />
-            <div className="ml-2">
-              <div className="text-xs text-blueGray-400 uppercase">Floors</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalFloors}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mr-3">
-            <RiHome4Line className="text-indigo-500 w-4 h-4 mb-5" />
-            <div className="ml-2">
-              <div className="text-xs text-blueGray-400 uppercase">Units</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalUnits}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-8 h-8 mb-5 rounded-full bg-lightBlue-50 text-lightBlue-600 text-xs font-bold">
-              Rs
-            </span>
-            <div>
-              <div className="text-xs text-blueGray-400 uppercase">
-                Total Amount
-              </div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalProjectAmount.toLocaleString()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main form card */}
-      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-6 shadow-md">
-        <form>
-          <div className="flex flex-wrap">
-            <div className="w-full lg:w-6/12 px-4  border-right-grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
-                <BiCommentDetail className="text-lightBlue-500 w-4 h-4 mr-1" />
-                Basic Details
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="name"
-                    >
+      <form onSubmit={createProject} className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="p-6">
+          <div className="flex flex-wrap -mx-2">
+            {/* Project Details Section */}
+            <div className="w-full lg:w-6/12 px-2 mb-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                  <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                  Project Details
+                </h3>
+                <div className="flex flex-wrap -mx-2">
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Name
                     </label>
                     <input
                       type="text"
                       name="name"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.name}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="address"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Address
                     </label>
                     <input
@@ -527,24 +461,19 @@ export default function AddProject() {
                       type="text"
                       name="address"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.address}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="projectType"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Type
                     </label>
                     <select
                       id="projectType"
                       name="projectType"
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.projectType}
                       onChange={changeProjectFields}
                     >
@@ -556,14 +485,9 @@ export default function AddProject() {
                       ))}
                     </select>
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="monthDuration"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Month Duration
                     </label>
                     <input
@@ -571,17 +495,12 @@ export default function AddProject() {
                       type="number"
                       name="monthDuration"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.monthDuration}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-12/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="information"
-                    >
+                  <div className="w-full px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Information
                     </label>
                     <textarea
@@ -589,25 +508,24 @@ export default function AddProject() {
                       name="information"
                       rows="3"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.information}
                     ></textarea>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w-full lg:w-6/12 px-4 grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
-                <GrMoney className="text-emerald-500 w-4 h-4 mr-1" />
-                Financial Details
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="purchasingAmount"
-                    >
+
+            {/* Financial Details Section */}
+            <div className="w-full lg:w-6/12 px-2 mb-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                  <FaMoneyBillAlt className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                  Financial Details
+                </h3>
+                <div className="flex flex-wrap -mx-2">
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Purchasing Amount
                     </label>
                     <input
@@ -615,17 +533,12 @@ export default function AddProject() {
                       type="number"
                       name="purchasingAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.purchasingAmount}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="registrationAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Registration Amount
                     </label>
                     <input
@@ -633,17 +546,12 @@ export default function AddProject() {
                       type="number"
                       name="registrationAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.registrationAmount}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="additionalAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Additional Amount
                     </label>
                     <input
@@ -651,25 +559,21 @@ export default function AddProject() {
                       type="number"
                       name="additionalAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.additionalAmount}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="totalAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Total Amount
                     </label>
                     <input
                       id="totalAmount"
                       type="number"
                       name="totalAmount"
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      readOnly
+                      className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                       value={
                         Number(project.additionalAmount) +
                         Number(project.purchasingAmount) +
@@ -682,96 +586,86 @@ export default function AddProject() {
             </div>
           </div>
 
-          <hr className="mt-6 border-b-1 border-blueGray-300" />
-
-          <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between px-4">
-            <div>
-            <FaLayerGroup
-                className="text-emerald-500 w-5 h-5 inline-block"
-                style={{ paddingBottom: "3px", paddingRight: "7px" }}
-              />
-              Floor List</div>
-            <button
-              type="button"
-              onClick={addFloor}
-              className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-            >
-              <FaLayerGroup
-                className="w-5 h-5 inline-block"
-                style={{ paddingBottom: "3px", paddingRight: "7px" }}
-              />
-              Add Floor
-            </button>
-          </h6>
+          {/* Floor List Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+            <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-4">
+              <h3 className="text-sm font-bold text-gray-700 flex items-center">
+                <FaLayerGroup className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                Floor List
+              </h3>
+              <button
+                type="button"
+                onClick={addFloor}
+                className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+              >
+                <FaLayerGroup className="mr-1" style={{ fontSize: "12px" }} />
+                Add Floor
+              </button>
+            </div>
 
           {floors.map((floor, floorIndex) => (
-            <div key={floorIndex} className="">
-              <h6
-                className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between border-bottom-grey p-3 cursor-pointer  hover:shadow-md"
-                // onClick={() => changeCollapseFloor(floorIndex)}
+            <div key={floorIndex} className="bg-white rounded-lg border border-gray-200 mb-3">
+              <div
+                className="text-sm font-bold text-gray-700 flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50"
               >
-                <div>Floor# {floorIndex}</div>
-                <div className="flex justify-between">
+                <div className="flex items-center">
+                  <FaLayerGroup className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                  Floor# {floorIndex}
+                </div>
+                <div className="flex items-center">
                   <div>
                     <button
                       type="button"
                       onClick={() => addUnit(floorIndex)}
-                      className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
                     >
-                      <HiMiniBuildingStorefront
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                      />
+                      <HiMiniBuildingStorefront className="mr-1" style={{ fontSize: "12px" }} />
                       Add Unit
                     </button>
                   </div>
-                  <div className="ml-6 ">
+                  <div className="ml-3">
                     <button
                       type="button"
                       onClick={() => removeFloor(floorIndex)}
-                      className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                      className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                     >
-                      <MdDeleteForever
-                        style={{ fontSize: "25px", marginTop: "7px" }}
-                      />
+                      <MdDeleteForever style={{ fontSize: "22px" }} />
                     </button>
                   </div>
                   <div
-                    className="ml-6 "
+                    className="ml-3 cursor-pointer"
                     onClick={() => changeCollapseFloor(floorIndex)}
                   >
                     {indexes.some((floor) => floor.floor === floorIndex) ? (
-                      <i class="cursor-pointer fas fa-chevron-up text-blue pt-2 text-xl"></i>
+                      <i className="fas fa-chevron-up text-gray-500 text-sm"></i>
                     ) : (
-                      <i class="cursor-pointer fas fa-chevron-down text-blue pt-2 text-xl"></i>
+                      <i className="fas fa-chevron-down text-gray-500 text-sm"></i>
                     )}
                   </div>
                 </div>
-              </h6>
+              </div>
               {indexes.some((fIndex) => fIndex.floor == floorIndex) && (
-                <div className="space-y-3 ">
+                <div className="p-3 border-t border-gray-200">
                   {floor.unitList.map((unit, unitIndex) => (
                     <div
                       key={unitIndex}
-                      className="mb-3 border-bottom-grey px-3 cursor-pointer pb-4 hover:shadow-md"
+                      className="bg-white rounded-lg border border-gray-200 mb-3 p-3"
                     >
-                      <div
-                        className="flex justify-between p-3"
-                        // onClick={() => toggleUnitIndex(floorIndex, unitIndex)}
-                      >
-                        <div className="text-blueGray-600 font-bold uppercase ">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm font-bold text-gray-700 flex items-center">
+                          <HiMiniBuildingStorefront className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
                           Unit# {unitIndex + 1}
                         </div>
-                        <div className="flex justify-between pt-1">
+                        <div className="flex items-center">
                           <button
                             type="button"
                             onClick={() => removeUnit(floorIndex, unitIndex)}
-                            className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                            className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                           >
-                            <MdDeleteForever style={{ fontSize: "25px" }} />
+                            <MdDeleteForever style={{ fontSize: "22px" }} />
                           </button>
                           <div
-                            className="ml-6 z-50"
+                            className="ml-3 cursor-pointer"
                             onClick={() =>
                               toggleUnitIndex(floorIndex, unitIndex)
                             }
@@ -779,9 +673,9 @@ export default function AddProject() {
                             {indexes
                               .find((floor) => floor.floor === floorIndex)
                               .unitIndexes.some((ui) => ui == unitIndex) ? (
-                              <i class="cursor-pointer fas fa-chevron-up text-blue text-xl"></i>
+                              <i className="fas fa-chevron-up text-gray-500 text-sm"></i>
                             ) : (
-                              <i class="cursor-pointer fas fa-chevron-down text-blue text-xl"></i>
+                              <i className="fas fa-chevron-down text-gray-500 text-sm"></i>
                             )}
                           </div>
                         </div>
@@ -790,158 +684,122 @@ export default function AddProject() {
                         .find((fIndex) => fIndex.floor == floorIndex)
                         .unitIndexes.some((uIndex) => uIndex == unitIndex) && (
                         <>
-                          <div className="flex flex-wrap mt-4">
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
-                                  Serial No
-                                </label>
-                                <input
-                                  id="name"
-                                  type="text"
-                                  name="serialNo"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .serialNo
-                                  }
-                                />
-                              </div>
+                          <div className="flex flex-wrap mt-4 -mx-2">
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Serial No
+                              </label>
+                              <input
+                                type="text"
+                                name="serialNo"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .serialNo
+                                }
+                              />
                             </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
-                                  Square Foot
-                                </label>
-                                <input
-                                  id="name"
-                                  type="number"
-                                  name="squareFoot"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .squareFoot
-                                  }
-                                />
-                              </div>
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Square Foot
+                              </label>
+                              <input
+                                type="number"
+                                name="squareFoot"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .squareFoot
+                                }
+                              />
                             </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="projectType"
-                                >
-                                  Unit Type
-                                </label>
-                                <select
-                                  id="projectType"
-                                  name="unitType"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .unitType
-                                  }
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                >
-                                  <option value="">SELECT UNIT TYPE</option>
-                                  {unitTypes.map((type, index) => (
-                                    <option key={index} value={type}>
-                                      {type}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
-                                  Room Count
-                                </label>
-                                <input
-                                  id="name"
-                                  type="text"
-                                  name="roomCount"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .roomCount
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
-                                  Bathroom Count
-                                </label>
-                                <input
-                                  id="name"
-                                  type="text"
-                                  name="bathroomCount"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .bathroomCount
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="projectType"
-                                >
-                                  Payment Plan Type
-                                </label>
-                                <select
-                                  id="projectType"
-                                  name="paymentPlanType"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                  value={
-                                    floors[floorIndex].unitList[unitIndex]
-                                      .paymentPlanType
-                                  }
-                                  onChange={(e) =>
-                                    changeUnitFields(floorIndex, unitIndex, e)
-                                  }
-                                >
-                                  <option value="">
-                                    SELECT PAYMENT PLAN TYPE
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Unit Type
+                              </label>
+                              <select
+                                name="unitType"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .unitType
+                                }
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                              >
+                                <option value="">SELECT UNIT TYPE</option>
+                                {unitTypes.map((type, index) => (
+                                  <option key={index} value={type}>
+                                    {type}
                                   </option>
-                                  {PAYMENT_PLANS_TYPE.map((type, index) => (
-                                    <option key={index} value={type}>
-                                      {type}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Room Count
+                              </label>
+                              <input
+                                type="text"
+                                name="roomCount"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .roomCount
+                                }
+                              />
+                            </div>
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Bathroom Count
+                              </label>
+                              <input
+                                type="text"
+                                name="bathroomCount"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .bathroomCount
+                                }
+                              />
+                            </div>
+                            <div className="w-full lg:w-4/12 px-2 mb-3">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Payment Plan Type
+                              </label>
+                              <select
+                                name="paymentPlanType"
+                                className="w-full p-2 border rounded-lg text-sm"
+                                value={
+                                  floors[floorIndex].unitList[unitIndex]
+                                    .paymentPlanType
+                                }
+                                onChange={(e) =>
+                                  changeUnitFields(floorIndex, unitIndex, e)
+                                }
+                              >
+                                <option value="">
+                                  SELECT PAYMENT PLAN TYPE
+                                </option>
+                                {PAYMENT_PLANS_TYPE.map((type, index) => (
+                                  <option key={index} value={type}>
+                                    {type}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                           <div className="px-4 lg:px-0 mt-7">
@@ -968,7 +826,7 @@ export default function AddProject() {
                                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                          className="block text-xs font-medium text-gray-700 mb-1"
                                           htmlFor="durationInMonths"
                                         >
                                           Duration In Months
@@ -977,7 +835,7 @@ export default function AddProject() {
                                           id="durationInMonths"
                                           type="text"
                                           name="durationInMonths"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="w-full p-2 border rounded-lg text-sm"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -998,7 +856,7 @@ export default function AddProject() {
                                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                          className="block text-xs font-medium text-gray-700 mb-1"
                                           htmlFor="actualAmount"
                                         >
                                           Actual Amount
@@ -1007,7 +865,7 @@ export default function AddProject() {
                                           id="actualAmount"
                                           type="number"
                                           name="actualAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="w-full p-2 border rounded-lg text-sm"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -1028,7 +886,7 @@ export default function AddProject() {
                                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                          className="block text-xs font-medium text-gray-700 mb-1"
                                           htmlFor="miscellaneousAmount"
                                         >
                                           Miscellaneous Amount
@@ -1037,7 +895,7 @@ export default function AddProject() {
                                           id="miscellaneousAmount"
                                           type="number"
                                           name="miscellaneousAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="w-full p-2 border rounded-lg text-sm"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -1059,7 +917,7 @@ export default function AddProject() {
                                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                          className="block text-xs font-medium text-gray-700 mb-1"
                                           htmlFor="miscellaneousAmount"
                                         >
                                           Development Amount
@@ -1068,7 +926,7 @@ export default function AddProject() {
                                           id="developmentAmount"
                                           type="number"
                                           name="developmentAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="w-full p-2 border rounded-lg text-sm"
                                           onChange={(e) =>
                                             changePaymentScheduleFields(
                                               floorIndex,
@@ -1089,7 +947,7 @@ export default function AddProject() {
                                     <div className="w-full px-4 lg:w-6/12 md:px-0">
                                       <div className="relative w-full mb-3">
                                         <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                          className="block text-xs font-medium text-gray-700 mb-1"
                                           htmlFor="totalAmount"
                                         >
                                           Total Amount
@@ -1099,7 +957,7 @@ export default function AddProject() {
                                           type="text"
                                           name="totalAmount"
                                           disabled
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                          className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                                           value={
                                             Number(
                                               floors[floorIndex].unitList[
@@ -1170,7 +1028,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-6/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="downPayment"
                                             >
                                               Down Payment
@@ -1179,7 +1037,7 @@ export default function AddProject() {
                                               id="downPayment"
                                               type="number"
                                               name="downPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1199,7 +1057,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-6/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="quarterlyPayment"
                                             >
                                               Quarterly Payment
@@ -1208,7 +1066,7 @@ export default function AddProject() {
                                               id="quarterlyPayment"
                                               type="text"
                                               name="quarterlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1229,7 +1087,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-6/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="halfYearlyPayment"
                                             >
                                               Half-Yearly Payment
@@ -1238,7 +1096,7 @@ export default function AddProject() {
                                               id="halfYearlyPayment"
                                               type="text"
                                               name="halfYearlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1258,7 +1116,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-6/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="yearlyPayment"
                                             >
                                               Yearly Payment
@@ -1267,7 +1125,7 @@ export default function AddProject() {
                                               id="yearlyPayment"
                                               type="text"
                                               name="yearlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1286,7 +1144,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-6/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="onPossessionPayment"
                                             >
                                               On Possession Payment
@@ -1295,7 +1153,7 @@ export default function AddProject() {
                                               id="onPossessionPayment"
                                               type="text"
                                               name="onPossessionPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1348,7 +1206,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-3/12 ">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     From Month
@@ -1357,7 +1215,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="text"
                                                     name="fromMonth"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlyPaymentFields(
                                                         floorIndex,
@@ -1380,7 +1238,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-3/12 px-2 md:px-0">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     To Month
@@ -1389,7 +1247,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="text"
                                                     name="toMonth"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlyPaymentFields(
                                                         floorIndex,
@@ -1412,7 +1270,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-4/12">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     Amount
@@ -1421,7 +1279,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="number"
                                                     name="amount"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlyPaymentFields(
                                                         floorIndex,
@@ -1515,7 +1373,7 @@ export default function AddProject() {
                                         <div className="w-full px-4 lg:w-12/12 md:px-0">
                                           <div className="relative w-full mb-3">
                                             <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                              className="block text-xs font-medium text-gray-700 mb-1"
                                               htmlFor="downPayment"
                                             >
                                               Down Payment
@@ -1524,7 +1382,7 @@ export default function AddProject() {
                                               id="downPayment"
                                               type="number"
                                               name="downPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                              className="w-full p-2 border rounded-lg text-sm"
                                               onChange={(e) =>
                                                 changePaymentScheduleFields(
                                                   floorIndex,
@@ -1576,7 +1434,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-3/12 ">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     Month
@@ -1585,7 +1443,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="text"
                                                     name="month"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlySpecificPaymentFields(
                                                         floorIndex,
@@ -1622,7 +1480,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-3/12 px-2 md:px-0">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     Year
@@ -1631,7 +1489,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="text"
                                                     name="year"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlySpecificPaymentFields(
                                                         floorIndex,
@@ -1666,7 +1524,7 @@ export default function AddProject() {
                                               <div className="w-full lg:w-4/12">
                                                 <div className="relative w-full mb-3">
                                                   <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                                                    className="block text-xs font-medium text-gray-700 mb-1"
                                                     htmlFor="name"
                                                   >
                                                     Amount
@@ -1675,7 +1533,7 @@ export default function AddProject() {
                                                     id="name"
                                                     type="number"
                                                     name="amount"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                    className="w-full p-2 border rounded-lg text-sm"
                                                     onChange={(e) =>
                                                       changeMonthlySpecificPaymentFields(
                                                         floorIndex,
@@ -1736,20 +1594,28 @@ export default function AddProject() {
               )}
             </div>
           ))}
+          </div>
 
-          <button
-            onClick={(e) => createProject(e)}
-            type="submit"
-            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 float-right"
-          >
-            <BsBuildingFillAdd
-              className="w-5 h-5 inline-block "
-              style={{ paddingBottom: "3px", paddingRight: "5px" }}
-            />
-            Add Project
-          </button>
-        </form>
-      </div>
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+            >
+              <FaBuilding className="mr-1" style={{ color: "white" }} />
+              Add Project
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

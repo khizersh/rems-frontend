@@ -1,8 +1,7 @@
 import { MainContext } from "context/MainContext";
 import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
-import { TbFileExport } from "react-icons/tb";
-import { FaSitemap } from "react-icons/fa";
+import { FaClipboardList, FaTruck, FaBoxOpen, FaClipboardCheck } from "react-icons/fa";
 import {
   useHistory,
   useLocation,
@@ -94,7 +93,6 @@ const AddGoodReceivingNotes = () => {
       const response = await httpService.post("/grn/create", requestBody);
       notifySuccess(response.responseMessage, 4000);
       setTimeout(() => {
-        // history.push("/dashboard/good-receiving-notes-list");
         history.goBack();
       }, 200);
     } catch (err) {
@@ -171,154 +169,145 @@ const AddGoodReceivingNotes = () => {
 
   return (
     <>
-      <div className="mb-0 py-6">
-        <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-          <span>
-            <button className="">
-              <IoArrowBackOutline
-                onClick={() => history.goBack()}
-                className="back-button-icon inline-block back-button"
-                style={{
-                  paddingBottom: "3px",
-                  paddingRight: "7px",
-                  marginBottom: "3px",
-                }}
-              />
-            </button>
-          </span>
-          ADD GOOD RECEIVING NOTES
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button onClick={() => history.goBack()} className="mr-2">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaClipboardList className="mr-2" style={{ color: "#10b981" }} />
+          Add Good Receiving Notes
         </h6>
       </div>
       {/* Add Grn Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-12 shadow-lg p-5">
-        <div className="flex max-lg-flex-col items-center justify-center">
-          {/* Po Dropdown */}
-          <div className="w-full lg:w-6/12 px-4 mt-3">
-            <SelectField
-              label="Select Purchase Order"
-              name="poId"
-              value={formData.poId}
-              disabled={poId}
-              onChange={handleChange}
-              options={purchaseOrderList}
-            />
-          </div>
-
-          {/* Received Date */}
-          {/* <div className="w-full lg:w-5/12 px-4 mt-3">
-            <InputField
-              label="Received Date"
-              name="receivedDate"
-              type="datetime-local"
-              value={formData.receivedDate}
-              onChange={handleChange}
-            />
-          </div> */}
-        </div>
-
-        <hr className="mt-6 mb-2 border-b-1 border-blueGray-300 w-full mx-auto" />
-
-        {formData.poId && (
-          <>
-            {/* Received Date */}
-            <div className="flex justify-center mb-2">
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <InputField
-                  label="Received Date"
-                  name="receivedDate"
-                  type="datetime-local"
-                  value={formData.receivedDate}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="p-6">
+          {/* Vendor/Project Info Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaTruck className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+              Vendor/Project Info
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Po Dropdown */}
+              <div>
+                <SelectField
+                  label="Select Purchase Order"
+                  name="poId"
+                  value={formData.poId}
+                  disabled={poId}
                   onChange={handleChange}
+                  options={purchaseOrderList}
                 />
               </div>
+
+              {/* Received Date */}
+              {formData.poId && (
+                <div>
+                  <InputField
+                    label="Received Date"
+                    name="receivedDate"
+                    type="datetime-local"
+                    value={formData.receivedDate}
+                    onChange={handleChange}
+                  />
+                </div>
+              )}
             </div>
-            {/* Po Item Listing  */}
-            <div className="w-full">
-              <div className="flex items-center g-1 py-3 px-4">
-                <FaSitemap />
-                <h6 className="text-blueGray-600 text-sm font-bold uppercase">
+          </div>
+
+          {formData.poId && (
+            <>
+              {/* Items List Section */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                  <FaBoxOpen className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
                   Items List
-                </h6>
-              </div>
+                </h3>
 
-              <div className="px-4 w-full">
-                {/* ITEMS LISTING  */}
-                {grnItemsList.map((item, index) => (
-                  <div key={index}>
-                    <div className="flex items-end items-center max-lg-flex-col hover:shadow-lg">
-                      {/* ITEM NAME */}
-                      <div className="w-full lg:w-4/12 px-4 mb-4">
-                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                          Purchase Order Item
-                        </label>
-                        <input
-                          value={item.name}
-                          type="text"
-                          disabled={true}
-                          className="w-full p-2 border rounded-lg disabled-styles"
-                        />
-                      </div>
+                {/* ITEMS LISTING */}
+                <div className="space-y-4">
+                  {grnItemsList.map((item, index) => (
+                    <div key={index} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="grid grid-cols-4 gap-4">
+                        {/* ITEM NAME */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Purchase Order Item
+                          </label>
+                          <input
+                            value={item.name}
+                            type="text"
+                            disabled={true}
+                            className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                          />
+                        </div>
 
-                      {/* ORDERED QUANTITY  */}
-                      <div className="w-full lg:w-4/12 px-4 mb-4">
-                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                          Ordered Quantity
-                        </label>
-                        <input
-                          value={item.quantity}
-                          type="text"
-                          disabled={true}
-                          className="w-full p-2 border rounded-lg disabled-styles"
-                        />
-                      </div>
+                        {/* ORDERED QUANTITY */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Ordered Quantity
+                          </label>
+                          <input
+                            value={item.quantity}
+                            type="text"
+                            disabled={true}
+                            className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                          />
+                        </div>
 
-                      {/* PENDING QUANTITY  */}
-                      <div className="w-full lg:w-4/12 px-4 mb-4">
-                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                          Pending Quantity
-                        </label>
-                        <input
-                          value={item.quantity - item.receivedQuantity}
-                          type="text"
-                          disabled={true}
-                          className="w-full p-2 border rounded-lg disabled-styles"
-                        />
-                      </div>
+                        {/* PENDING QUANTITY */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Pending Quantity
+                          </label>
+                          <input
+                            value={item.quantity - item.receivedQuantity}
+                            type="text"
+                            disabled={true}
+                            className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                          />
+                        </div>
 
-                      {/* RECEIVED QUANTITY */}
-                      <div className="w-full lg:w-4/12 px-4 mb-4">
-                        <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                          Received Quantity
-                        </label>
-                        <input
-                          onChange={(e) => handleItemChange(e, index)}
-                          name="quantityReceived"
-                          value={item.quantityReceived}
-                          type="number"
-                          className="w-full p-2 border rounded-lg"
-                        />
+                        {/* RECEIVED QUANTITY */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Received Quantity
+                          </label>
+                          <input
+                            onChange={(e) => handleItemChange(e, index)}
+                            name="quantityReceived"
+                            value={item.quantityReceived}
+                            type="number"
+                            className="w-full p-2 border rounded-lg text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <hr className="py-2 border-b-1 border-blueGray-300 w-full mx-auto" />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
-        <div className="w-full lg:w-12/12 px-4 text-right">
-          <button
-            type="submit"
-            disabled={loading || submitting || grnItemsList.length === 0}
-            className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-          >
-            <TbFileExport
-              className="w-5 h-5 inline-block "
-              style={{ paddingBottom: "3px", paddingRight: "5px" }}
-            />
-            {submitting ? "Submitting..." : "Add Grn"}
-          </button>
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || submitting || grnItemsList.length === 0}
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            >
+              <FaClipboardCheck className="mr-1" style={{ color: "white" }} />
+              {submitting ? "Saving..." : "Add GRN"}
+            </button>
+          </div>
         </div>
       </form>
     </>
@@ -345,7 +334,7 @@ const InputField = ({
       value={value}
       onChange={onChange}
       readOnly={readOnly}
-      className={`w-full p-2 border rounded-lg ${
+      className={`w-full p-2 border rounded-lg text-sm ${
         readOnly ? "bg-gray-100 cursor-not-allowed" : ""
       }`}
     />
@@ -354,13 +343,13 @@ const InputField = ({
 
 const SelectField = ({ label, name, value, onChange, options, disabled }) => (
   <div>
-    <label className="block text-xs font-small mb-1">{label}</label>
+    <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
     <select
       disabled={disabled}
       name={name}
       value={value}
       onChange={onChange}
-      className="border rounded-lg px-3 w-full disabled-styles"
+      className={`w-full p-2 border rounded-lg text-sm ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
     >
       <option value="">Select</option>
       {options.map((opt) => (

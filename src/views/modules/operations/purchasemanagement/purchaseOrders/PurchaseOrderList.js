@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
+import DynamicDetailsModal from "../../../../../components/CustomerComponents/DynamicModal.js";
 import { RxCross2 } from "react-icons/rx";
 import {
   FaCheckCircle,
@@ -18,10 +19,7 @@ export default function PurchaseOrderList() {
     useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [purchaseOrderList, setPurchaseOrderList] = useState([]);
-  const [purchaseOrderItem, setPurchaseOrderItem] = useState({
-    item: [],
-    po: {},
-  });
+  const [purchaseOrderItem, setPurchaseOrderItem] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -49,9 +47,16 @@ export default function PurchaseOrderList() {
         payload,
       );
 
-      setPurchaseOrderList(response?.data || []);
-      // setTotalPages(response?.data?.totalPages || 0);
-      // setTotalElements(response?.data?.totalElements || 0);
+      console.log("response :: ", response);
+
+      const resData = response?.data?.data || response?.data || {};
+      const content = resData?.content || resData || [];
+
+      setPurchaseOrderList(content);
+      setTotalPages(resData?.totalPages ?? 0);
+      setTotalElements(resData?.totalElements ?? 0);
+      setPage(resData?.page ?? page);
+      setPageSize(resData?.size ?? pageSize);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -64,11 +69,7 @@ export default function PurchaseOrderList() {
     setLoading(true);
     try {
       const response = await httpService.get(`/purchaseOrder/getById/${id}`);
-
-      setPurchaseOrderItem({
-        item: response?.data?.items || [],
-        po: response?.data?.po || {},
-      });
+      setPurchaseOrderItem(response?.data || response || null);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -90,10 +91,13 @@ export default function PurchaseOrderList() {
         return (
           <span
             className={
-              status === "OPEN" ? "text-gray-600" :
-              status === "PARTIAL" ? "text-blue-600" :
-              status === "CLOSED" ? "text-green-600" :
-              status === "CANCELLED" && "text-red-600"
+              status === "OPEN"
+                ? "text-gray-600"
+                : status === "PARTIAL"
+                  ? "text-blue-600"
+                  : status === "CLOSED"
+                    ? "text-green-600"
+                    : status === "CANCELLED" && "text-red-600"
             }
           >
             {status}
@@ -112,7 +116,9 @@ export default function PurchaseOrderList() {
     { header: "Code", field: "items.code" },
     { header: "Description", field: "items.description" },
     { header: "Rate", field: "rate" },
-    { header: "Quantity", field: "quantity" },
+    { header: "Qty", field: "quantity" },
+    { header: "Rec. Qty", field: "receivedQuantity" },
+    { header: "Inv. Qty", field: "invoicedQuantity" },
     { header: "Amount", field: "amount" },
   ];
 
@@ -121,28 +127,67 @@ export default function PurchaseOrderList() {
     { header: "ProjectId", field: "projectId" },
     { header: "VendorId", field: "vendorId" },
     { header: "TotalAmount", field: "totalAmount" },
-    { header: "Status", field: "status", render: (status) => {
+    {
+      header: "Status",
+      field: "status",
+      render: (status) => {
         return (
           <span
             className={
-              status === "OPEN" ? "text-gray-600" :
-              status === "PARTIAL" ? "text-blue-600" :
-              status === "CLOSED" ? "text-green-600" :
-              status === "CANCELLED" && "text-red-600"
+              status === "OPEN"
+                ? "text-gray-600"
+                : status === "PARTIAL"
+                  ? "text-blue-600"
+                  : status === "CLOSED"
+                    ? "text-green-600"
+                    : status === "CANCELLED" && "text-red-600"
             }
           >
             {status}
           </span>
         );
       },
-     },
+    },
   ];
 
   // Handle View Po Details
-  const handleView = ({ id }) => {
+  const handleView = (data) => {
+    // Format purchase order items for display
+    const formattedItems = (
+      data?.items ||
+      data?.purchaseOrderItemList ||
+      []
+    ).map((item) => ({
+      "Item Name": item.items?.name || item.itemName || "N/A",
+      Code: item.items?.code || "N/A",
+      Quantity: item.quantity,
+      "Received Qty": item.receivedQuantity || 0,
+      "Invoiced Qty": item.invoicedQuantity || 0,
+      Rate: `Rs. ${item.rate?.toLocaleString() || 0}`,
+      Amount: `Rs. ${item.amount?.toLocaleString() || 0}`,
+    }));
+
+    const formattedDetails = {
+      "PO Information": {
+        "PO Number": data?.poNumber || data?.po?.poNumber,
+        Status: data?.status || data?.po?.status,
+        "Total Amount": `Rs. ${(data?.totalAmount || data?.po?.totalAmount)?.toLocaleString() || 0}`,
+      },
+      "Reference Info": {
+        Project: data?.projectName || data?.po?.projectName || `Project #${data?.projectId || data?.po?.projectId}`,
+        Vendor: data?.vendorName || data?.po?.vendorName || `Vendor #${data?.vendorId || data?.po?.vendorId}`,
+      },
+      "Audit Info": {
+        "Created By": data?.createdBy || data?.po?.createdBy,
+        "Created Date": data?.createdDate || data?.po?.createdDate,
+        "Updated By": data?.updatedBy || data?.po?.updatedBy,
+        "Updated Date": data?.updatedDate || data?.po?.updatedDate,
+      },
+      "Items List": formattedItems,
+    };
+
+    setPurchaseOrderItem(formattedDetails);
     setIsModalOpen(true);
-    setPurchaseOrderItem({ item: [], po: {} });
-    fetchPoDetails(id);
   };
 
   // Handle Edit Po
@@ -226,13 +271,13 @@ export default function PurchaseOrderList() {
 
   // Handle View Grn
   const handleViewGrn = ({ id, status }) => {
-    if (status !== "PARTIAL") {
-      return notifyError(
-        "View GRN Not Allowed",
-        "GRN can only be viewed for partial purchase orders",
-        4000,
-      );
-    }
+    // if (status !== "PARTIAL") {
+    //   return notifyError(
+    //     "View GRN Not Allowed",
+    //     "GRN can only be viewed for partial purchase orders",
+    //     4000,
+    //   );
+    // }
     history.push(`/dashboard/good-receiving-notes-list/?poId=${id}`);
   };
 
@@ -284,6 +329,13 @@ export default function PurchaseOrderList() {
   return (
     <>
       <div>
+        <DynamicDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          data={purchaseOrderItem}
+          title="Purchase Order Detail"
+        />
+
         <DynamicTableComponent
           fetchDataFunction={fetchPurchaseOrderList}
           setPage={setPage}
@@ -301,57 +353,6 @@ export default function PurchaseOrderList() {
       </div>
 
       {/* Item MODAL  */}
-      {isModalOpen && (
-        <>
-          <div className="backdrop-class"></div>
-
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="bg-white rounded cancel-booking-modal inset-0 z-50 mx-auto modal-width shadow-xl"
-          >
-            {/* HEADER */}
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Purchase Order Details
-              </h2>
-
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-red-500 outline-none focus:outline-none"
-              >
-                <RxCross2 className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6 max-h-65-vh overflow-y-auto">
-              {/* PO SUMMARY */}
-              <div className="bg-gray-50 border rounded-lg p-4 m-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  PO Summary
-                </h3>
-
-                <ItemTable
-                  data={[purchaseOrderItem.po]}
-                  column={itemPoColumn}
-                />
-              </div>
-
-              {/* ITEMS SECTION */}
-              <div className="bg-gray-50 border rounded-lg p-4 m-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Item Listing
-                </h3>
-
-                <ItemTable
-                  data={purchaseOrderItem.item}
-                  column={itemTableColumn}
-                />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </>
   );
 }

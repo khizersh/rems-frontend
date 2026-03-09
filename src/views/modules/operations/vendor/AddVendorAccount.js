@@ -1,6 +1,7 @@
 import { MainContext } from "context/MainContext";
 import React, { useContext, useState } from "react";
-import { IoArrowBackCircleOutline, IoArrowBackOutline } from "react-icons/io5";
+import { IoArrowBackOutline } from "react-icons/io5";
+import { FaTruck, FaCreditCard } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import httpService from "utility/httpService";
 
@@ -69,103 +70,118 @@ const AddVendorComponent = () => {
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className="mb-0 py-6">
-        <div className="flex justify-between">
-          <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-            <span>
-              <button className="">
-                <IoArrowBackOutline
-                  onClick={() => history.goBack()}
-                  className="back-button-icon inline-block back-button"
-                  style={{
-                    paddingBottom: "3px",
-                    paddingRight: "7px",
-                    marginBottom: "3px",
-                  }}
+      {/* Header */}
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button type="button" onClick={() => history.goBack()} className="mr-2">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaTruck className="mr-2" style={{ color: "#10b981" }} />
+          Add Vendor
+        </h6>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="p-6 space-y-6">
+          {/* Vendor Details Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaTruck className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+              Vendor Details
+            </h3>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-6/12 px-2 mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Account Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-lg text-sm"
                 />
-              </button>
-            </span>
-            Add Vendor
-          </h6>
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Details Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
+              Financial Details
+            </h3>
+            <div className="flex flex-wrap">
+              <div className="w-full lg:w-6/12 px-2 mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Total Amount Paid
+                </label>
+                <input
+                  type="number"
+                  name="totalAmountPaid"
+                  value={formData.totalAmountPaid}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-lg text-sm"
+                />
+              </div>
+              <div className="w-full lg:w-6/12 px-2 mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Total Credit Amount
+                </label>
+                <input
+                  type="number"
+                  name="totalCreditAmount"
+                  value={formData.totalCreditAmount}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-lg text-sm"
+                />
+              </div>
+              <div className="w-full lg:w-6/12 px-2 mb-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Total Amount
+                </label>
+                <input
+                  type="number"
+                  name="totalAmount"
+                  value={
+                    Number(formData.totalAmountPaid) +
+                    Number(formData.totalCreditAmount)
+                  }
+                  readOnly
+                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+                />
+              </div>
+            </div>
+          </div>
+
+          {responseMessage && (
+            <p className="text-sm text-gray-700">{responseMessage}</p>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            >
+              <FaTruck className="mr-1" style={{ color: "white" }} />
+              {loading ? "Saving..." : "Add Vendor"}
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div className="rounded-12 flex-auto px-4 bg-white shadow-md py-6 mt-4">
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-wrap bg-white">
-            <div className="w-full lg:w-6/12 px-4 mb-3">
-              <InputField
-                type="text"
-                label="Account Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="w-full lg:w-6/12 px-4 mb-3">
-              <InputField
-                type="number"
-                label="Total Amount Paid"
-                name="totalAmountPaid"
-                value={formData.totalAmountPaid}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="w-full lg:w-6/12 px-4 mb-3">
-              <InputField
-                type="number"
-                label="Total Credit Amount"
-                name="totalCreditAmount"
-                value={formData.totalCreditAmount}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="w-full lg:w-6/12 px-4 mb-3">
-              <InputField
-                label="Total Amount"
-                name="totalAmount"
-                type="number"
-                value={
-                  Number(formData.totalAmountPaid) +
-                  Number(formData.totalCreditAmount)
-                }
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap bg-white">
-            <div className="w-full lg:w-6/12 px-4 mb-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-              >
-                {loading ? "Submitting..." : "Add Account"}
-              </button>
-              {responseMessage && (
-                <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>
-              )}
-            </div>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 };
-
-const InputField = ({ label, name, value, onChange, type = "text" }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label}
-    </label>
-    <input
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="w-full p-2 border rounded"
-    />
-  </div>
-);
 
 export default AddVendorComponent;

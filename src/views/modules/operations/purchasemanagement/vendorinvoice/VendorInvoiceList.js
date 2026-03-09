@@ -2,33 +2,33 @@ import React, { useEffect, useState, useContext } from "react";
 import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
-import { RxCross2 } from "react-icons/rx";
-import { FaEye, FaPlus, FaFileInvoiceDollar } from "react-icons/fa";
+import DynamicDetailsModal from "../../../../../components/CustomerComponents/DynamicModal.js";
+import { FaEye, FaPlus, FaFileInvoiceDollar, FaEdit, FaMoneyBillWave } from "react-icons/fa";
+import { GoSearch } from "react-icons/go";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import * as PurchaseService from "../../../../../service/PurchaseManagementService.js";
 
 export default function VendorInvoiceList() {
-  const { loading, setLoading, notifyError, notifySuccess } = useContext(MainContext);
+  const { loading, setLoading, notifyError, backdrop, setBackdrop } =
+    useContext(MainContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [vendorInvoiceList, setVendorInvoiceList] = useState([]);
-  const [vendorInvoiceDetails, setVendorInvoiceDetails] = useState({
-    invoiceItems: [],
-    invoice: {},
-  });
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [filterBy, setFilterBy] = useState('all'); // 'all', 'vendor', 'status'
-  const [selectedVendor, setSelectedVendor] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
+  const [filterBy, setFilterBy] = useState("all");
+  const [selectedVendor, setSelectedVendor] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [vendors, setVendors] = useState([]);
   const history = useHistory();
 
   // Fetch Vendor Invoice List
   const fetchVendorInvoiceList = async () => {
     try {
-      const organization = JSON.parse(localStorage.getItem("organization")) || null;
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
       if (!organization) return;
 
       setLoading(true);
@@ -41,41 +41,28 @@ export default function VendorInvoiceList() {
       };
 
       let response;
-      
-      if (filterBy === 'vendor' && selectedVendor) {
-        response = await PurchaseService.getVendorInvoicesByVendor(selectedVendor, paginationParams);
-      } else if (filterBy === 'status' && selectedStatus) {
+
+      if (filterBy === "vendor" && selectedVendor) {
+        response = await PurchaseService.getVendorInvoicesByVendor(
+          selectedVendor,
+          paginationParams,
+        );
+      } else if (filterBy === "status" && selectedStatus) {
         response = await PurchaseService.getVendorInvoicesByStatus(
           organization.organizationId,
           selectedStatus,
-          paginationParams
+          paginationParams,
         );
       } else {
         response = await PurchaseService.getAllVendorInvoices(
           organization.organizationId,
-          paginationParams
+          paginationParams,
         );
       }
 
-      setVendorInvoiceList(response?.data?.content || []);
-      setTotalPages(response?.data?.totalPages || 0);
-      setTotalElements(response?.data?.totalElements || 0);
-    } catch (err) {
-      notifyError(err.message, err.data, 4000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch Vendor Invoice Details
-  const fetchInvoiceDetails = async (id) => {
-    setLoading(true);
-    try {
-      const response = await PurchaseService.getVendorInvoiceById(id);
-      setVendorInvoiceDetails({
-        invoiceItems: response?.data?.invoiceItemList || [],
-        invoice: response?.data || {},
-      });
+      setVendorInvoiceList(response?.content || []);
+      setTotalPages(response?.totalPages || 0);
+      setTotalElements(response?.totalElements || 0);
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -86,10 +73,13 @@ export default function VendorInvoiceList() {
   // Fetch Vendors for dropdown
   const fetchVendors = async () => {
     try {
-      const organization = JSON.parse(localStorage.getItem("organization")) || null;
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
       if (!organization) return;
 
-      const response = await httpService.get(`/vendor/${organization.organizationId}/getAll`);
+      const response = await httpService.get(
+        `/vendorAccount/getVendorByOrg/${organization.organizationId}`,
+      );
       setVendors(response?.data || []);
     } catch (err) {
       console.error("Error fetching vendors:", err);
@@ -97,30 +87,19 @@ export default function VendorInvoiceList() {
   };
 
   useEffect(() => {
-    fetchVendorInvoiceList();
-  }, [page, pageSize, filterBy, selectedVendor, selectedStatus]);
-
-  useEffect(() => {
     fetchVendors();
   }, []);
 
+  useEffect(() => {
+    fetchVendorInvoiceList();
+  }, [page, pageSize]);
+
   const tableColumns = [
     { header: "Invoice No", field: "invoiceNumber" },
-    { 
-      header: "Total Amount", 
-      field: "totalAmount",
-      render: (amount) => `₹${amount?.toLocaleString() || 0}`
-    },
-    { 
-      header: "Paid Amount", 
-      field: "paidAmount",
-      render: (amount) => `₹${amount?.toLocaleString() || 0}`
-    },
-    { 
-      header: "Pending Amount", 
-      field: "pendingAmount",
-      render: (amount) => `₹${amount?.toLocaleString() || 0}`
-    },
+    { header: "GRN Number", field: "grnNumber" },
+    { header: "Total Amount", field: "totalAmount" },
+    { header: "Paid Amount", field: "paidAmount" },
+    { header: "Pending Amount", field: "pendingAmount" },
     {
       header: "Status",
       field: "status",
@@ -128,10 +107,13 @@ export default function VendorInvoiceList() {
         return (
           <span
             className={
-              status === "UNPAID" ? "text-red-600 font-semibold" :
-              status === "PARTIAL" ? "text-yellow-600 font-semibold" :
-              status === "PAID" ? "text-green-600 font-semibold" : 
-              "text-gray-600"
+              status === "UNPAID"
+                ? "text-red-600 font-semibold"
+                : status === "PARTIAL"
+                  ? "text-yellow-600 font-semibold"
+                  : status === "PAID"
+                    ? "text-green-600 font-semibold"
+                    : "text-gray-600"
             }
           >
             {status}
@@ -141,62 +123,48 @@ export default function VendorInvoiceList() {
     },
     { header: "Invoice Date", field: "invoiceDate" },
     { header: "Due Date", field: "dueDate" },
-    { header: "Vendor ID", field: "vendorId" },
-    { header: "Created By", field: "createdBy" },
-    { header: "Created Date", field: "createdDate" },
-  ];
-
-  const itemTableColumns = [
-    { header: "GRN Item ID", field: "grnItemId" },
-    { header: "Quantity", field: "quantity" },
-    { 
-      header: "Rate", 
-      field: "rate",
-      render: (rate) => `₹${rate?.toLocaleString() || 0}`
-    },
-    { 
-      header: "Amount", 
-      field: "amount",
-      render: (amount) => `₹${amount?.toLocaleString() || 0}`
-    },
-  ];
-
-  const invoiceDetailsColumns = [
-    { header: "Invoice Number", field: "invoiceNumber" },
-    { header: "Project ID", field: "projectId" },
-    { header: "Vendor ID", field: "vendorId" },
-    { header: "PO ID", field: "poId" },
-    { header: "GRN ID", field: "grnId" },
-    { 
-      header: "Total Amount", 
-      field: "totalAmount",
-      render: (amount) => `₹${amount?.toLocaleString() || 0}`
-    },
-    {
-      header: "Status",
-      field: "status",
-      render: (status) => {
-        return (
-          <span
-            className={
-              status === "UNPAID" ? "text-red-600 font-semibold" :
-              status === "PARTIAL" ? "text-yellow-600 font-semibold" :
-              status === "PAID" ? "text-green-600 font-semibold" : 
-              "text-gray-600"
-            }
-          >
-            {status}
-          </span>
-        );
-      },
-    },
+    { header: "Vendor", field: "vendorName" },
   ];
 
   // Handle View Invoice Details
-  const handleView = ({ id }) => {
-    setIsModalOpen(true);
-    setVendorInvoiceDetails({ invoiceItems: [], invoice: {} });
-    fetchInvoiceDetails(id);
+  const handleView = (data) => {
+
+    // Format invoice items for display
+    const formattedItems = (data?.invoiceItemList || []).map((item) => ({
+      "Item Name": item.itemName || `Item #${item.grnItemId}`,
+      Quantity: item.quantity,
+      Rate: `₹${item.rate?.toLocaleString() || 0}`,
+      Amount: `₹${item.amount?.toLocaleString() || 0}`,
+    }));
+
+    const formattedDetails = {
+      "Invoice Information": {
+        "Invoice Number": data?.invoiceNumber,
+        "Invoice Date": data?.invoiceDate,
+        "Due Date": data?.dueDate,
+        Status: data?.status,
+      },
+      "Amount Details": {
+        "Total Amount": `₹${data?.totalAmount?.toLocaleString() || 0}`,
+        "Paid Amount": `₹${data?.paidAmount?.toLocaleString() || 0}`,
+        "Pending Amount": `₹${data?.pendingAmount?.toLocaleString() || 0}`,
+      },
+      "Reference Info": {
+        Project: data?.projectName || `Project #${data?.projectId}`,
+        Vendor: data?.vendorName || `Vendor #${data?.vendorId}`,
+        "PO Number": data?.poNumber || `PO #${data?.poId}`,
+        "GRN Number": data?.grnNumber || `GRN #${data?.grnId}`,
+      },
+      "Audit Info": {
+        "Created By": data?.createdBy,
+        "Created Date": data?.createdDate,
+        "Updated By": data?.updatedBy,
+        "Updated Date": data?.updatedDate,
+      },
+      "Invoice Items": formattedItems,
+    };
+    setSelectedInvoice(formattedDetails);
+    toggleModal();
   };
 
   // Handle Create New Invoice
@@ -209,70 +177,91 @@ export default function VendorInvoiceList() {
     history.push("/dashboard/vendor-invoice-pending-summary");
   };
 
+  // Handle Edit Invoice (only for UNPAID)
+  const handleEdit = (data) => {
+    if (data.status !== "UNPAID") {
+      notifyError(`Only UNPAID invoices can be edited. Current status: ${data.status}`);
+      return;
+    }
+    history.push(`/dashboard/update-vendor-invoice/${data.id}`);
+  };
+
+  // Handle Make Payment (for UNPAID or PARTIAL invoices)
+  const handleMakePayment = (data) => {
+    if (data.status === "PAID") {
+      notifyError("This invoice is already fully paid");
+      return;
+    }
+    history.push(`/dashboard/create-vendor-invoice-payment?invoiceId=${data.id}`);
+  };
+
+  // Handle View Payments List
+  const handleViewPayments = () => {
+    history.push("/dashboard/vendor-invoice-payments");
+  };
+
   const actions = [
     {
       icon: FaEye,
       onClick: handleView,
-      title: "View Invoice Details",
+      title: "View Detail",
       className: "text-blue-600",
+    },
+    {
+      icon: FaEdit,
+      onClick: handleEdit,
+      title: "Edit Invoice",
+      className: "text-yellow-600",
+      condition: (data) => data.status === "UNPAID",
+    },
+    {
+      icon: FaMoneyBillWave,
+      onClick: handleMakePayment,
+      title: "Make Payment",
+      className: "text-green-600",
+      condition: (data) => data.status !== "PAID",
     },
   ];
 
+  const toggleModal = () => {
+    setBackdrop(!backdrop);
+    setIsModalOpen(!isModalOpen);
+  };
+
   const handleFilterChange = (e) => {
     setFilterBy(e.target.value);
-    setSelectedVendor('');
-    setSelectedStatus('');
-    setPage(0);
+    setSelectedVendor("");
+    setSelectedStatus("");
   };
 
   const handleVendorChange = (e) => {
     setSelectedVendor(e.target.value);
-    setPage(0);
   };
 
   const handleStatusChange = (e) => {
     setSelectedStatus(e.target.value);
+  };
+
+  const onClickSearch = async (e) => {
+    e.preventDefault();
     setPage(0);
+    fetchVendorInvoiceList();
   };
 
   return (
     <>
-      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
-        <div className="rounded-t mb-0 px-4 py-3 border-0">
-          <div className="flex flex-wrap items-center">
-            <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-              <h3 className="font-semibold text-base text-blueGray-700">
-                Vendor Invoice Management
-              </h3>
-            </div>
-            <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
-              <button
-                className="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                type="button"
-                onClick={handleCreateInvoice}
-              >
-                <FaPlus className="inline-block mr-1" />
-                Create Invoice
-              </button>
-              <button
-                className="bg-green-500 text-white active:bg-green-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                type="button"
-                onClick={handleViewPendingSummary}
-              >
-                <FaFileInvoiceDollar className="inline-block mr-1" />
-                Pending Summary
-              </button>
-            </div>
-          </div>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap items-center mt-4 gap-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">Filter By:</label>
+      {/* Filter Section */}
+      <div className="container mx-auto p-4">
+        <form onSubmit={onClickSearch}>
+          <div className="px-5 rounded bg-white shadow-lg flex flex-wrap py-5 md:justify-content-between">
+            <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
+              <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                Filter By
+              </label>
               <select
                 value={filterBy}
                 onChange={handleFilterChange}
-                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
               >
                 <option value="all">All Invoices</option>
                 <option value="vendor">By Vendor</option>
@@ -280,31 +269,35 @@ export default function VendorInvoiceList() {
               </select>
             </div>
 
-            {filterBy === 'vendor' && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Vendor:</label>
+            {filterBy === "vendor" && (
+              <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5 lg:ml-4">
+                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                  Select Vendor
+                </label>
                 <select
                   value={selectedVendor}
                   onChange={handleVendorChange}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
                 >
                   <option value="">Select Vendor</option>
                   {vendors.map((vendor) => (
                     <option key={vendor.id} value={vendor.id}>
-                      {vendor.name} (ID: {vendor.id})
+                      {vendor.name}
                     </option>
                   ))}
                 </select>
               </div>
             )}
 
-            {filterBy === 'status' && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Status:</label>
+            {filterBy === "status" && (
+              <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5 lg:ml-4">
+                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                  Select Status
+                </label>
                 <select
                   value={selectedStatus}
                   onChange={handleStatusChange}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
                 >
                   <option value="">Select Status</option>
                   <option value="UNPAID">Unpaid</option>
@@ -313,84 +306,62 @@ export default function VendorInvoiceList() {
                 </select>
               </div>
             )}
-          </div>
-        </div>
 
-        <div className="block w-full overflow-x-auto">
-          <DynamicTableComponent
-            data={vendorInvoiceList}
-            columns={tableColumns}
-            actions={actions}
-            pagination={{
-              page,
-              size: pageSize,
-              totalPages,
-              totalElements,
-              setPage,
-              setSize: setPageSize,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Modal for Invoice Details */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-          <div className="relative w-auto my-6 mx-auto max-w-6xl">
-            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-              {/* Header */}
-              <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                <h3 className="text-3xl font-semibold">Invoice Details</h3>
-                <button
-                  className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
-                    <RxCross2 />
-                  </span>
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="relative p-6 flex-auto max-h-96 overflow-y-auto">
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold mb-3">Invoice Information</h4>
-                  <DynamicTableComponent
-                    data={[vendorInvoiceDetails.invoice]}
-                    columns={invoiceDetailsColumns}
-                    showActions={false}
-                  />
-                </div>
-
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Invoice Items</h4>
-                  <DynamicTableComponent
-                    data={vendorInvoiceDetails.invoiceItems}
-                    columns={itemTableColumns}
-                    showActions={false}
-                  />
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
-                <button
-                  className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
+            <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12">
+              <button
+                type="submit"
+                className="px-5 mt-7 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none"
+              >
+                <GoSearch className="w-5 h-5 inline-block mr-1" />
+                Search
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        </form>
+      </div>
 
-      {/* Background overlay */}
-      {isModalOpen && (
-        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
-      )}
+      {/* Table Section */}
+      <div className="container mx-auto p-4">
+        <DynamicDetailsModal
+          isOpen={isModalOpen}
+          onClose={toggleModal}
+          data={selectedInvoice}
+          title="Vendor Invoice Detail"
+        />
+
+        <DynamicTableComponent
+          fetchDataFunction={fetchVendorInvoiceList}
+          setPage={setPage}
+          page={page}
+          setPageSize={setPageSize}
+          data={vendorInvoiceList}
+          columns={tableColumns}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          totalElements={totalElements}
+          loading={loading}
+          title="Vendor Invoices"
+          actions={actions}
+          firstButton={{
+            title: "Create Invoice",
+            onClick: handleCreateInvoice,
+            icon: FaPlus,
+            className: "bg-emerald-500",
+          }}
+          secondButton={{
+            title: "View Payments",
+            onClick: handleViewPayments,
+            icon: FaMoneyBillWave,
+            className: "bg-green-500",
+          }}
+          thirdButton={{
+            title: "Pending Summary",
+            onClick: handleViewPendingSummary,
+            icon: FaFileInvoiceDollar,
+            className: "bg-lightBlue-500",
+          }}
+        />
+      </div>
     </>
   );
 }

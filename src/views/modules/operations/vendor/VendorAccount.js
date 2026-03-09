@@ -13,6 +13,7 @@ import { RxCross2 } from "react-icons/rx";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
 import { GoSearch } from "react-icons/go";
+import { paymentTypes } from "utility/Utility.js";
 
 export default function VendorAccount() {
   const {
@@ -404,9 +405,11 @@ export default function VendorAccount() {
                         >
                           <option value="">SELECT PAYMENT TYPE</option>
                           {/* minimal static options to match ExpenseList */}
-                          <option value="CASH">CASH</option>
-                          <option value="CHEQUE">CHEQUE</option>
-                          <option value="PAY_ORDER">PAY_ORDER</option>
+                          {paymentTypes.map((type, index) => (
+                            <option key={index} value={type}>
+                              {type}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>

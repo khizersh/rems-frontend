@@ -4,7 +4,7 @@ import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { FaTools, FaReceipt, FaMoneyBillAlt, FaSitemap } from "react-icons/fa";
+import { FaTools, FaReceipt, FaMoneyBillAlt, FaSitemap, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt, FaBoxOpen } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
@@ -164,7 +164,7 @@ const AddExpense = () => {
         accounts: accountList || [],
         expenseTypes: expenseTypes.data || [],
         expenseAccountGroups: expenseAccountGroups.data.data || [],
-        itemList: itemList.data || [],
+        itemList: itemList.data?.data || itemList.data || [],
       });
       setLoading(false);
     } catch (err) {
@@ -324,6 +324,13 @@ const AddExpense = () => {
     setPurchaseOrderItemList((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const getItemUnitSymbol = (itemId) => {
+    const selectedItem = dropdowns.itemList.find(
+      (listItem) => Number(listItem.id) === Number(itemId),
+    );
+    return selectedItem?.itemsUnit?.symbol || "";
+  };
+
   const selectFields = [
     {
       label: "Select Project",
@@ -370,296 +377,264 @@ const AddExpense = () => {
   };
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6  border-0">
-      <div className="mb-0 py-6">
-        <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-          <span>
-            <button className="">
-              <IoArrowBackOutline
-                onClick={() => history.goBack()}
-                className="back-button-icon inline-block back-button"
-                style={{
-                  paddingBottom: "3px",
-                  paddingRight: "7px",
-                  marginBottom: "3px",
-                }}
-              />
-            </button>
-          </span>
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
+      {/* Header */}
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button onClick={() => history.goBack()} className="mr-3">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaMoneyBillAlt className="mr-2" style={{ color: "#10b981" }} />
           Add Expense
         </h6>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="py-4 bg-white rounded-12 shadow-lg"
+        className="bg-white rounded-xl shadow-lg border border-gray-200"
       >
-        <div className="flex flex-wrap bg-white">
-          <div className="w-full lg:w-12/12 mb-8">
-            <div className="flex flex-wrap">
-              <div className="w-full lg:w-3/12 "></div>
-              <div className="w-full lg:w-6/12 px-5">
-                <div>
-                  <label className="block text-xs font-small mb-1">
-                    Expense Type
-                  </label>
-                  <div className="flex space-x-3 max-sm-flex-col g-2">
-                    {EXPENSE_TYPE.map((type) => {
-                      const Icon = getIconForType(type);
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => handleTabChange(type)}
-                          className={`w-36 flex items-center justify-center space-x-2 px-3 py-2 mx-2 rounded-lg border transform hover:-translate-y-1 transition-all duration-200 ${
-                            formData.expenseType === type
-                              ? "bg-lightBlue-500 text-white border-lightBlue-600 scale-105 shadow-md"
-                              : "bg-white text-gray-700"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-4 h-4 ${formData.expenseType === type ? "text-white" : "text-gray-600"}`}
-                          />
-                          <span className="text-sm font-medium">{type}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className="w-full lg:w-3/12 "></div>
+        {/* Expense Type Tabs */}
+        <div className="px-6 pt-6 pb-4 border-b border-gray-200">
+          <div className="flex justify-center">
+            <div className="bg-gray-100 p-1 rounded-lg inline-flex" style={{ gap: "0.25rem" }}>
+              {EXPENSE_TYPE.map((type) => {
+                const Icon = getIconForType(type);
+                const isActive = formData.expenseType === type;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => handleTabChange(type)}
+                    className={`inline-flex items-center px-4 py-2 rounded-md transition-all duration-200 text-xs font-bold uppercase tracking-wide ${
+                      isActive
+                        ? "bg-white text-gray-700 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon
+                      className="mr-2"
+                      style={{ fontSize: "14px", color: isActive ? "#3b82f6" : "#94a3b8" }}
+                    />
+                    {type.replace("_", " ")}
+                  </button>
+                );
+              })}
             </div>
           </div>
+        </div>
+
+        <div className="p-6">
           {formData.expenseType == "CONSTRUCTION" ? (
-            <>
-              <div className="w-full lg:w-6/12 px-4 mb-3 border-right-grey">
-                <div className="px-4 mb-5">
-                  <h2>Expense Detail</h2>
-                </div>
-
-                <div className="flex flex-wrap bg-white">
-                  {selectFields.map(({ label, name, options }) => (
-                    <div key={name} className="w-full lg:w-6/12 px-4 mb-3">
-                      <SelectField
-                        label={label}
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                        options={options}
-                      />
-                    </div>
-                  ))}
-
-                  <div className="w-full lg:w-12/12 px-4 mt-3 ">
-                    <InputField
-                      label={"Narrations"}
-                      name={"comments"}
-                      value={formData["comments"]}
-                      onChange={handleChange}
-                      type={"text"}
-                      readOnly={false}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full lg:w-6/12 px-4 mb-3">
-                <div className="px-4 mb-5">
-                  <h2>Payment Detail</h2>
-                </div>
-                <div className="flex flex-wrap bg-white">
-                  {inputFields.map(({ label, name, type, readOnly }) => (
-                    <div key={name} className="w-full lg:w-6/12 px-4 mb-3">
+            <div className="flex flex-wrap -mx-2">
+              {/* Expense Detail Section */}
+              <div className="w-full lg:w-6/12 px-2 mb-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                  <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                    <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                    Expense Details
+                  </h3>
+                  <div className="flex flex-wrap -mx-2">
+                    {selectFields.map(({ label, name, options }) => (
+                      <div key={name} className="w-full lg:w-6/12 px-2 mb-3">
+                        <SelectField
+                          label={label}
+                          name={name}
+                          value={formData[name]}
+                          onChange={handleChange}
+                          options={options}
+                        />
+                      </div>
+                    ))}
+                    <div className="w-full px-2 mt-2">
                       <InputField
-                        label={label}
-                        name={name}
-                        value={formData[name]}
+                        label="Narrations"
+                        name="comments"
+                        value={formData.comments}
                         onChange={handleChange}
-                        type={type}
-                        readOnly={readOnly}
+                        type="text"
+                        readOnly={false}
                       />
                     </div>
-                  ))}
-                  <div className="w-full lg:w-6/12 px-4 mb-3">
-                    <SelectField
-                      label={"Payment Type"}
-                      name={"paymentType"}
-                      value={formData["paymentType"]}
-                      onChange={handleChange}
-                      options={getPaymentTypes()}
-                    />
-                  </div>
-
-                  {formData.paymentType == "CHEQUE" ||
-                  formData.paymentType == "PAY_ORDER" ? (
-                    <>
-                      <div className="w-full lg:w-6/12 px-4 mb-3">
-                        <InputField
-                          label={
-                            formData.paymentType == "CHEQUE"
-                              ? "Cheque No"
-                              : formData.paymentType == "PAY_ORDER"
-                                ? "Pay Order No"
-                                : ""
-                          }
-                          name={"paymentDocNo"}
-                          value={formData.paymentDocNo}
-                          onChange={handleChange}
-                          type={"text"}
-                          readOnly={false}
-                        />
-                      </div>
-                      <div className="w-full lg:w-6/12 px-4 mb-3">
-                        <InputField
-                          label={
-                            formData.paymentType == "CHEQUE"
-                              ? "Cheque Date"
-                              : formData.paymentType == "PAY_ORDER"
-                                ? "Pay Order Date"
-                                : ""
-                          }
-                          type="datetime-local"
-                          name="paymentDocDate"
-                          value={formData["paymentDocDate"]}
-                          onChange={handleChange}
-                          readOnly={false}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    ""
-                  )}
-
-                  <div className="w-full lg:w-12/12 px-4 mb-3">
-                    <InputField
-                      label={"Created Date"}
-                      type="datetime-local"
-                      name="createdDate"
-                      value={formData["createdDate"]}
-                      onChange={handleChange}
-                      readOnly={false}
-                    />
                   </div>
                 </div>
               </div>
-            </>
-          ) : formData.expenseType == "MISCELLANEOUS" ? (
-            <>
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <SelectField
-                  label={"Select Account"}
-                  name={"organizationAccountId"}
-                  value={formData["organizationAccountId"]}
-                  onChange={handleChange}
-                  options={dropdowns.accounts}
-                />
-              </div>
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <InputField
-                  label={"Amount"}
-                  name={"amountPaid"}
-                  value={formData["amountPaid"]}
-                  onChange={handleChange}
-                  type={"number"}
-                  readOnly={false}
-                />
-              </div>
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <SelectField
-                  label={"Payment Type"}
-                  name={"paymentType"}
-                  value={formData["paymentType"]}
-                  onChange={handleChange}
-                  options={getPaymentTypes()}
-                />
-              </div>
-              {formData.paymentType == "CHEQUE" ||
-              formData.paymentType == "PAY_ORDER" ? (
-                <>
-                  <div className="w-full lg:w-4/12 px-4 mt-3">
-                    <InputField
-                      label={
-                        formData.paymentType == "CHEQUE"
-                          ? "Cheque No"
-                          : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order No"
-                            : ""
-                      }
-                      name={"paymentDocNo"}
-                      value={formData.paymentDocNo}
-                      onChange={handleChange}
-                      type={"text"}
-                      readOnly={false}
-                    />
-                  </div>
-                  <div className="w-full lg:w-4/12 px-4 mt-3">
-                    <InputField
-                      label={
-                        formData.paymentType == "CHEQUE"
-                          ? "Cheque Date"
-                          : formData.paymentType == "PAY_ORDER"
-                            ? "Pay Order Date"
-                            : ""
-                      }
-                      type="datetime-local"
-                      name="paymentDocDate"
-                      value={formData["paymentDocDate"]}
-                      onChange={handleChange}
-                      readOnly={false}
-                    />
-                  </div>
-                </>
-              ) : (
-                ""
-              )}
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <InputField
-                  label={"Created Date"}
-                  type="datetime-local"
-                  name="createdDate"
-                  value={formData["createdDate"]}
-                  onChange={handleChange}
-                  readOnly={false}
-                />
-              </div>
-              {/* Expense Account Group Dropdown */}
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <SelectField
-                  label={"Select Expense Account Group"}
-                  name={"expenseAccountGroupId"}
-                  value={expenseAccountGroupId}
-                  onChange={handleChange}
-                  options={dropdowns.expenseAccountGroups}
-                />
-              </div>
-              {/* Expense Account Dropdown */}
-              <div className="w-full lg:w-4/12 px-4 mt-3">
-                <SelectField
-                  label={"Select Expense Account"}
-                  name={"expenseCOAId"}
-                  value={formData["expenseCOAId"]}
-                  onChange={handleChange}
-                  options={ExpenseAccountDropdown}
-                />
-              </div>
-              <div className="w-full lg:w-12/12 px-4 mt-3 ">
-                <InputField
-                  label={"Narrations"}
-                  name={"comments"}
-                  value={formData["comments"]}
-                  onChange={handleChange}
-                  type={"text"}
-                  readOnly={false}
-                />
-              </div>
-            </>
-          ) : (
-            formData.expenseType == "PURCHASE_ORDER" && (
-              <>
-                {/* PURCHASE ORDER FORM */}
 
-                {/* Project */}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
+              {/* Payment Detail Section */}
+              <div className="w-full lg:w-6/12 px-2 mb-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                  <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                    <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                    Payment Details
+                  </h3>
+                  <div className="flex flex-wrap -mx-2">
+                    {inputFields.map(({ label, name, type, readOnly }) => (
+                      <div key={name} className="w-full lg:w-6/12 px-2 mb-3">
+                        <InputField
+                          label={label}
+                          name={name}
+                          value={formData[name]}
+                          onChange={handleChange}
+                          type={type}
+                          readOnly={readOnly}
+                        />
+                      </div>
+                    ))}
+                    <div className="w-full lg:w-6/12 px-2 mb-3">
+                      <SelectField
+                        label="Payment Type"
+                        name="paymentType"
+                        value={formData.paymentType}
+                        onChange={handleChange}
+                        options={getPaymentTypes()}
+                      />
+                    </div>
+                    {(formData.paymentType === "CHEQUE" || formData.paymentType === "PAY_ORDER") && (
+                      <>
+                        <div className="w-full lg:w-6/12 px-2 mb-3">
+                          <InputField
+                            label={formData.paymentType === "CHEQUE" ? "Cheque No" : "Pay Order No"}
+                            name="paymentDocNo"
+                            value={formData.paymentDocNo}
+                            onChange={handleChange}
+                            type="text"
+                            readOnly={false}
+                          />
+                        </div>
+                        <div className="w-full lg:w-6/12 px-2 mb-3">
+                          <InputField
+                            label={formData.paymentType === "CHEQUE" ? "Cheque Date" : "Pay Order Date"}
+                            type="datetime-local"
+                            name="paymentDocDate"
+                            value={formData.paymentDocDate}
+                            onChange={handleChange}
+                            readOnly={false}
+                          />
+                        </div>
+                      </>
+                    )}
+                    <div className="w-full px-2 mb-3">
+                      <InputField
+                        label="Created Date"
+                        type="datetime-local"
+                        name="createdDate"
+                        value={formData.createdDate}
+                        onChange={handleChange}
+                        readOnly={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : formData.expenseType == "MISCELLANEOUS" ? (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                <FaReceipt className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
+                Miscellaneous Expense
+              </h3>
+              <div className="flex flex-wrap -mx-2">
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <SelectField
+                    label="Select Account"
+                    name="organizationAccountId"
+                    value={formData.organizationAccountId}
+                    onChange={handleChange}
+                    options={dropdowns.accounts}
+                  />
+                </div>
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <InputField
+                    label="Amount"
+                    name="amountPaid"
+                    value={formData.amountPaid}
+                    onChange={handleChange}
+                    type="number"
+                    readOnly={false}
+                  />
+                </div>
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <SelectField
+                    label="Payment Type"
+                    name="paymentType"
+                    value={formData.paymentType}
+                    onChange={handleChange}
+                    options={getPaymentTypes()}
+                  />
+                </div>
+                {(formData.paymentType === "CHEQUE" || formData.paymentType === "PAY_ORDER") && (
+                  <>
+                    <div className="w-full lg:w-4/12 px-2 mb-3">
+                      <InputField
+                        label={formData.paymentType === "CHEQUE" ? "Cheque No" : "Pay Order No"}
+                        name="paymentDocNo"
+                        value={formData.paymentDocNo}
+                        onChange={handleChange}
+                        type="text"
+                        readOnly={false}
+                      />
+                    </div>
+                    <div className="w-full lg:w-4/12 px-2 mb-3">
+                      <InputField
+                        label={formData.paymentType === "CHEQUE" ? "Cheque Date" : "Pay Order Date"}
+                        type="datetime-local"
+                        name="paymentDocDate"
+                        value={formData.paymentDocDate}
+                        onChange={handleChange}
+                        readOnly={false}
+                      />
+                    </div>
+                  </>
+                )}
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <InputField
+                    label="Created Date"
+                    type="datetime-local"
+                    name="createdDate"
+                    value={formData.createdDate}
+                    onChange={handleChange}
+                    readOnly={false}
+                  />
+                </div>
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <SelectField
+                    label="Expense Account Group"
+                    name="expenseAccountGroupId"
+                    value={expenseAccountGroupId}
+                    onChange={handleChange}
+                    options={dropdowns.expenseAccountGroups}
+                  />
+                </div>
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <SelectField
+                    label="Expense Account"
+                    name="expenseCOAId"
+                    value={formData.expenseCOAId}
+                    onChange={handleChange}
+                    options={ExpenseAccountDropdown}
+                  />
+                </div>
+                <div className="w-full px-2 mb-3">
+                  <InputField
+                    label="Narrations"
+                    name="comments"
+                    value={formData.comments}
+                    onChange={handleChange}
+                    type="text"
+                    readOnly={false}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : formData.expenseType === "PURCHASE_ORDER" && (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                <FaMoneyBillAlt className="mr-2" style={{ fontSize: "14px", color: "#3b82f6" }} />
+                Purchase Order
+              </h3>
+              
+              {/* Main Fields */}
+              <div className="flex flex-wrap -mx-2 mb-4">
+                <div className="w-full lg:w-4/12 px-2 mb-3">
                   <SelectField
                     label="Select Project"
                     name="projectId"
@@ -668,9 +643,7 @@ const AddExpense = () => {
                     options={dropdowns.projects}
                   />
                 </div>
-
-                {/* Vendor */}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
+                <div className="w-full lg:w-4/12 px-2 mb-3">
                   <SelectField
                     label="Select Vendor"
                     name="vendorAccountId"
@@ -679,116 +652,127 @@ const AddExpense = () => {
                     options={dropdowns.vendors}
                   />
                 </div>
-
-                {/* Total Amount */}
-                <div className="w-full lg:w-4/12 px-4 mt-3">
-                  <InputField
-                    readOnly={true}
-                    label="Total Amount"
-                    name="totalAmount"
-                    type="number"
-                    value={formData.totalAmount}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Item Form Listing  */}
-                <div className="w-full">
-                  <hr className="mt-6 border-b-1 border-blueGray-300 w-95-p mx-auto" />
-                  <div className="w-full lg:w-12/12 px-12 mb-5 flex justify-end items-center">
-                    <button
-                      type="button"
-                      onClick={handleAddMoreItem}
-                      className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                    >
-                      <FaSitemap
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                      />
-                      Add Item
-                    </button>
-                  </div>
-
-                  <div className="px-4 w-full">
-                    {purchaseOrderItemList.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-end justify-between items-center max-lg-flex-col"
-                      >
-                        {/* ITEM DROPDOWN */}
-                        <div className="w-full lg:w-3/12 px-4 mb-4">
-                          <SelectField
-                            label="Select Item"
-                            name="itemsId"
-                            value={item.itemsId}
-                            onChange={(e) => handleItemChange(e, index)}
-                            options={dropdowns.itemList}
-                          />
-                        </div>
-
-                        {/* RATE */}
-                        <div className="w-full lg:w-3/12 px-4 mb-4">
-                          <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                            Rate
-                          </label>
-                          <input
-                            onChange={(e) => handleItemChange(e, index)}
-                            name="rate"
-                            value={item.rate}
-                            type="number"
-                            className="w-full p-2 border rounded-lg bg-gray-100"
-                          />
-                        </div>
-
-                        {/* QUANTITY */}
-                        <div className="w-full lg:w-3/12 px-4 mb-4">
-                          <label className="block text-blueGray-500 text-xs font-bold mb-1">
-                            Quantity
-                          </label>
-                          <input
-                            onChange={(e) => handleItemChange(e, index)}
-                            name="quantity"
-                            value={item.quantity}
-                            type="number"
-                            className="w-full p-2 border rounded-lg bg-gray-100"
-                          />
-                        </div>
-
-                        {/* Delete Item  */}
-                        <div className="">
-                          <button
-                            onClick={() => handleItemDelete(index)}
-                            type="button"
-                            className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
-                          >
-                            <MdDeleteForever
-                              style={{ fontSize: "25px", marginTop: "7px" }}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Total Amount</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-500 font-medium">₹</span>
+                    <input
+                      type="number"
+                      name="totalAmount"
+                      value={formData.totalAmount}
+                      readOnly
+                      className="w-full pl-7 p-2 border rounded-lg bg-gray-100 cursor-not-allowed font-semibold text-gray-700"
+                    />
                   </div>
                 </div>
-              </>
-            )
+              </div>
+
+              {/* Items Section */}
+              <div className="border-t border-gray-200 pt-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-xs font-bold text-gray-600 uppercase flex items-center">
+                    <FaBoxOpen className="mr-2" style={{ fontSize: "12px", color: "#8b5cf6" }} />
+                    Order Items
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleAddMoreItem}
+                    className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-2 rounded shadow-sm hover:shadow-md transition-all inline-flex items-center"
+                  >
+                    <FaSitemap className="mr-1" style={{ fontSize: "10px", color: "white" }} />
+                    Add Item
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {purchaseOrderItemList.length === 0 ? (
+                    <div className="text-center py-6 bg-white rounded-lg border border-dashed border-gray-300">
+                      <FaBoxOpen className="text-2xl mx-auto mb-2" style={{ color: "#a5b4fc" }} />
+                      <p className="text-gray-500 text-sm">No items added yet</p>
+                    </div>
+                  ) : (
+                    purchaseOrderItemList.map((item, index) => {
+                      const unitSymbol = getItemUnitSymbol(item.itemsId);
+                      const unitSuffix = unitSymbol ? ` /${unitSymbol}` : "";
+                      return (
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-sm transition-shadow"
+                        >
+                          <div className="flex items-end flex-wrap" style={{ gap: "0.75rem" }}>
+                            <div className="flex-1 min-w-0" style={{ minWidth: "100px" }}>
+                              <SelectField
+                                label="Item"
+                                name="itemsId"
+                                value={item.itemsId}
+                                onChange={(e) => handleItemChange(e, index)}
+                                options={dropdowns.itemList}
+                              />
+                            </div>
+                            <div className="w-24">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Rate{unitSuffix}</label>
+                              <input
+                                onChange={(e) => handleItemChange(e, index)}
+                                name="rate"
+                                value={item.rate}
+                                type="number"
+                                placeholder="0"
+                                className="w-full p-2 border rounded-lg text-sm"
+                              />
+                            </div>
+                            <div className="w-24">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Qty{unitSuffix}</label>
+                              <input
+                                onChange={(e) => handleItemChange(e, index)}
+                                name="quantity"
+                                value={item.quantity}
+                                type="number"
+                                placeholder="0"
+                                className="w-full p-2 border rounded-lg text-sm"
+                              />
+                            </div>
+                            <div className="w-24">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Subtotal</label>
+                              <div className="p-2 bg-green-50 border border-green-200 rounded-lg text-sm font-semibold text-green-700">
+                                ₹{(item.rate * item.quantity).toLocaleString()}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleItemDelete(index)}
+                              type="button"
+                              className="hover:bg-red-50 rounded p-1.5 transition-all mt-7"
+                              title="Remove Item"
+                            >
+                              <MdDeleteForever style={{ fontSize: "20px", color: "#ef4444" }} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
           )}
 
-          <div className="w-full lg:w-12/12 px-4 text-right">
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={loading || submitting}
-              className="px-4 mt-4 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
             >
-              <TbFileExport
-                className="w-5 h-5 inline-block "
-                style={{ paddingBottom: "3px", paddingRight: "5px" }}
-              />
+              <TbFileExport className="mr-1" style={{ color: "white" }} />
               {submitting ? "Submitting..." : "Add Expense"}
             </button>
-            {responseMessage && (
-              <p className="mt-2 text-sm text-gray-700">{responseMessage}</p>
-            )}
           </div>
         </div>
       </form>

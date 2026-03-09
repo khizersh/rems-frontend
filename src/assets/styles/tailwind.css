@@ -558,6 +558,7 @@ video {
 
 [type="text"],
 [type="datetime-local"],
+[type="date"],
 [type="email"],
 [type="url"],
 [type="password"],
@@ -584,6 +585,7 @@ select {
 
 [type="text"]:focus,
 [type="datetime-local"]:focus,
+[type="date"]:focus,
 [type="email"]:focus,
 [type="url"]:focus,
 [type="password"]:focus,
@@ -2080,6 +2082,10 @@ select {
 
 .p-5 {
   padding: 1.25rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
 }
 
 .p-8 {

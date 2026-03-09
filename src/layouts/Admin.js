@@ -10,7 +10,8 @@ import FooterAdmin from "components/Footers/FooterAdmin.js";
 
 // views
 
-import Dashboard from "views/modules/homepages/AdminHomepage";
+import AdminDashboard from "views/modules/homepages/AdminHomepage";
+import UserDashboard from "views/modules/homepages/UserHomepage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -37,6 +38,12 @@ import VendorHome from "views/modules/operations/vendor/VendorHome";
 import VendorPaymentHistory from "views/modules/operations/vendor/VendorPaymentHistory";
 import AddOrganizationComponent from "views/modules/organization-settings/organization-accounts/AddOrganizationAccount";
 import AddVendorComponent from "views/modules/operations/vendor/AddVendorAccount";
+
+// Customer Module Pages
+import CustomerAccounts from "views/modules/customer/CustomerAccounts";
+import CustomerPayments from "views/modules/customer/CustomerPayments";
+import CustomerLedgerPage from "views/modules/customer/CustomerLedger";
+import AccountDetails from "views/modules/customer/AccountDetails";
 import ExpenseList from "views/modules/operations/expense/ExpenseList";
 import AddExpense from "views/modules/operations/expense/AddExpense";
 import ExpenseDetailList from "views/modules/operations/expense/ExpenseDetailList";
@@ -67,9 +74,14 @@ import {
   VendorInvoiceDashboard,
   VendorInvoiceList,
   CreateVendorInvoice,
+  UpdateVendorInvoice,
   VendorInvoiceDetails,
   VendorInvoicePendingSummary
 } from "views/modules/operations/purchasemanagement/vendorinvoice";
+import {
+  VendorPaymentList,
+  CreateVendorPayment
+} from "views/modules/operations/purchasemanagement/vendorpayment";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -79,10 +91,10 @@ export default function Admin() {
   }
 
   function isRouteAllowed(pathname, sidebar) {
-    const current = normalize(pathname); // e.g., /dashboard/floor
+    const current = normalize(pathname);
 
     for (const menu of sidebar) {
-      const base = normalize(menu.url); // e.g., /dashboard
+      const base = normalize(menu.url);
 
       // 1️⃣ Direct match with menu
       if (current === base) return true;
@@ -97,6 +109,24 @@ export default function Admin() {
       for (const child of menu.childList || []) {
         const childBase = normalize(child.url);
         if (current === childBase) return true;
+
+        // 4️⃣ Grandchild menu match
+        for (const grandChild of child.grandChildList || []) {
+          const gcBase = normalize(grandChild.url);
+          if (current === gcBase) return true;
+
+          // 5️⃣ Match FEATURE_ALIASES for grandchild URLs
+          const gcAliases = FEATURE_ALIASES[gcBase] || [];
+          if (gcAliases.some((a) => current === normalize(a))) {
+            return true;
+          }
+        }
+
+        // 6️⃣ Match FEATURE_ALIASES for child URLs
+        const childAliases = FEATURE_ALIASES[childBase] || [];
+        if (childAliases.some((a) => current === normalize(a))) {
+          return true;
+        }
       }
     }
 
@@ -116,7 +146,12 @@ export default function Admin() {
 
           <Switch>
             {[
-              { path: "/dashboard", exact: true, component: Dashboard },
+              { path: "/dashboard/admin-dashboard", exact: true, component: AdminDashboard },
+              { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
+              { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
+              { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },
+              { path: "/dashboard/user-dashboard/payments", exact: true, component: CustomerPayments },
+              { path: "/dashboard/user-dashboard/ledger", exact: true, component: CustomerLedgerPage },
               {
                 path: "/dashboard/project-analysis/:projectId",
                 component: ProjectAnalytics,
@@ -226,8 +261,11 @@ export default function Admin() {
               { path: "/dashboard/vendor-invoice-dashboard", component: VendorInvoiceDashboard },
               { path: "/dashboard/vendor-invoices", component: VendorInvoiceList },
               { path: "/dashboard/create-vendor-invoice", component: CreateVendorInvoice },
+              { path: "/dashboard/update-vendor-invoice/:invoiceId", component: UpdateVendorInvoice },
               { path: "/dashboard/vendor-invoice-details/:invoiceId", component: VendorInvoiceDetails },
               { path: "/dashboard/vendor-invoice-pending-summary", component: VendorInvoicePendingSummary },
+              { path: "/dashboard/vendor-invoice-payments", component: VendorPaymentList },
+              { path: "/dashboard/create-vendor-invoice-payment", component: CreateVendorPayment },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

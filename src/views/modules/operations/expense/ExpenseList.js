@@ -221,6 +221,8 @@ export default function ExpenseList() {
     fetchVendors();
     fetchAccountList();
     fetchAccountGroups();
+    // Fetch expense list on initial mount so the table shows data immediately
+    fetchExpenseList();
   }, []);
 
   // Fetch COAs automatically when account group is selected

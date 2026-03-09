@@ -9,11 +9,7 @@ export function MainProvider({ children }) {
   const [imageData, setImageData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [backdrop, setBackdrop] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    // Load collapsed state from localStorage
-    const saved = localStorage.getItem("sidebarCollapsed");
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Function to set image data
   const setImage = (data) => {

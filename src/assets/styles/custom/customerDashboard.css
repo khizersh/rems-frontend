@@ -1,0 +1,160 @@
+/* Customer Dashboard Styles */
+
+.customer-dashboard-header {
+  padding: 0 16px;
+}
+
+.customer-dashboard-header h1 {
+  line-height: 1.2;
+}
+
+/* Summary Cards Animation */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Account Cards Hover Effect */
+.account-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Progress Bar Gradient */
+.progress-gradient {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+}
+
+/* Status Badges */
+.status-badge-active {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.status-badge-closed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-badge-overdue {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.status-badge-paid {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-badge-unpaid {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.status-badge-pending {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .customer-dashboard-header {
+    padding: 0 8px;
+  }
+
+  .customer-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .customer-dashboard-header p {
+    flex-direction: column;
+  }
+
+  .customer-dashboard-header p span {
+    margin-left: 0 !important;
+    margin-top: 4px;
+  }
+}
+
+/* Table Responsive */
+@media (max-width: 640px) {
+  .recent-payments-table {
+    font-size: 11px;
+  }
+
+  .recent-payments-table th,
+  .recent-payments-table td {
+    padding: 8px 4px;
+  }
+}
+
+/* Alert Banner */
+.overdue-alert {
+  background-color: rgba(254, 226, 226, 1);
+  border-left: 4px solid #ef4444;
+}
+
+/* Chart Container */
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #a0aec0;
+}
+
+/* Card Shadows */
+.card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow-hover:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Refresh Button */
+.refresh-btn {
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  transform: rotate(180deg);
+}
+
+/* Grid Gap Fix */
+.grid-gap-4 {
+  gap: 1rem;
+}
+
+/* Financial Stats Colors */
+.text-paid {
+  color: #10b981;
+}
+
+.text-remaining {
+  color: #f59e0b;
+}
+
+.text-overdue {
+  color: #ef4444;
+}
+
+.bg-paid {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.bg-remaining {
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.bg-overdue {
+  background-color: rgba(239, 68, 68, 0.1);
+}

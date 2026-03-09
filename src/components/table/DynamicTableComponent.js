@@ -230,6 +230,10 @@ export default function DynamicTableComponent({
                     <td className="px-6 py-4">
                       <div className="flex gap-4 items-center">
                         {actions.map((action, idx) => {
+                          // Check if action has a condition and evaluate it
+                          if (action.condition && !action.condition(item)) {
+                            return null;
+                          }
                           const IconComponent = action.icon;
                           return (
                             <Tippy

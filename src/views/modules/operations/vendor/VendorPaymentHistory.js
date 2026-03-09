@@ -11,6 +11,7 @@ import { FaEye, FaPen, FaTrashAlt, FaDownload } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
+import { paymentTypes } from "utility/Utility.js";
 
 export default function VendorPaymentHistory() {
   const {
@@ -85,11 +86,16 @@ export default function VendorPaymentHistory() {
       const respData = response?.data || {};
       const mainData = respData.data || respData;
       const maybeTotalPaid = mainData.totalPaid ?? respData.totalPaid ?? null;
-      const maybeTotalCredit = mainData.totalCredit ?? respData.totalCredit ?? null;
-      const maybeTotalAmount = mainData.totalAmount ?? respData.totalAmount ?? null;
-      if (maybeTotalPaid !== null && maybeTotalPaid !== undefined) setTotalPaid(Number(maybeTotalPaid) || 0);
-      if (maybeTotalCredit !== null && maybeTotalCredit !== undefined) setTotalCredit(Number(maybeTotalCredit) || 0);
-      if (maybeTotalAmount !== null && maybeTotalAmount !== undefined) setTotalAmount(Number(maybeTotalAmount) || 0);
+      const maybeTotalCredit =
+        mainData.totalCredit ?? respData.totalCredit ?? null;
+      const maybeTotalAmount =
+        mainData.totalAmount ?? respData.totalAmount ?? null;
+      if (maybeTotalPaid !== null && maybeTotalPaid !== undefined)
+        setTotalPaid(Number(maybeTotalPaid) || 0);
+      if (maybeTotalCredit !== null && maybeTotalCredit !== undefined)
+        setTotalCredit(Number(maybeTotalCredit) || 0);
+      if (maybeTotalAmount !== null && maybeTotalAmount !== undefined)
+        setTotalAmount(Number(maybeTotalAmount) || 0);
       setTotalPages(response?.data?.totalPages || 0);
       setTotalElements(response?.data?.totalElements || 0);
     } catch (err) {
@@ -109,8 +115,17 @@ export default function VendorPaymentHistory() {
       const data = response?.data || {};
 
       // populate totals if available on this single-account response
-      const tp = Number(data.totalAmountPaid ?? data.totalPaid ?? data.totalPaidAmount ?? 0) || 0;
-      const tc = Number(data.totalCreditAmount ?? data.totalCredit ?? data.totalCreditAmount ?? 0) || 0;
+      const tp =
+        Number(
+          data.totalAmountPaid ?? data.totalPaid ?? data.totalPaidAmount ?? 0,
+        ) || 0;
+      const tc =
+        Number(
+          data.totalCreditAmount ??
+            data.totalCredit ??
+            data.totalCreditAmount ??
+            0,
+        ) || 0;
       const ta = Number(data.totalAmount ?? 0) || 0;
 
       setTotalPaid(tp);
@@ -146,35 +161,36 @@ export default function VendorPaymentHistory() {
 
   const tableColumns = [
     { header: "From Account", field: "organizationAccount" },
-    {
-      header: "Type",
-      field: "transactionType",
-      render: (value) => {
-        const baseClass = "font-semibold uppercase";
-        if (value === "CREDIT")
-          return (
-            <span className="text-red-600">
-              <i className="fas fa-arrow-up text-red-500 mr-4"></i>
-              {value}
-            </span>
-          );
-        if (value === "DEBIT")
-          return (
-            <span className="text-green-600">
-              <i className="fas fa-arrow-down text-emerald-500 mr-4"></i>
-              {value}
-            </span>
-          );
-        else
-          return (
-            <span>
-              <i className="fas fa-arrow-up text-emerald-500"></i>
-              <i className="fas fa-arrow-down text-red-500 mr-2"></i>
-              {value}
-            </span>
-          );
-      },
-    },
+    { header: "Payment Method", field: "paymentMethodType" },
+    // {
+    //   header: "Type",
+    //   field: "transactionType",
+    //   render: (value) => {
+    //     const baseClass = "font-semibold uppercase";
+    //     if (value === "CREDIT")
+    //       return (
+    //         <span className="text-red-600">
+    //           <i className="fas fa-arrow-up text-red-500 mr-4"></i>
+    //           {value}
+    //         </span>
+    //       );
+    //     if (value === "DEBIT")
+    //       return (
+    //         <span className="text-green-600">
+    //           <i className="fas fa-arrow-down text-emerald-500 mr-4"></i>
+    //           {value}
+    //         </span>
+    //       );
+    //     else
+    //       return (
+    //         <span>
+    //           <i className="fas fa-arrow-up text-emerald-500"></i>
+    //           <i className="fas fa-arrow-down text-red-500 mr-2"></i>
+    //           {value}
+    //         </span>
+    //       );
+    //   },
+    // },
     {
       header: "Payment Type",
       field: "vendorPaymentType",
@@ -182,10 +198,18 @@ export default function VendorPaymentHistory() {
         const baseClass = "font-semibold uppercase";
         if (value === "DIRECT_PURCHASE")
           return (
-            <span className="text-blueGray-500 font-semibold">{value}</span>
+            <span className="text-red-600">
+              <i className="fas fa-arrow-up text-red-500 d-inline mr-1"></i>
+              {value}
+            </span>
           );
         if (value === "DUE_CLEARANCE")
-          return <span className="text-green-600">{value}</span>;
+          return (
+            <span className="text-green-600">
+              <i className="fas fa-arrow-down text-emerald-500 d-inline mr-1"></i>
+              {value}{" "}
+            </span>
+          );
         else return <span>-</span>;
       },
     },
@@ -222,9 +246,8 @@ export default function VendorPaymentHistory() {
           comments: expenseDetail.comments || "",
           paymentMethodType: expenseDetail.paymentMethodType || "",
           paymentDocNo: expenseDetail.paymentDocNo || "",
-          paymentDocDate: expenseDetail.paymentDocDate || null, 
+          paymentDocDate: expenseDetail.paymentDocDate || null,
         };
-        
 
         const resp = await httpService.put(
           `/vendorAccount/updatePayback/${selectedPaymentItem.id}`,
@@ -246,6 +269,10 @@ export default function VendorPaymentHistory() {
             Number(expenseDetail.organizationAccountId) || null,
           amountPaid: Number(expenseDetail.amountPaid) || 0,
           idempotencyKey: idempotencyKey,
+          paymentMethodType: expenseDetail.paymentMethodType || "",
+          paymentDocNo: expenseDetail.paymentDocNo || "",
+          paymentDocDate: expenseDetail.paymentDocDate || null,
+          comments: expenseDetail.comments || "",
         };
 
         const resp = await httpService.post(
@@ -298,7 +325,10 @@ export default function VendorPaymentHistory() {
   const handleOpenUpdate = (row) => {
     if (!row) return notifyError("Invalid transaction", 4000);
     if (row.vendorPaymentType !== "DUE_CLEARANCE") {
-      return notifyError("Only Due Clearance transactions can be updated", 4000);
+      return notifyError(
+        "Only Due Clearance transactions can be updated",
+        4000,
+      );
     }
     setSelectedPaymentItem(row);
     setExpenseDetail((prev) => {
@@ -307,8 +337,13 @@ export default function VendorPaymentHistory() {
         if (row.createdDate) {
           // normalize to datetime-local `YYYY-MM-DDTHH:mm`
           const d = new Date(row.createdDate);
-          if (!isNaN(d.getTime())) createdDateVal = d.toISOString().slice(0, 16);
-          else if (typeof row.createdDate === "string" && row.createdDate.includes("T")) createdDateVal = row.createdDate.slice(0, 16);
+          if (!isNaN(d.getTime()))
+            createdDateVal = d.toISOString().slice(0, 16);
+          else if (
+            typeof row.createdDate === "string" &&
+            row.createdDate.includes("T")
+          )
+            createdDateVal = row.createdDate.slice(0, 16);
         }
       } catch (e) {
         // fallback to previous value
@@ -317,7 +352,8 @@ export default function VendorPaymentHistory() {
         ...prev,
         vendorAccountId: Number(accountId) || prev.vendorAccountId,
         amountPaid: row.amountPaid || 0,
-        organizationAccountId: row.organizationAccountId || prev.organizationAccountId,
+        organizationAccountId:
+          row.organizationAccountId || prev.organizationAccountId,
         comments: row.comments || prev.comments,
         paymentMethodType: row.paymentMethodType || prev.paymentMethodType,
         createdDate: createdDateVal,
@@ -519,9 +555,11 @@ export default function VendorPaymentHistory() {
                         onChange={changeExpenseDetail}
                       >
                         <option value="">SELECT PAYMENT TYPE</option>
-                        <option value="CASH">CASH</option>
-                        <option value="CHEQUE">CHEQUE</option>
-                        <option value="PAY_ORDER">PAY_ORDER</option>
+                        {paymentTypes.map((type, index) => (
+                          <option key={index} value={type}>
+                            {type}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>

@@ -129,7 +129,7 @@ const VendorInvoiceDetails = () => {
   };
 
   const handleCreatePayment = () => {
-    history.push(`/dashboard/create-vendor-payment?invoiceId=${invoiceId}`);
+    history.push(`/dashboard/vendor-invoice-payment?invoiceId=${invoiceId}`);
   };
 
   const getStatusColor = (status) => {

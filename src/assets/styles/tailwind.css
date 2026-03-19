@@ -1227,6 +1227,11 @@ select {
   background-color: rgba(16, 185, 129, var(--tw-bg-opacity));
 }
 
+.bg-green-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(220, 252, 231, var(--tw-bg-opacity));
+}
+
 .bg-yellow-500 {
   --tw-bg-opacity: 1;
   background-color: rgba(234, 179, 8, var(--tw-bg-opacity));
@@ -1359,6 +1364,11 @@ select {
 .border-blueGray-200 {
   --tw-border-opacity: 1;
   border-color: rgba(226, 232, 240, var(--tw-border-opacity));
+}
+
+.border-green-200 {
+  --tw-border-opacity: 1;
+  border-color: rgba(187, 247, 208, var(--tw-border-opacity));
 }
 
 .border-blueGray-300 {
@@ -1690,11 +1700,16 @@ select {
 }
 
 .tippy-box[data-theme~="custom"] {
-  color: white;
-  border-radius: 6px;
+  color: #334155;
+  border-radius: 8px;
   font-size: 12px;
-  --tw-bg-opacity: 1;
-  background-color: rgba(99, 102, 241, var(--tw-bg-opacity));
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.tippy-box[data-theme~="custom"] > .tippy-arrow {
+  color: #ffffff;
 }
 
 .m-2 {
@@ -2579,6 +2594,11 @@ select {
 .text-emerald-500 {
   --tw-text-opacity: 1;
   color: rgba(16, 185, 129, var(--tw-text-opacity));
+}
+
+.text-green-800 {
+  --tw-text-opacity: 1;
+  color: rgba(22, 101, 52, var(--tw-text-opacity));
 }
 
 .text-orange-500 {

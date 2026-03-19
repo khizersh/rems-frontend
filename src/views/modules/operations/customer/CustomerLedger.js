@@ -9,8 +9,11 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { getOrdinal } from "../../../../utility/Utility.js";
 import Tippy from "@tippyjs/react";
+import { FaFilter } from "react-icons/fa";
 import { MdPrint } from "react-icons/md";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { RxCross2 } from "react-icons/rx";
+import "../../../../assets/styles/projects/project.css";
 
 export default function CustomerLedger() {
   const {
@@ -34,6 +37,7 @@ export default function CustomerLedger() {
   const [filterProject, setFilterProject] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [defaultCustomerName, setDefaultCustomerName] = useState("");
   const [amounts, setAmount] = useState({
     totalAmount: 0,
     grandTotal: 0,
@@ -71,7 +75,8 @@ export default function CustomerLedger() {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const myParam = queryParams.get("cName");
-    setCustomerName(myParam);
+    setCustomerName(myParam || "");
+    setDefaultCustomerName(myParam || "");
   }, []);
 
   const fetchCustomerAccountList = async (id, filteredBy) => {
@@ -143,21 +148,62 @@ export default function CustomerLedger() {
   };
 
   const changeSelectedProjected = (projectId) => {
+    setPage(0);
+    setFilterProject(projectId);
+    setSelectedCustomerAccount(null);
+    setCustomerAccountFilterId("");
+
     if (projectId) {
       setFilteredId(projectId);
-      setFilterProject(projectId);
       fetchCustomerAccountList(projectId, "project");
+    } else {
+      setFilteredId("");
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
+      if (organization) {
+        fetchCustomerAccountList(organization.organizationId, "organization");
+      }
+      setCustomerName(defaultCustomerName || "");
     }
   };
 
   const changeCustomerAccount = (accountId) => {
     if (accountId) {
+      setPage(0);
       setSelectedCustomerAccount(accountId);
       setCustomerAccountFilterId(accountId);
-      let customerName = customerAccountList.find(
+      const selectedAccount = customerAccountList.find(
         (customer) => customer.accountId == accountId
       );
-      setCustomerName(customerName.customerName);
+      setCustomerName(selectedAccount?.customerName || defaultCustomerName || "");
+    } else {
+      setSelectedCustomerAccount(null);
+      setCustomerAccountFilterId("");
+      setCustomerName(defaultCustomerName || "");
+    }
+  };
+
+  const handleClearFilters = () => {
+    const organization =
+      JSON.parse(localStorage.getItem("organization")) || null;
+
+    setPage(0);
+    setFilteredId("");
+    setFilterProject("");
+    setSelectedCustomerAccount(null);
+    setCustomerAccountFilterId("");
+    setCustomerName(defaultCustomerName || "");
+
+    if (organization) {
+      fetchCustomerAccountList(organization.organizationId, "organization");
+    }
+
+    if (!customerAccountId) {
+      setCustomer(null);
+      setCustomerPaymentList([]);
+      setAmount({ totalAmount: 0, grandTotal: 0, remaianingBalance: 0 });
+      setTotalPages(0);
+      setTotalElements(0);
     }
   };
 
@@ -397,43 +443,67 @@ export default function CustomerLedger() {
     path.split(".").reduce((acc, part) => (acc ? acc[part] : ""), obj);
 
   const history = useHistory();
+  const hasActiveFilters = Boolean(filterProject || selectedCustomerAccount);
 
   return (
     <>
       <div className="container mx-auto ">
-        <div className="flex flex-wrap py-3 px-4 md:justify-content-between">
-          <div className="bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-            <label className="block text-sm font-medium mb-1">Project</label>
-            <select
-              value={filterProject}
-              onChange={(e) => changeSelectedProjected(e.target.value)}
-              className="border rounded-lg px-3 py-2 w-full"
-            >
-              <option value="">All Projects</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
+        <div className="booking-filter-shell mx-4 mt-4">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Customer Ledger
+              </h4>
+              <p className="booking-filter-subtitle">
+                Select project and account to view ledger entries.
+              </p>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <RxCross2 className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
           </div>
 
-          <div className="bg-white shadow-lg p-5 rounded-12 mx-4 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-            <label className="block text-sm font-medium mb-1">
-              Customer Account
-            </label>
-            <select
-              value={selectedCustomerAccount}
-              onChange={(e) => changeCustomerAccount(e.target.value)}
-              className="border rounded-lg px-3 py-2 w-full"
-            >
-              <option value="">Select Account</option>
-              {customerAccountList.map((account) => (
-                <option key={account.accountId} value={account.accountId}>
-                  {account.customerName} - {account.unitSerial}
-                </option>
-              ))}
-            </select>
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
+              <select
+                value={filterProject}
+                onChange={(e) => changeSelectedProjected(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Customer Account</label>
+              <select
+                value={selectedCustomerAccount || ""}
+                onChange={(e) => changeCustomerAccount(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">Select Account</option>
+                {customerAccountList.map((account) => (
+                  <option key={account.accountId} value={account.accountId}>
+                    {account.customerName} - {account.unitSerial}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>

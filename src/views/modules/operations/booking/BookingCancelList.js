@@ -19,6 +19,7 @@ import { GoSearch } from "react-icons/go";
 import { RxCross2 } from "react-icons/rx";
 import { paymentTypes } from "utility/Utility.js";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
+import "../../../../assets/styles/projects/project.css";
 
 export default function BookingCancelList() {
   const {
@@ -34,10 +35,8 @@ export default function BookingCancelList() {
 
   const [bookingList, setBookingList] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [filterProject, setFilterProject] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenEditFee, setIsOpenEditFee] = useState(false);
-  const [filterFloor, setFilterFloor] = useState("");
   const [projectId, setProjectId] = useState("");
   const [accountList, setAccountList] = useState([]);
   const [customerName, setCustomerName] = useState("");
@@ -69,7 +68,7 @@ export default function BookingCancelList() {
 
   useEffect(() => {
     fetchCancelBookingList();
-  }, [page, filterProject, filterFloor]);
+  }, [page]);
 
   const fetchProjects = async () => {
     try {
@@ -86,20 +85,27 @@ export default function BookingCancelList() {
     }
   };
 
-  const fetchCancelBookingList = async () => {
+  const fetchCancelBookingList = async (overrides = {}) => {
     setLoading(true);
     try {
+      const activeProjectId =
+        overrides.projectId !== undefined ? overrides.projectId : projectId;
+      const activeCustomerName =
+        overrides.customerName !== undefined
+          ? overrides.customerName
+          : customerName;
+
       let url = "";
       let organizationLocal = JSON.parse(localStorage.getItem("organization"));
       if (organizationLocal) {
         url = `/booking/${organizationLocal.organizationId}/allCancelledBookings`;
       }
-      if (projectId && customerName) {
-        url += `?projectId=${projectId}&customerName=${customerName}`;
-      } else if (projectId) {
-        url += `?projectId=${projectId}`;
-      } else if (customerName) {
-        url += `?customerName=${customerName}`;
+      if (activeProjectId && activeCustomerName) {
+        url += `?projectId=${activeProjectId}&customerName=${activeCustomerName}`;
+      } else if (activeProjectId) {
+        url += `?projectId=${activeProjectId}`;
+      } else if (activeCustomerName) {
+        url += `?customerName=${activeCustomerName}`;
       }
 
       const response = await httpService.get(url);
@@ -144,6 +150,24 @@ export default function BookingCancelList() {
     } else {
       setCustomerName("");
     }
+  };
+
+  const handleSearch = async () => {
+    setPage(0);
+    await fetchCancelBookingList({
+      projectId,
+      customerName,
+    });
+  };
+
+  const handleClearFilters = async () => {
+    setProjectId("");
+    setCustomerName("");
+    setPage(0);
+    await fetchCancelBookingList({
+      projectId: "",
+      customerName: "",
+    });
   };
 
   const handleDetails = async (booking) => {
@@ -284,6 +308,8 @@ export default function BookingCancelList() {
     setIsOpenEditFee(!isOpenEditFee);
   };
 
+  const hasActiveFilters = Boolean(projectId || customerName.trim());
+
   const handleSubmit = async () => {
     setLoading(true);
 
@@ -317,16 +343,34 @@ export default function BookingCancelList() {
   return (
     <>
       <div className="container mx-auto p-4">
-        <div className="w-full">
-          <div className="bg-white rounded-12 shadow-lg flex flex-wrap py-3 md:justify-content-between">
-            <div className=" p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-              <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                PROJECT
-              </label>
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">Filter Cancelled Bookings</h4>
+              <p className="booking-filter-subtitle">
+                Search cancelled bookings by project and customer name.
+              </p>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <RxCross2 className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
               <select
                 value={projectId}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded-lg px-3 py-2 w-full"
+                className="booking-filter-select"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -337,37 +381,34 @@ export default function BookingCancelList() {
               </select>
             </div>
 
-            <div className="p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-              <div className="relative w-full mb-3">
-                <label
-                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                  htmlFor="name"
-                >
-                  CUSTOMER NAME
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Enter customer name"
-                  onChange={(e) => changeCustomer(e.target.value)}
-                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                  value={customerName}
-                />
-              </div>
+            <div className="booking-filter-field">
+              <label className="booking-filter-label" htmlFor="customerNameFilter">
+                Customer Name
+              </label>
+              <input
+                id="customerNameFilter"
+                type="text"
+                name="name"
+                placeholder="Enter customer name"
+                onChange={(e) => changeCustomer(e.target.value)}
+                className="booking-filter-select"
+                value={customerName}
+              />
             </div>
-            <div className=" p-5 rounded-12  lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-              <button
-                onClick={fetchCancelBookingList}
-                type="submit"
-                className="mt-7 ml-1 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-              >
-                <GoSearch
-                  className="w-5 h-5 inline-block "
-                  style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                />
-                Search
-              </button>
-            </div>
+          </div>
+
+          <div className="w-full flex justify-end mt-4">
+            <button
+              onClick={handleSearch}
+              type="button"
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+            >
+              <GoSearch
+                className="w-5 h-5 inline-block"
+                style={{ paddingBottom: "3px", paddingRight: "5px" }}
+              />
+              Search
+            </button>
           </div>
         </div>
       </div>

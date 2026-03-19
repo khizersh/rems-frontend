@@ -82,6 +82,15 @@ import {
   VendorPaymentList,
   CreateVendorPayment
 } from "views/modules/operations/purchasemanagement/vendorpayment";
+import {
+  WarehouseList,
+  AddWarehouse,
+  StockOverview,
+  StockTransfer,
+  StockAdjustment,
+  StockLedger,
+  MaterialIssue,
+} from "views/modules/warehouse";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -266,6 +275,14 @@ export default function Admin() {
               { path: "/dashboard/vendor-invoice-pending-summary", component: VendorInvoicePendingSummary },
               { path: "/dashboard/vendor-invoice-payments", component: VendorPaymentList },
               { path: "/dashboard/create-vendor-invoice-payment", component: CreateVendorPayment },
+              { path: "/dashboard/warehouse/list", component: WarehouseList },
+              { path: "/dashboard/warehouse/add", component: AddWarehouse },
+              { path: "/dashboard/warehouse/edit/:id", component: AddWarehouse },
+              { path: "/dashboard/warehouse/stock-overview", component: StockOverview },
+              { path: "/dashboard/warehouse/stock-transfer", component: StockTransfer },
+              { path: "/dashboard/warehouse/stock-adjustment", component: StockAdjustment },
+              { path: "/dashboard/warehouse/stock-ledger", component: StockLedger },
+              { path: "/dashboard/warehouse/material-issue", component: MaterialIssue },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

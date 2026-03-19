@@ -3,10 +3,19 @@ import httpService from "../../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import DynamicDetailsModal from "../../../../../components/CustomerComponents/DynamicModal.js";
-import { FaEye, FaPlus, FaFileInvoiceDollar, FaEdit, FaMoneyBillWave } from "react-icons/fa";
+import {
+  FaEye,
+  FaFilter,
+  FaPlus,
+  FaFileInvoiceDollar,
+  FaEdit,
+  FaMoneyBillWave,
+} from "react-icons/fa";
 import { GoSearch } from "react-icons/go";
+import { RxCross2 } from "react-icons/rx";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import * as PurchaseService from "../../../../../service/PurchaseManagementService.js";
+import "../../../../../assets/styles/projects/project.css";
 
 export default function VendorInvoiceList() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =
@@ -25,8 +34,22 @@ export default function VendorInvoiceList() {
   const history = useHistory();
 
   // Fetch Vendor Invoice List
-  const fetchVendorInvoiceList = async () => {
+  const fetchVendorInvoiceList = async (overrides = {}) => {
     try {
+      const activeFilterBy =
+        overrides.filterBy !== undefined ? overrides.filterBy : filterBy;
+      const activeVendor =
+        overrides.selectedVendor !== undefined
+          ? overrides.selectedVendor
+          : selectedVendor;
+      const activeStatus =
+        overrides.selectedStatus !== undefined
+          ? overrides.selectedStatus
+          : selectedStatus;
+      const activePage = overrides.page !== undefined ? overrides.page : page;
+      const activePageSize =
+        overrides.pageSize !== undefined ? overrides.pageSize : pageSize;
+
       const organization =
         JSON.parse(localStorage.getItem("organization")) || null;
       if (!organization) return;
@@ -34,23 +57,23 @@ export default function VendorInvoiceList() {
       setLoading(true);
 
       const paginationParams = {
-        page: page,
-        size: pageSize,
+        page: activePage,
+        size: activePageSize,
         sortBy: "createdDate",
         sortDir: "desc",
       };
 
       let response;
 
-      if (filterBy === "vendor" && selectedVendor) {
+      if (activeFilterBy === "vendor" && activeVendor) {
         response = await PurchaseService.getVendorInvoicesByVendor(
-          selectedVendor,
+          activeVendor,
           paginationParams,
         );
-      } else if (filterBy === "status" && selectedStatus) {
+      } else if (activeFilterBy === "status" && activeStatus) {
         response = await PurchaseService.getVendorInvoicesByStatus(
           organization.organizationId,
-          selectedStatus,
+          activeStatus,
           paginationParams,
         );
       } else {
@@ -242,75 +265,111 @@ export default function VendorInvoiceList() {
     setSelectedStatus(e.target.value);
   };
 
+  const handleClearFilters = async () => {
+    setFilterBy("all");
+    setSelectedVendor("");
+    setSelectedStatus("");
+    setPage(0);
+    await fetchVendorInvoiceList({
+      filterBy: "all",
+      selectedVendor: "",
+      selectedStatus: "",
+      page: 0,
+    });
+  };
+
   const onClickSearch = async (e) => {
     e.preventDefault();
     setPage(0);
-    fetchVendorInvoiceList();
+    fetchVendorInvoiceList({ page: 0 });
   };
+
+  const hasActiveFilters = Boolean(
+    filterBy !== "all" || selectedVendor || selectedStatus
+  );
 
   return (
     <>
       {/* Filter Section */}
       <div className="container mx-auto p-4">
         <form onSubmit={onClickSearch}>
-          <div className="px-5 rounded bg-white shadow-lg flex flex-wrap py-5 md:justify-content-between">
-            <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-              <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                Filter By
-              </label>
-              <select
-                value={filterBy}
-                onChange={handleFilterChange}
-                className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
-              >
-                <option value="all">All Invoices</option>
-                <option value="vendor">By Vendor</option>
-                <option value="status">By Status</option>
-              </select>
+          <div className="booking-filter-shell">
+            <div className="booking-filter-header">
+              <div>
+                <h4 className="booking-filter-title">
+                  <FaFilter className="booking-filter-title-icon" />
+                  Filter Vendor Invoices
+                </h4>
+                <p className="booking-filter-subtitle">
+                  Narrow invoices by vendor or payment status.
+                </p>
+              </div>
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="booking-filter-clear-btn"
+                >
+                  <RxCross2 className="booking-filter-clear-icon" />
+                  Clear Filters
+                </button>
+              )}
             </div>
 
-            {filterBy === "vendor" && (
-              <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5 lg:ml-4">
-                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                  Select Vendor
-                </label>
+            <div className="booking-filter-grid">
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Filter By</label>
                 <select
-                  value={selectedVendor}
-                  onChange={handleVendorChange}
-                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
+                  value={filterBy}
+                  onChange={handleFilterChange}
+                  className="booking-filter-select"
                 >
-                  <option value="">Select Vendor</option>
-                  {vendors.map((vendor) => (
-                    <option key={vendor.id} value={vendor.id}>
-                      {vendor.name}
-                    </option>
-                  ))}
+                  <option value="all">All Invoices</option>
+                  <option value="vendor">By Vendor</option>
+                  <option value="status">By Status</option>
                 </select>
               </div>
-            )}
 
-            {filterBy === "status" && (
-              <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5 lg:ml-4">
-                <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                  Select Status
-                </label>
-                <select
-                  value={selectedStatus}
-                  onChange={handleStatusChange}
-                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full border"
-                >
-                  <option value="">Select Status</option>
-                  <option value="UNPAID">Unpaid</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="PAID">Paid</option>
-                </select>
-              </div>
-            )}
+              {filterBy === "vendor" && (
+                <div className="booking-filter-field">
+                  <label className="booking-filter-label">Vendor</label>
+                  <select
+                    value={selectedVendor}
+                    onChange={handleVendorChange}
+                    className="booking-filter-select"
+                  >
+                    <option value="">Select Vendor</option>
+                    {vendors.map((vendor) => (
+                      <option key={vendor.id} value={vendor.id}>
+                        {vendor.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-            <div className="rounded-12 lg:w-3/12 md:w-6/12 sm:w-12/12">
+              {filterBy === "status" && (
+                <div className="booking-filter-field">
+                  <label className="booking-filter-label">Status</label>
+                  <select
+                    value={selectedStatus}
+                    onChange={handleStatusChange}
+                    className="booking-filter-select"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="UNPAID">Unpaid</option>
+                    <option value="PARTIAL">Partial</option>
+                    <option value="PAID">Paid</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full flex justify-end mt-4">
               <button
                 type="submit"
-                className="px-5 mt-7 ml-4 bg-lightBlue-500 text-white font-bold uppercase text-xs py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none"
+                className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none"
               >
                 <GoSearch className="w-5 h-5 inline-block mr-1" />
                 Search

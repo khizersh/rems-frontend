@@ -4,6 +4,8 @@ import {
   FaAngleLeft,
   FaAngleRight,
   FaAngleDoubleRight,
+  FaChevronDown,
+  FaEllipsisV,
 } from "react-icons/fa";
 import "../../assets/styles/projects/project.css";
 import Tippy from "@tippyjs/react";
@@ -73,6 +75,14 @@ export default function DynamicTableComponent({
     return rangeWithDots;
   };
 
+  const getVisibleActions = (item) =>
+    actions.filter((action) => !action.condition || action.condition(item));
+
+  const startItem = totalElements === 0 ? 0 : page * pageSize + 1;
+  const endItem =
+    totalElements === 0 ? 0 : Math.min((page + 1) * pageSize, totalElements);
+  const currentPage = totalPages === 0 ? 0 : page + 1;
+
   // Notify parent when pageSize changes (for fetching data)
   useEffect(() => {
     if (onPageSizeChange) {
@@ -101,6 +111,7 @@ export default function DynamicTableComponent({
             <button
               onClick={firstButton.onClick}
               className={`${firstButton.className} text-white text-xs font-bold px-3 py-1 rounded`}
+              style={firstButton.style}
             >
               {firstButton.icon && (
                 <firstButton.icon
@@ -177,85 +188,110 @@ export default function DynamicTableComponent({
                 </td>
               </tr>
             ) : (
-              data.map((item, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } project-table-rows`}
-                >
-                  <td className="px-6 py-4">{page * pageSize + index + 1}</td>
+              data.map((item, index) => {
+                const visibleActions = getVisibleActions(item);
 
-                  {columns.map((col, i) => {
-                    const rawValue = getNestedValue(item, col.field);
-                    let displayValue = rawValue;
+                return (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } project-table-rows`}
+                  >
+                    <td className="px-6 py-4">{page * pageSize + index + 1}</td>
 
-                    // ✅ Format amount fields
-                    if (
-                      col.header?.toLowerCase().includes("amount") ||
-                      col.header?.toLowerCase().includes("balance") ||
-                      col.field?.toLowerCase().includes("amount")
-                    ) {
-                      const num = parseFloat(rawValue);
-                      displayValue = isNaN(num) ? "-" : num.toLocaleString();
-                    }
+                    {columns.map((col, i) => {
+                      const rawValue = getNestedValue(item, col.field);
+                      let displayValue = rawValue;
 
-                    // ✅ Format date fields
-                    if (
-                      col.header?.toLowerCase().includes("date") &&
-                      typeof rawValue === "string" &&
-                      rawValue.includes("T")
-                    ) {
-                      displayValue = rawValue.split("T")[0];
-                    }
+                      // ✅ Format amount fields
+                      if (
+                        col.header?.toLowerCase().includes("amount") ||
+                        col.header?.toLowerCase().includes("balance") ||
+                        col.field?.toLowerCase().includes("amount")
+                      ) {
+                        const num = parseFloat(rawValue);
+                        displayValue = isNaN(num) ? "-" : num.toLocaleString();
+                      }
 
-                    if (
-                      displayValue === null ||
-                      displayValue === "" ||
-                      displayValue === undefined
-                    ) {
-                      displayValue = "—";
-                    }
+                      // ✅ Format date fields
+                      if (
+                        col.header?.toLowerCase().includes("date") &&
+                        typeof rawValue === "string" &&
+                        rawValue.includes("T")
+                      ) {
+                        displayValue = rawValue.split("T")[0];
+                      }
 
-                    return (
-                      <td key={i} className="px-6 py-4">
-                        {col.render
-                          ? col.render(displayValue, item)
-                          : displayValue}
-                      </td>
-                    );
-                  })}
+                      if (
+                        displayValue === null ||
+                        displayValue === "" ||
+                        displayValue === undefined
+                      ) {
+                        displayValue = "—";
+                      }
 
-                  {actions.length > 0 && (
-                    <td className="px-6 py-4">
-                      <div className="flex gap-4 items-center">
-                        {actions.map((action, idx) => {
-                          // Check if action has a condition and evaluate it
-                          if (action.condition && !action.condition(item)) {
-                            return null;
-                          }
-                          const IconComponent = action.icon;
-                          return (
-                            <Tippy
-                              key={idx}
-                              placement="top"
-                              theme="custom"
-                              content={action.title}
+                      return (
+                        <td key={i} className="px-6 py-4">
+                          {col.render
+                            ? col.render(displayValue, item)
+                            : displayValue}
+                        </td>
+                      );
+                    })}
+
+                    {actions.length > 0 && (
+                      <td className="px-6 py-4">
+                        {visibleActions.length === 0 ? (
+                          <span className="text-xs text-blueGray-400">No Actions</span>
+                        ) : (
+                          <Tippy
+                            trigger="click"
+                            interactive
+                            hideOnClick={true}
+                            placement="bottom-end"
+                            animation="shift-away"
+                            duration={[180, 120]}
+                            offset={[0, 6]}
+                            theme="custom"
+                            content={
+                              <div className="action-menu-panel">
+                                {visibleActions.map((action, idx) => {
+                                  const IconComponent = action.icon;
+                                  return (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => action.onClick(item)}
+                                      className="action-menu-item"
+                                    >
+                                      {IconComponent && (
+                                        <IconComponent
+                                          className={`action-menu-item-icon ${action.className || ""}`}
+                                        />
+                                      )}
+                                      <span>{action.title}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            }
+                          >
+                            <button
+                              type="button"
+                              className="action-trigger-btn"
                             >
-                              <button
-                                onClick={() => action.onClick(item)}
-                                className={`hover:shadow-md transition-shadow duration-150 ${action.className}`}
-                              >
-                                <IconComponent className="table-icon" />
-                              </button>
-                            </Tippy>
-                          );
-                        })}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))
+                              <FaEllipsisV className="action-trigger-icon" />
+                              <span>Actions</span>
+                              <FaChevronDown className="action-trigger-caret" />
+                            </button>
+                          </Tippy>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -265,8 +301,8 @@ export default function DynamicTableComponent({
       <div className="table-footer px-6 py-4 text-xs">
         {/* Left side - Page size selector & info */}
         <div className="table-footer-left">
-          <div className="flex items-center gap-2">
-            <label className="text-gray-600">Show</label>
+          <div className="flex items-center gap-2 table-footer-info">
+            <label className="text-gray-600">Rows</label>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -280,28 +316,33 @@ export default function DynamicTableComponent({
             </select>
           </div>
 
-          <div className="text-gray-600">
-            Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
-            <span className="font-medium">
-              {Math.min((page + 1) * pageSize, totalElements)}
-            </span>{" "}
-            of <span className="font-medium">{totalElements}</span> results
+          <div className="text-gray-600 table-footer-summary">
+            <span>
+              Showing <span className="font-medium">{startItem}</span> -{" "}
+              <span className="font-medium">{endItem}</span> of{" "}
+              <span className="font-medium">{totalElements}</span> results
+            </span>
+            <span className="table-footer-page-badge">
+              Page {currentPage} / {totalPages}
+            </span>
           </div>
         </div>
 
         {/* Pagination controls */}
-        <div className="table-footer-right">
+        <div className="table-footer-right pagination-shell">
           <button
             onClick={() => setPage(0)}
             disabled={page === 0}
-            className="p-2 rounded bg-gray-200 disabled:opacity-50"
+            className="pagination-nav-btn"
+            aria-label="First page"
           >
             <FaAngleDoubleLeft />
           </button>
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
             disabled={page === 0}
-            className="p-2 rounded bg-gray-200 disabled:opacity-50"
+            className="pagination-nav-btn"
+            aria-label="Previous page"
           >
             <FaAngleLeft />
           </button>
@@ -322,17 +363,15 @@ export default function DynamicTableComponent({
 
           {getPaginationRange(page, totalPages).map((item, idx) =>
             item === "..." ? (
-              <span key={idx} className="px-2 text-gray-500">
+              <span key={idx} className="pagination-dots">
                 …
               </span>
             ) : (
               <button
                 key={idx}
                 onClick={() => setPage(item)}
-                className={`px-3 py-1 text-sm font-medium rounded-full ${
-                  item === page
-                    ? "bg-indigo-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className={`pagination-page-btn ${
+                  item === page ? "is-active" : ""
                 }`}
               >
                 {item + 1}
@@ -343,14 +382,16 @@ export default function DynamicTableComponent({
           <button
             onClick={() => setPage((prev) => prev + 1)}
             disabled={page + 1 >= totalPages}
-            className="p-2 rounded bg-gray-200 disabled:opacity-50"
+            className="pagination-nav-btn"
+            aria-label="Next page"
           >
             <FaAngleRight />
           </button>
           <button
             onClick={() => setPage(totalPages - 1)}
             disabled={page + 1 >= totalPages}
-            className="p-2 rounded bg-gray-200 disabled:opacity-50"
+            className="pagination-nav-btn"
+            aria-label="Last page"
           >
             <FaAngleDoubleRight />
           </button>

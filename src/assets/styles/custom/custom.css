@@ -15,12 +15,13 @@
 
 .modal-height-add-unit {
   max-height: 83vh;
+  width: 90%;
   overflow-y: auto;
 }
 
 .fixed-unit-position {
   position: fixed;
-  left: 4%;
+  left: 5%;
   top: 6%;
 }
 
@@ -389,6 +390,27 @@
   }
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .lg\:grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  }
+
+  /* Grid column span fallbacks for desktop layouts */
+  .lg\:col-span-4 {
+    grid-column: span 4 / span 4 !important;
+  }
+  .lg\:col-span-8 {
+    grid-column: span 8 / span 8 !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Grid column span fallbacks for large desktop layouts */
+  .xl\:col-span-3 {
+    grid-column: span 3 / span 3 !important;
+  }
+  .xl\:col-span-9 {
+    grid-column: span 9 / span 9 !important;
   }
 }
 

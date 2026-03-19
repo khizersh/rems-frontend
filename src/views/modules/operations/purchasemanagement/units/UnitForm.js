@@ -74,80 +74,93 @@ export default function UnitForm({ isOpen, onClose, onSuccess, unit }) {
 
   if (!isOpen) return null;
 
+  const modalTitle = formData.id ? "Edit Unit" : "Add New Unit";
+
   return (
-    <div className="payback-modal inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded shadow-lg w-full max-w-xl">
-        <div className="flex justify-between items-center mb-4 p-4">
-          <h3 className="text-lg font-semibold uppercase">
-            {formData.id ? "Edit Unit" : "Add New Unit"}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 py-6">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+          <h3 className="text-blueGray-700 text-lg font-bold uppercase">
+            {modalTitle}
           </h3>
-          <button onClick={onClose} className="text-gray-700 hover:text-gray-500">
-            <RxCross2 className="w-5 h-5 text-red-500" />
+          <button
+            onClick={onClose}
+            className="text-gray-500 transition-colors hover:text-red-500"
+            type="button"
+          >
+            <RxCross2 className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto max-h-[70vh]">
-          <div className="grid grid-cols-12 gap-4 payback-form">
-            <div className="flex flex-wrap bg-white">
-              {/* Unit Name */}
-              <div className="w-full lg:w-6/12 px-2 mb-2">
-                <div className="relative w-full mb-2">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Unit Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="e.g., Kilogram"
-                    className={`border rounded px-3 py-2 w-full ${errors.name ? "border-red-500" : ""}`}
-                  />
-                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                </div>
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[calc(90vh-74px)] overflow-y-auto p-6"
+        >
+          <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <h3 className="mb-4 border-b border-gray-200 pb-2 text-sm font-bold text-gray-700">
+              Unit Information
+            </h3>
+
+            <div className="flex flex-wrap -mx-2">
+              <div className="mb-3 w-full px-2 lg:w-6/12">
+                <label className="mb-1 block text-xs font-medium text-gray-700">
+                  Unit Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g., Kilogram"
+                  className={`w-full rounded-lg border p-2 text-sm ${
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                )}
               </div>
 
-              {/* Unit Symbol */}
-              <div className="w-full lg:w-6/12 px-2 mb-2">
-                <div className="relative w-full mb-2">
-                  <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                    Symbol <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="symbol"
-                    value={formData.symbol}
-                    onChange={handleChange}
-                    placeholder="e.g., kg"
-                    className={`border rounded px-3 py-2 w-full ${errors.symbol ? "border-red-500" : ""}`}
-                  />
-                  {errors.symbol && <p className="text-red-500 text-xs mt-1">{errors.symbol}</p>}
-                  <p className="text-gray-500 text-xs mt-1">
-                    Short abbreviation used to display the unit (e.g., kg, pcs, m)
-                  </p>
-                </div>
+              <div className="mb-3 w-full px-2 lg:w-6/12">
+                <label className="mb-1 block text-xs font-medium text-gray-700">
+                  Symbol <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="symbol"
+                  value={formData.symbol}
+                  onChange={handleChange}
+                  placeholder="e.g., kg"
+                  className={`w-full rounded-lg border p-2 text-sm ${
+                    errors.symbol ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.symbol && (
+                  <p className="mt-1 text-xs text-red-500">{errors.symbol}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Short abbreviation used to display the unit (e.g., kg, pcs, m)
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+          <div className="mt-6 flex justify-end border-t border-gray-200 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="mr-3 inline-flex items-center rounded bg-gray-100 px-5 py-2 text-xs font-bold uppercase text-gray-700 shadow-sm transition-all hover:bg-gray-200 hover:shadow-md"
             >
-              <FaTimes className="w-4 h-4 mr-2" />
+              <FaTimes className="mr-1" />
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+              className="inline-flex items-center rounded bg-lightBlue-500 px-5 py-2 text-xs font-bold uppercase text-white shadow-sm outline-none transition-all duration-150 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <FaSave className="w-4 h-4 mr-2" />
-              {loading ? "Saving..." : formData.id ? "Update" : "Create"}
+              <FaSave className="mr-1" />
+              {loading ? "Saving..." : formData.id ? "Update Unit" : "Create Unit"}
             </button>
           </div>
         </form>

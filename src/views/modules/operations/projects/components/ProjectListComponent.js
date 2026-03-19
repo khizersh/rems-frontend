@@ -12,7 +12,11 @@ import {
   FaPen,
   FaTrashAlt,
   FaLayerGroup,
+  FaEllipsisV,
+  FaChevronDown,
 } from "react-icons/fa";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 import "../../../../../assets/styles/projects/project.css";
 import "../../../../../assets/styles/responsive.css";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
@@ -35,6 +39,36 @@ export default function ProjectListComponent() {
   const [pageSize, setPageSize] = useState(10);
 
   const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+  const getPaginationRange = (currentPage, totalPages, delta = 1) => {
+    const range = [];
+    const rangeWithDots = [];
+    let lastPage;
+
+    for (let i = 0; i < totalPages; i++) {
+      if (
+        i === 0 ||
+        i === totalPages - 1 ||
+        (i >= currentPage - delta && i <= currentPage + delta)
+      ) {
+        range.push(i);
+      }
+    }
+
+    for (const visiblePage of range) {
+      if (lastPage !== undefined) {
+        if (visiblePage - lastPage === 2) {
+          rangeWithDots.push(lastPage + 1);
+        } else if (visiblePage - lastPage > 2) {
+          rangeWithDots.push("...");
+        }
+      }
+      rangeWithDots.push(visiblePage);
+      lastPage = visiblePage;
+    }
+
+    return rangeWithDots;
+  };
 
   const fetchProjects = async () => {
     const organization =
@@ -136,6 +170,11 @@ export default function ProjectListComponent() {
     history.push("/dashboard/add-project");
   };
 
+  const startItem = totalElements === 0 ? 0 : page * pageSize + 1;
+  const endItem =
+    totalElements === 0 ? 0 : Math.min((page + 1) * pageSize, totalElements);
+  const currentPage = totalPages === 0 ? 0 : page + 1;
+
   return (
     <>
       <DynamicDetailsModal
@@ -144,7 +183,7 @@ export default function ProjectListComponent() {
         data={selectedProject}
         title="Project Details"
       />
-      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-12">
+      <div className="relative flex flex-col min-w-0 break-words bg-white border border-gray-200 w-full mb-6 shadow-lg rounded-12">
         <div className="rounded-t mb-0 px-4 py-3 border-0">
           <div className="flex flex-wrap items-center justify-between max-sm-flex-col max-sm-items-stretch g-2">
             <h3 className="font-semibold text-base text-blueGray-700">
@@ -239,41 +278,57 @@ export default function ProjectListComponent() {
                     <td className="px-6 py-4">{project.floors}</td>
                     <td className="px-6 py-4">{project.totalAmount}</td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-4 items-center">
-                        <button
-                          className="text-green-600 hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
-                          title="View Details"
-                          onClick={() => handleClickDetails(project)}
-                        >
-                          <FaEye />
+                      <Tippy
+                        trigger="click"
+                        interactive
+                        hideOnClick={true}
+                        placement="bottom-end"
+                        animation="shift-away"
+                        duration={[180, 120]}
+                        offset={[0, 6]}
+                        theme="custom"
+                        content={
+                          <div className="action-menu-panel">
+                            <button
+                              type="button"
+                              onClick={() => handleClickDetails(project)}
+                              className="action-menu-item"
+                            >
+                              <FaEye className="action-menu-item-icon text-green-600" />
+                              <span>View Details</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleClickFloor(project.projectId)}
+                              className="action-menu-item"
+                            >
+                              <FaLayerGroup className="action-menu-item-icon text-blue-500" />
+                              <span>View Floors</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(project.projectId)}
+                              className="action-menu-item"
+                            >
+                              <FaPen className="action-menu-item-icon text-yellow-500" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="action-menu-item"
+                            >
+                              <FaTrashAlt className="action-menu-item-icon text-red-500" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        }
+                      >
+                        <button type="button" className="action-trigger-btn">
+                          <FaEllipsisV className="action-trigger-icon" />
+                          <span>Actions</span>
+                          <FaChevronDown className="action-trigger-caret" />
                         </button>
-                        <button
-                          className="grey hover:shadow-md transition-shadow shadow-hover hover:text-blue-700 transition-colors duration-150"
-                          title="View Floor"
-                          onClick={() => handleClickFloor(project.projectId)}
-                        >
-                          <FaLayerGroup
-                            className="w-5 h-5 inline-block"
-                            style={{
-                              paddingBottom: "3px",
-                              paddingRight: "7px",
-                            }}
-                          />
-                        </button>
-                        <button
-                          className=" blue hover:shadow-md transition-shadow text-yellow-500 hover:text-yellow-600 transition-colors duration-150"
-                          title="Edit"
-                          onClick={() => handleEdit(project.projectId)}
-                        >
-                          <FaPen />
-                        </button>
-                        <button
-                          className=" red hover:shadow-md transition-shadow text-red-500 hover:text-red-600 transition-colors duration-150"
-                          title="Delete"
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
+                      </Tippy>
                     </td>
                   </tr>
                 ))
@@ -286,7 +341,7 @@ export default function ProjectListComponent() {
         <div className="table-footer px-6 py-4 text-xs">
           {/* Left side - Page size selector & info */}
           <div className="table-footer-left">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 table-footer-info">
               <label className="text-gray-600">Show</label>
               <select
                 value={pageSize}
@@ -301,21 +356,24 @@ export default function ProjectListComponent() {
               </select>
             </div>
 
-            <div className="text-gray-600">
-              Showing <span className="font-medium">{page * pageSize + 1}</span> –{" "}
-              <span className="font-medium">
-                {Math.min((page + 1) * pageSize, totalElements)}
-              </span>{" "}
-              of <span className="font-medium">{totalElements}</span> results
+            <div className="text-gray-600 table-footer-summary">
+              <span>
+                Showing <span className="font-medium">{startItem}</span> -{" "}
+                <span className="font-medium">{endItem}</span> of{" "}
+                <span className="font-medium">{totalElements}</span> results
+              </span>
+              <span className="table-footer-page-badge">
+                Page {currentPage} / {totalPages}
+              </span>
             </div>
           </div>
 
           {/* Pagination controls */}
-          <div className="table-footer-right">
+          <div className="table-footer-right pagination-shell">
             <button
               onClick={() => setPage(0)}
               disabled={page === 0}
-              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-nav-btn"
               title="First"
             >
               <FaAngleDoubleLeft />
@@ -323,30 +381,34 @@ export default function ProjectListComponent() {
             <button
               onClick={() => setPage(page - 1)}
               disabled={page === 0}
-              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-nav-btn"
               title="Previous"
             >
               <FaAngleLeft />
             </button>
 
-            {[...Array(totalPages)].map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setPage(idx)}
-                className={`px-3 py-1 text-sm font-medium rounded-full ${
-                  idx === page
-                    ? "bg-indigo-500 text-white border-indigo-500"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
-                }`}
-              >
-                {idx + 1}
-              </button>
-            ))}
+            {getPaginationRange(page, totalPages).map((item, idx) =>
+              item === "..." ? (
+                <span key={idx} className="pagination-dots">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={idx}
+                  onClick={() => setPage(item)}
+                  className={`pagination-page-btn ${
+                    item === page ? "is-active" : ""
+                  }`}
+                >
+                  {item + 1}
+                </button>
+              )
+            )}
 
             <button
               onClick={() => setPage(page + 1)}
               disabled={page + 1 >= totalPages}
-              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-nav-btn"
               title="Next"
             >
               <FaAngleRight />
@@ -354,7 +416,7 @@ export default function ProjectListComponent() {
             <button
               onClick={() => setPage(totalPages - 1)}
               disabled={page + 1 >= totalPages}
-              className="p-2 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-nav-btn"
               title="Last"
             >
               <FaAngleDoubleRight />

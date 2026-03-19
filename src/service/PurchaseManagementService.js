@@ -109,6 +109,27 @@ export const getGRNsByPoId = async (poId, paginationParams = {}) => {
   return response.data;
 };
 
+/**
+ * Update GRN (reverses old stock, adds new stock)
+ * @param {number|string} grnId - GRN ID
+ * @param {Object} grnData - Updated GRN data
+ * @returns {Promise<Object>} - Update result
+ */
+export const updateGRN = async (grnId, grnData) => {
+  const response = await httpService.post(`/grn/update/${grnId}`, grnData);
+  return response.data;
+};
+
+/**
+ * Cancel GRN (reverses stock, reverts PO quantities)
+ * @param {number|string} grnId - GRN ID
+ * @returns {Promise<Object>} - Cancel result
+ */
+export const cancelGRN = async (grnId) => {
+  const response = await httpService.post(`/grn/cancel/${grnId}`);
+  return response.data;
+};
+
 // =====================
 // Vendor Invoice APIs
 // =====================
@@ -316,6 +337,8 @@ const PurchaseManagementService = {
   createGRN,
   getGRNById,
   getGRNsByPoId,
+  updateGRN,
+  cancelGRN,
 
   // Vendor Invoices
   createVendorInvoice,

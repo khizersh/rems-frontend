@@ -3,10 +3,12 @@ import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaFilter, FaPen, FaTrashAlt } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { MdOutlinePayments } from "react-icons/md";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
+import { RxCross2 } from "react-icons/rx";
+import "../../../../assets/styles/projects/project.css";
 
 export default function CustomerAccount() {
   const { loading, setLoading, notifyError, backdrop, setBackdrop } =
@@ -147,20 +149,44 @@ export default function CustomerAccount() {
 
   // Handle changing the selected project
   const changeSelectedProjected = (projectId) => {
+    setPage(0);
+    setFilterProject(projectId);
+    setFilterFloor("");
+
     if (projectId) {
       setFilteredId(projectId);
       setFilteredBy("project");
-      setFilterProject(projectId);
       fetchFloors(projectId);
+    } else {
+      setFilteredId("");
+      setFilteredBy("organization");
+      setFloorOptions([]);
     }
   };
 
   const changeSelectedFloor = (floorId) => {
+    setPage(0);
+    setFilterFloor(floorId);
+
     if (floorId) {
       setFilteredId(floorId);
       setFilteredBy("floor");
-      setFilterFloor(floorId);
+    } else if (filterProject) {
+      setFilteredId(filterProject);
+      setFilteredBy("project");
+    } else {
+      setFilteredId("");
+      setFilteredBy("organization");
     }
+  };
+
+  const handleClearFilters = () => {
+    setPage(0);
+    setFilterProject("");
+    setFilterFloor("");
+    setFilteredId("");
+    setFilteredBy("organization");
+    setFloorOptions([]);
   };
 
   const tableColumns = [
@@ -293,6 +319,8 @@ export default function CustomerAccount() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const hasActiveFilters = Boolean(filterProject || filterFloor);
+
   return (
     <>
       <DynamicDetailsModal
@@ -302,16 +330,37 @@ export default function CustomerAccount() {
         title="Customer Account Details"
       />
       <div className="container mx-auto p-4">
-        <div className="w-full">
-          <div className="flex flex-wrap py-3 md:justify-content-between">
-            <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-              <label className="block text-sm font-medium mb-1">
-                Select Project
-              </label>
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Customer Accounts
+              </h4>
+              <p className="booking-filter-subtitle">
+                Narrow down accounts by project and floor.
+              </p>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <RxCross2 className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
               <select
                 value={filterProject}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded-lg px-3 py-2 w-full"
+                className="booking-filter-select"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -322,21 +371,23 @@ export default function CustomerAccount() {
               </select>
             </div>
 
-            <div className=" bg-white shadow-lg p-5 mx-4 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-              <label className="block text-sm font-medium mb-1">
-                Select Floor
-              </label>
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Floor</label>
               <select
                 value={filterFloor}
                 onChange={(e) => changeSelectedFloor(e.target.value)}
-                className="border rounded-lg px-3 py-2 w-full"
+                className="booking-filter-select"
+                disabled={!filterProject}
               >
-                <option value="">All Floors</option>
-                {floorOptions.map((floor) => (
-                  <option key={floor.id} value={floor.id}>
-                    {floor.floorNo}
-                  </option>
-                ))}
+                <option value="">
+                  {filterProject ? "All Floors" : "Select a project first"}
+                </option>
+                {filterProject &&
+                  floorOptions.map((floor) => (
+                    <option key={floor.id} value={floor.id}>
+                      {floor.floorNo}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>

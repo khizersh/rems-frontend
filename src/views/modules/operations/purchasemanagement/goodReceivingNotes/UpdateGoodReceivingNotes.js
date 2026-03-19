@@ -1,12 +1,13 @@
 import { MainContext } from "context/MainContext";
 import React, { useContext, useEffect, useState } from "react";
 import httpService from "utility/httpService";
-import { FaClipboardList, FaTruck, FaBoxOpen, FaClipboardCheck } from "react-icons/fa";
+import { FaClipboardList, FaTruck, FaBoxOpen, FaClipboardCheck, FaWarehouse, FaProjectDiagram, FaInfoCircle } from "react-icons/fa";
 import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { getAllWarehousesForDropdown } from "service/WarehouseService";
 
 const UpdateGoodReceivingNotes = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -21,13 +22,25 @@ const UpdateGoodReceivingNotes = () => {
     receivedDate: "",
     receiptType: null,
     warehouseId: null,
+    directConsumeProjectId: null,
   });
+  const [warehouses, setWarehouses] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleReceiptTypeChange = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      receiptType: type,
+      warehouseId: type === "WAREHOUSE_STOCK" ? prev.warehouseId : null,
+      directConsumeProjectId: type === "DIRECT_CONSUME" ? prev.directConsumeProjectId : null,
     }));
   };
 
@@ -55,8 +68,32 @@ const UpdateGoodReceivingNotes = () => {
         );
       }
 
+      if (formData.receiptType === "WAREHOUSE_STOCK" && !formData.warehouseId) {
+        setSubmitting(false);
+        setLoading(false);
+        return notifyError(
+          "Missing field",
+          "Please select a warehouse for Warehouse Stock receipt",
+          4000,
+        );
+      }
+
+      if (formData.receiptType === "DIRECT_CONSUME" && !formData.directConsumeProjectId) {
+        setSubmitting(false);
+        setLoading(false);
+        return notifyError(
+          "Missing field",
+          "Please select a project for Direct Consume receipt",
+          4000,
+        );
+      }
+
       let requestBody = {
-        ...formData,
+        poId: formData.poId,
+        receivedDate: formData.receivedDate,
+        receiptType: formData.receiptType || null,
+        warehouseId: formData.receiptType === "WAREHOUSE_STOCK" ? formData.warehouseId : null,
+        directConsumeProjectId: formData.receiptType === "DIRECT_CONSUME" ? formData.directConsumeProjectId : null,
         grnItemsList: grnItems.map((item) => ({
           poItemId: item.poItemId,
           quantityReceived: item.quantityReceived,
@@ -88,16 +125,22 @@ const UpdateGoodReceivingNotes = () => {
 
       setLoading(true);
 
-      const [grn, purchaseOrders, items] = await Promise.all([
+      const [grn, purchaseOrders, items, warehouseResponse, projectResponse] = await Promise.all([
         httpService.get(`/grn/getById/${grnId}`),
         httpService.get(
           `/purchaseOrder/${org.organizationId}/getByStatus?status=PARTIAL`,
         ),
         httpService.get(`/items/${org.organizationId}/list`),
+        getAllWarehousesForDropdown(org.organizationId),
+        httpService.get(
+          `/project/getAllProjectByOrg/${org.organizationId}`,
+        ),
       ]);
 
       let poNo = purchaseOrders?.data.find((po) => po.id === grn?.data?.poId);
       setGrn({ ...grn?.data, poNumber: poNo?.poNumber });
+      setWarehouses(warehouseResponse?.data?.content || warehouseResponse?.data || []);
+      setProjects(projectResponse?.data || []);
 
       const formatedItems = items?.data?.reduce((acc, i) => {
         acc[i.id] = i.name;
@@ -114,6 +157,9 @@ const UpdateGoodReceivingNotes = () => {
         ...prev,
         poId: grn?.data?.poId,
         receivedDate: grn?.data?.receivedDate,
+        receiptType: grn?.data?.receiptType || null,
+        warehouseId: grn?.data?.warehouseId || null,
+        directConsumeProjectId: grn?.data?.directConsumeProjectId || null,
       }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -193,6 +239,99 @@ const UpdateGoodReceivingNotes = () => {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Receipt Type Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+              <FaWarehouse className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+              Receipt Type
+            </h3>
+
+            {/* Radio Group */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              {[
+                { value: "WAREHOUSE_STOCK", label: "Warehouse Stock", icon: FaWarehouse, color: "#6366f1", desc: "Items added to warehouse inventory" },
+                { value: "DIRECT_CONSUME", label: "Direct Consume", icon: FaProjectDiagram, color: "#f59e0b", desc: "Items consumed directly by project" },
+                { value: null, label: "None", icon: FaInfoCircle, color: "#94a3b8", desc: "No warehouse or project assignment" },
+              ].map((option) => (
+                <button
+                  key={option.value || "none"}
+                  type="button"
+                  onClick={() => handleReceiptTypeChange(option.value)}
+                  className={`flex-1 min-w-[180px] p-3 rounded-lg border-2 text-left transition-all ${
+                    formData.receiptType === option.value
+                      ? "border-indigo-500 bg-indigo-50 shadow-md"
+                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow"
+                  }`}
+                >
+                  <div className="flex items-center mb-1">
+                    <option.icon className="mr-2" style={{ color: option.color, fontSize: "14px" }} />
+                    <span className="text-sm font-bold text-gray-800">{option.label}</span>
+                    {formData.receiptType === option.value && (
+                      <div className="ml-auto w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: "#6366f1" }}>
+                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">{option.desc}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Warehouse Dropdown */}
+            {formData.receiptType === "WAREHOUSE_STOCK" && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Select Warehouse <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="warehouseId"
+                  value={formData.warehouseId || ""}
+                  onChange={handleChange}
+                  className="w-full lg:w-6/12 p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Select Warehouse</option>
+                  {warehouses.filter((wh) => wh.active).map((wh) => (
+                    <option key={wh.id} value={wh.id}>
+                      {wh.code} - {wh.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs mt-1 flex items-center" style={{ color: "#6366f1" }}>
+                  <FaInfoCircle className="mr-1" style={{ fontSize: "10px" }} />
+                  Old warehouse stock will be reversed and new stock will be added.
+                </p>
+              </div>
+            )}
+
+            {/* Direct Consume Project Dropdown */}
+            {formData.receiptType === "DIRECT_CONSUME" && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Consume Project <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="directConsumeProjectId"
+                  value={formData.directConsumeProjectId || ""}
+                  onChange={handleChange}
+                  className="w-full lg:w-6/12 p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Select Project</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs mt-1 flex items-center" style={{ color: "#f59e0b" }}>
+                  <FaInfoCircle className="mr-1" style={{ fontSize: "10px" }} />
+                  Goods will be marked as consumed directly by this project. No stock entry.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Items List Section */}

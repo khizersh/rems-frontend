@@ -58,6 +58,16 @@ export const FEATURE_ALIASES = {
     "/dashboard/vendor-invoice-payments",
     "/dashboard/create-vendor-invoice-payment",
   ],
+
+  "/dashboard/warehouse/list": [
+    "/dashboard/warehouse/add",
+    "/dashboard/warehouse/edit",
+    "/dashboard/warehouse/stock-overview",
+    "/dashboard/warehouse/stock-transfer",
+    "/dashboard/warehouse/stock-adjustment",
+    "/dashboard/warehouse/stock-ledger",
+    "/dashboard/warehouse/material-issue",
+  ],
 };
 
 export const ROLE_DASHBOARD_PRIORITY = {

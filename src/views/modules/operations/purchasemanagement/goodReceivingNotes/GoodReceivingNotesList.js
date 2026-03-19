@@ -10,6 +10,8 @@ import {
   FaFileInvoiceDollar,
   FaFileAlt,
   FaBuilding,
+  FaWarehouse,
+  FaBan,
 } from "react-icons/fa";
 import {
   useHistory,
@@ -17,6 +19,7 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicTableComponentDateRange from "components/table/DynamicTableComponentDateRange.js";
 import { TbFileExport } from "react-icons/tb";
+import { getAllWarehousesForDropdown } from "service/WarehouseService";
 
 export default function GoodReceivingNotesList() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -42,12 +45,21 @@ export default function GoodReceivingNotesList() {
     vendorId: null,
     status: "RECEIVED",
     invoiceStatus: null,
+    receiptType: null,
+    warehouseId: null,
   });
   const [selectedPo, setSelectedPo] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelGrnId, setCancelGrnId] = useState(null);
   const [dropdowns, setDropdowns] = useState({
     purchaseOrders: [],
     vendors: [],
+    warehouses: [],
     status: ["RECEIVED", "CANCELLED"],
+    receiptTypes: [
+      { id: "WAREHOUSE_STOCK", name: "Warehouse Stock" },
+      { id: "DIRECT_CONSUME", name: "Direct Consume" },
+    ],
     invoiceStatus: [
       { id: "NOT_INVOICED", name: "Not Invoiced" },
       { id: "PARTIALLY_INVOICED", name: "Partially Invoiced" },
@@ -84,7 +96,7 @@ export default function GoodReceivingNotesList() {
         page: page,
         size: pageSize,
         sortBy: "createdDate",
-        sortDir: "asc",
+        sortDir: "desc",
       };
 
       if (poId) {
@@ -145,9 +157,10 @@ export default function GoodReceivingNotesList() {
 
       setLoading(true);
 
-      const [purchaseOrders, vendors] = await Promise.all([
+      const [purchaseOrders, vendors, warehouseResponse] = await Promise.all([
         httpService.get(`/purchaseOrder/${org.organizationId}/listBasic`),
         httpService.get(`/vendorAccount/getVendorByOrg/${org.organizationId}`),
+        getAllWarehousesForDropdown(org.organizationId),
       ]);
 
       const purchaseOrdersList =
@@ -157,6 +170,7 @@ export default function GoodReceivingNotesList() {
         ...prev,
         purchaseOrders: purchaseOrdersList,
         vendors: vendors.data || [],
+        warehouses: warehouseResponse?.data?.content || warehouseResponse?.data || [],
       }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -196,6 +210,47 @@ export default function GoodReceivingNotesList() {
   const tableColumns = [
     { header: "GRN Number", field: "grnNumber" },
     { header: "Status", field: "status" },
+    {
+      header: "Receipt Type",
+      field: "receiptType",
+      render: (value) => {
+        if (value === "WAREHOUSE_STOCK") {
+          return (
+            <span
+              className="px-2 py-1 rounded-full text-xs font-bold uppercase"
+              style={{ backgroundColor: "#eef2ff", color: "#4f46e5" }}
+            >
+              Warehouse
+            </span>
+          );
+        }
+        if (value === "DIRECT_CONSUME") {
+          return (
+            <span
+              className="px-2 py-1 rounded-full text-xs font-bold uppercase"
+              style={{ backgroundColor: "#fff7ed", color: "#c2410c" }}
+            >
+              Direct Consume
+            </span>
+          );
+        }
+        return (
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            —
+          </span>
+        );
+      },
+    },
+    {
+      header: "Warehouse",
+      field: "warehouseName",
+      render: (value, item) =>
+        item.receiptType === "WAREHOUSE_STOCK" && value
+          ? value
+          : item.receiptType === "DIRECT_CONSUME" && item.directConsumeProjectName
+          ? item.directConsumeProjectName
+          : "—",
+    },
     {
       header: "Invoice Status",
       field: "invoiceStatus",
@@ -252,6 +307,23 @@ export default function GoodReceivingNotesList() {
 
   const handleDelete = ({ id }) => {
     // Implement delete logic
+  };
+
+  // Handle Cancel GRN
+  const handleCancelGrn = async () => {
+    if (!cancelGrnId) return;
+    setLoading(true);
+    try {
+      const response = await httpService.post(`/grn/cancel/${cancelGrnId}`);
+      notifySuccess(response?.responseMessage || "GRN cancelled successfully", 4000);
+      fetchGrnList();
+    } catch (err) {
+      notifyError(err.message, err.data || "Failed to cancel GRN", 4000);
+    } finally {
+      setLoading(false);
+      setShowCancelModal(false);
+      setCancelGrnId(null);
+    }
   };
 
   // Handle Create Invoice - redirect to create invoice page with GRN pre-selected

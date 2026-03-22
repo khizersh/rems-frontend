@@ -25,20 +25,21 @@ const VendorInvoiceDetails = () => {
       setLoading(true);
       
       const response = await PurchaseService.getVendorInvoiceById(invoiceId);
+      const invoiceData = response?.data || response || {};
       
       setInvoiceDetails({
-        invoice: response?.data || {},
-        invoiceItems: response?.data?.invoiceItemList || [],
+        invoice: invoiceData,
+        invoiceItems: invoiceData?.invoiceItemList || [],
         payments: [],
       });
 
       // Fetch related data
-      if (response?.data?.vendorId) {
-        fetchVendorDetails(response.data.vendorId);
+      if (invoiceData?.vendorId) {
+        fetchVendorDetails(invoiceData.vendorId);
       }
       
-      if (response?.data?.projectId) {
-        fetchProjectDetails(response.data.projectId);
+      if (invoiceData?.projectId) {
+        fetchProjectDetails(invoiceData.projectId);
       }
 
       // Fetch payments for this invoice
@@ -77,7 +78,7 @@ const VendorInvoiceDetails = () => {
       const response = await PurchaseService.getPaymentsByInvoice(invoiceId);
       setInvoiceDetails(prev => ({
         ...prev,
-        payments: response?.data || [],
+        payments: Array.isArray(response) ? response : response?.data || [],
       }));
     } catch (err) {
       console.error("Error fetching payments:", err);
@@ -129,7 +130,7 @@ const VendorInvoiceDetails = () => {
   };
 
   const handleCreatePayment = () => {
-    history.push(`/dashboard/vendor-invoice-payment?invoiceId=${invoiceId}`);
+    history.push(`/dashboard/create-vendor-invoice-payment?invoiceId=${invoiceId}`);
   };
 
   const getStatusColor = (status) => {

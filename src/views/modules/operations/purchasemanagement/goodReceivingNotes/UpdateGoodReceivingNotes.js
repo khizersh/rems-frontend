@@ -8,6 +8,11 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { getAllWarehousesForDropdown } from "service/WarehouseService";
+import {
+  GRN_RECEIPT_TYPE_OPTIONS,
+  GRN_RECEIPT_TYPES,
+  normalizeGrnReceiptType,
+} from "utility/GrnReceiptType";
 
 const UpdateGoodReceivingNotes = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -22,7 +27,7 @@ const UpdateGoodReceivingNotes = () => {
     receivedDate: "",
     receiptType: null,
     warehouseId: null,
-    directConsumeProjectId: null,
+    directProjectId: null,
   });
   const [warehouses, setWarehouses] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -36,11 +41,13 @@ const UpdateGoodReceivingNotes = () => {
   };
 
   const handleReceiptTypeChange = (type) => {
+    const normalizedType = normalizeGrnReceiptType(type);
+
     setFormData((prev) => ({
       ...prev,
-      receiptType: type,
-      warehouseId: type === "WAREHOUSE_STOCK" ? prev.warehouseId : null,
-      directConsumeProjectId: type === "DIRECT_CONSUME" ? prev.directConsumeProjectId : null,
+      receiptType: normalizedType,
+      warehouseId: normalizedType === GRN_RECEIPT_TYPES.STOCK ? prev.warehouseId : null,
+      directProjectId: normalizedType === GRN_RECEIPT_TYPES.DIRECT ? prev.directProjectId : null,
     }));
   };
 
@@ -68,22 +75,22 @@ const UpdateGoodReceivingNotes = () => {
         );
       }
 
-      if (formData.receiptType === "WAREHOUSE_STOCK" && !formData.warehouseId) {
+      if (formData.receiptType === GRN_RECEIPT_TYPES.STOCK && !formData.warehouseId) {
         setSubmitting(false);
         setLoading(false);
         return notifyError(
           "Missing field",
-          "Please select a warehouse for Warehouse Stock receipt",
+          "Please select a warehouse for Stock receipt",
           4000,
         );
       }
 
-      if (formData.receiptType === "DIRECT_CONSUME" && !formData.directConsumeProjectId) {
+      if (formData.receiptType === GRN_RECEIPT_TYPES.DIRECT && !formData.directProjectId) {
         setSubmitting(false);
         setLoading(false);
         return notifyError(
           "Missing field",
-          "Please select a project for Direct Consume receipt",
+          "Please select a project for Direct receipt",
           4000,
         );
       }
@@ -91,9 +98,11 @@ const UpdateGoodReceivingNotes = () => {
       let requestBody = {
         poId: formData.poId,
         receivedDate: formData.receivedDate,
-        receiptType: formData.receiptType || null,
-        warehouseId: formData.receiptType === "WAREHOUSE_STOCK" ? formData.warehouseId : null,
-        directConsumeProjectId: formData.receiptType === "DIRECT_CONSUME" ? formData.directConsumeProjectId : null,
+        receiptType: normalizeGrnReceiptType(formData.receiptType),
+        warehouseId:
+          formData.receiptType === GRN_RECEIPT_TYPES.STOCK ? formData.warehouseId : null,
+        directProjectId:
+          formData.receiptType === GRN_RECEIPT_TYPES.DIRECT ? formData.directProjectId : null,
         grnItemsList: grnItems.map((item) => ({
           poItemId: item.poItemId,
           quantityReceived: item.quantityReceived,
@@ -157,9 +166,10 @@ const UpdateGoodReceivingNotes = () => {
         ...prev,
         poId: grn?.data?.poId,
         receivedDate: grn?.data?.receivedDate,
-        receiptType: grn?.data?.receiptType || null,
+        receiptType: normalizeGrnReceiptType(grn?.data?.receiptType) || GRN_RECEIPT_TYPES.STOCK,
         warehouseId: grn?.data?.warehouseId || null,
-        directConsumeProjectId: grn?.data?.directConsumeProjectId || null,
+        directProjectId:
+          grn?.data?.directProjectId || grn?.data?.directConsumeProjectId || null,
       }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -250,25 +260,28 @@ const UpdateGoodReceivingNotes = () => {
 
             {/* Radio Group */}
             <div className="flex flex-wrap gap-4 mb-4">
-              {[
-                { value: "WAREHOUSE_STOCK", label: "Warehouse Stock", icon: FaWarehouse, color: "#6366f1", desc: "Items added to warehouse inventory" },
-                { value: "DIRECT_CONSUME", label: "Direct Consume", icon: FaProjectDiagram, color: "#f59e0b", desc: "Items consumed directly by project" },
-                { value: null, label: "None", icon: FaInfoCircle, color: "#94a3b8", desc: "No warehouse or project assignment" },
-              ].map((option) => (
+              {GRN_RECEIPT_TYPE_OPTIONS.map((option) => {
+                const isStock = option.id === GRN_RECEIPT_TYPES.STOCK;
+                const IconComponent = isStock ? FaWarehouse : FaProjectDiagram;
+
+                return (
                 <button
-                  key={option.value || "none"}
+                  key={option.id}
                   type="button"
-                  onClick={() => handleReceiptTypeChange(option.value)}
+                  onClick={() => handleReceiptTypeChange(option.id)}
                   className={`flex-1 min-w-[180px] p-3 rounded-lg border-2 text-left transition-all ${
-                    formData.receiptType === option.value
+                    formData.receiptType === option.id
                       ? "border-indigo-500 bg-indigo-50 shadow-md"
                       : "border-gray-200 bg-white hover:border-gray-300 hover:shadow"
                   }`}
                 >
                   <div className="flex items-center mb-1">
-                    <option.icon className="mr-2" style={{ color: option.color, fontSize: "14px" }} />
-                    <span className="text-sm font-bold text-gray-800">{option.label}</span>
-                    {formData.receiptType === option.value && (
+                    <IconComponent
+                      className="mr-2"
+                      style={{ color: isStock ? "#6366f1" : "#f59e0b", fontSize: "14px" }}
+                    />
+                    <span className="text-sm font-bold text-gray-800">{option.name}</span>
+                    {formData.receiptType === option.id && (
                       <div className="ml-auto w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: "#6366f1" }}>
                         <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -276,13 +289,14 @@ const UpdateGoodReceivingNotes = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">{option.desc}</p>
+                  <p className="text-xs text-gray-500">{option.description}</p>
                 </button>
-              ))}
+                );
+              })}
             </div>
 
             {/* Warehouse Dropdown */}
-            {formData.receiptType === "WAREHOUSE_STOCK" && (
+            {formData.receiptType === GRN_RECEIPT_TYPES.STOCK && (
               <div className="mt-3">
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Select Warehouse <span className="text-red-500">*</span>
@@ -307,15 +321,15 @@ const UpdateGoodReceivingNotes = () => {
               </div>
             )}
 
-            {/* Direct Consume Project Dropdown */}
-            {formData.receiptType === "DIRECT_CONSUME" && (
+            {/* Direct Project Dropdown */}
+            {formData.receiptType === GRN_RECEIPT_TYPES.DIRECT && (
               <div className="mt-3">
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Consume Project <span className="text-red-500">*</span>
+                  Direct Project <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="directConsumeProjectId"
-                  value={formData.directConsumeProjectId || ""}
+                  name="directProjectId"
+                  value={formData.directProjectId || ""}
                   onChange={handleChange}
                   className="w-full lg:w-6/12 p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >

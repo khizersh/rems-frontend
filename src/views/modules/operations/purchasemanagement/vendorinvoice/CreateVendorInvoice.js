@@ -5,6 +5,11 @@ import { useHistory, useLocation } from "react-router-dom/cjs/react-router-dom.m
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FaFileInvoiceDollar, FaTruck, FaBoxOpen, FaMoneyBillWave } from "react-icons/fa";
 import * as PurchaseService from "../../../../../service/PurchaseManagementService.js";
+import {
+  GRN_RECEIPT_TYPES,
+  getGrnReceiptTypeLabel,
+  normalizeGrnReceiptType,
+} from "utility/GrnReceiptType";
 
 const CreateVendorInvoice = () => {
   const { notifySuccess, notifyError, setLoading, loading } = useContext(MainContext);
@@ -24,6 +29,9 @@ const CreateVendorInvoice = () => {
     vendorName: "",
     poNumber: "",
     status: "",
+    receiptType: null,
+    warehouseName: "",
+    directProjectName: "",
   });
 
   // Invoice items: { grnItemId, quantity, rate }
@@ -180,6 +188,9 @@ const CreateVendorInvoice = () => {
         vendorName: "",
         poNumber: "",
         status: "",
+        receiptType: null,
+        warehouseName: "",
+        directProjectName: "",
       });
       setDropdowns((prev) => ({ ...prev, grnItems: [] }));
       setInvoiceItemList([]);
@@ -211,6 +222,10 @@ const CreateVendorInvoice = () => {
         vendorName: grnData.vendorName || "",
         poNumber: grnData.poNumber || "",
         status: grnData.status || "",
+        receiptType: normalizeGrnReceiptType(grnData.receiptType),
+        warehouseName: grnData.warehouseName || "",
+        directProjectName:
+          grnData.directProjectName || grnData.directConsumeProjectName || "",
       });
 
       const items = grnData.grnItemsList || [];
@@ -273,8 +288,6 @@ const CreateVendorInvoice = () => {
 
   // Set pre-selected GRN from URL query params after GRN list is loaded
   useEffect(() => {
-
-    
     if (!preSelectedGrnNumber || dropdowns.grnList.length === 0) return;
 
     const normalizedQueryGrnNumber = String(preSelectedGrnNumber).trim().toLowerCase();
@@ -286,9 +299,6 @@ const CreateVendorInvoice = () => {
     const matchedGrn = dropdowns.grnList.find(
       (grn) => String(grn.grnNumber || "").trim().toLowerCase() === normalizedQueryGrnNumber,
     );
-
-    console.log("matchedGrn :: ",matchedGrn);
-
 
     if (matchedGrn) {
       setFormData((prev) => ({
@@ -306,6 +316,13 @@ const CreateVendorInvoice = () => {
   useEffect(() => {
     fetchGRNDetails();
   }, [formData.grnId]);
+
+  const receiptTarget =
+    grnDetails.receiptType === GRN_RECEIPT_TYPES.STOCK
+      ? grnDetails.warehouseName
+      : grnDetails.receiptType === GRN_RECEIPT_TYPES.DIRECT
+        ? grnDetails.directProjectName
+        : "";
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
@@ -388,7 +405,7 @@ const CreateVendorInvoice = () => {
                 <FaFileInvoiceDollar className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
                 GRN Information
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
                     GRN Number
@@ -396,6 +413,30 @@ const CreateVendorInvoice = () => {
                   <input
                     type="text"
                     value={grnDetails.grnNumber}
+                    className="w-full p-2 border rounded-lg text-sm bg-gray-100"
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Receipt Type
+                  </label>
+                  <input
+                    type="text"
+                    value={getGrnReceiptTypeLabel(grnDetails.receiptType)}
+                    className="w-full p-2 border rounded-lg text-sm bg-gray-100"
+                    readOnly
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Warehouse / Project
+                  </label>
+                  <input
+                    type="text"
+                    value={receiptTarget || "N/A"}
                     className="w-full p-2 border rounded-lg text-sm bg-gray-100"
                     readOnly
                   />

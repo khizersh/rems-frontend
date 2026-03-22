@@ -45,6 +45,7 @@ export const FEATURE_ALIASES = {
     "/dashboard/material",
     "/dashboard/material-unit",
     "/dashboard/purchase-order-list",
+    "/dashboard/add-purchase-order",
     "/dashboard/purchase-order-update",
     "/dashboard/add-good-receiving-notes",
     "/dashboard/good-receiving-notes-list",

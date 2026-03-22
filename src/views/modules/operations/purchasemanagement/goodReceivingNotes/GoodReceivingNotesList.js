@@ -10,6 +10,7 @@ import {
   FaFileInvoiceDollar,
   FaFileAlt,
   FaBuilding,
+  FaFilter,
   FaWarehouse,
   FaBan,
 } from "react-icons/fa";
@@ -20,6 +21,13 @@ import {
 import DynamicTableComponentDateRange from "components/table/DynamicTableComponentDateRange.js";
 import { TbFileExport } from "react-icons/tb";
 import { getAllWarehousesForDropdown } from "service/WarehouseService";
+import "../../../../../assets/styles/projects/project.css";
+import {
+  GRN_RECEIPT_TYPE_OPTIONS,
+  GRN_RECEIPT_TYPES,
+  getGrnReceiptTypeLabel,
+  normalizeGrnReceiptType,
+} from "utility/GrnReceiptType";
 
 export default function GoodReceivingNotesList() {
   const { loading, setLoading, notifyError, notifySuccess } =
@@ -56,10 +64,10 @@ export default function GoodReceivingNotesList() {
     vendors: [],
     warehouses: [],
     status: ["RECEIVED", "CANCELLED"],
-    receiptTypes: [
-      { id: "WAREHOUSE_STOCK", name: "Warehouse Stock" },
-      { id: "DIRECT_CONSUME", name: "Direct Consume" },
-    ],
+    receiptTypes: GRN_RECEIPT_TYPE_OPTIONS.map((option) => ({
+      id: option.id,
+      name: option.name,
+    })),
     invoiceStatus: [
       { id: "NOT_INVOICED", name: "Not Invoiced" },
       { id: "PARTIALLY_INVOICED", name: "Partially Invoiced" },
@@ -81,28 +89,35 @@ export default function GoodReceivingNotesList() {
   };
 
   // Fetch Grn List
-  const fetchGrnList = async () => {
+  const fetchGrnList = async (overrides = {}) => {
     try {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
 
+      const activePayloadData = overrides.payloadData || payloadData;
+      const activeFormattedDate = overrides.formattedDate || formattedDate;
+      const activePage = overrides.page !== undefined ? overrides.page : page;
+      const activePageSize =
+        overrides.pageSize !== undefined ? overrides.pageSize : pageSize;
+
       setLoading(true);
 
       let payload = {
-        ...payloadData,
-        startDate: formattedDate.startDate,
-        endDate: formattedDate.endDate,
+        ...activePayloadData,
+        receiptType: normalizeGrnReceiptType(activePayloadData.receiptType),
+        startDate: activeFormattedDate.startDate,
+        endDate: activeFormattedDate.endDate,
         orgId: org.organizationId,
-        page: page,
-        size: pageSize,
+        page: activePage,
+        size: activePageSize,
         sortBy: "createdDate",
         sortDir: "desc",
       };
 
       if (poId) {
         payload = {
-          page: page,
-          size: pageSize,
+          page: activePage,
+          size: activePageSize,
           sortBy: "createdDate",
           sortDir: "asc",
         };
@@ -134,11 +149,12 @@ export default function GoodReceivingNotesList() {
           status: firstGrn.status,
         }));
       } else if (poId) {
-        setPayloadData({
+        setPayloadData((prev) => ({
+          ...prev,
           poId: response?.data?.[0]?.poId || null,
           vendorId: response?.data?.[0]?.vendorId || null,
           status: response?.data?.[0]?.status || null,
-        });
+        }));
       }
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -170,7 +186,8 @@ export default function GoodReceivingNotesList() {
         ...prev,
         purchaseOrders: purchaseOrdersList,
         vendors: vendors.data || [],
-        warehouses: warehouseResponse?.data?.content || warehouseResponse?.data || [],
+        warehouses:
+          warehouseResponse?.data?.content || warehouseResponse?.data || [],
       }));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
@@ -185,8 +202,7 @@ export default function GoodReceivingNotesList() {
     try {
       const response = await httpService.get(`/grn/getById/${id}`);
 
-      console.log("response :: ",response);
-      
+      console.log("response :: ", response);
 
       setGrnItems({
         grn: response?.data || {},
@@ -214,23 +230,26 @@ export default function GoodReceivingNotesList() {
       header: "Receipt Type",
       field: "receiptType",
       render: (value) => {
-        if (value === "WAREHOUSE_STOCK") {
+        const normalizedType = normalizeGrnReceiptType(value);
+
+        if (normalizedType === GRN_RECEIPT_TYPES.STOCK) {
           return (
             <span
               className="px-2 py-1 rounded-full text-xs font-bold uppercase"
               style={{ backgroundColor: "#eef2ff", color: "#4f46e5" }}
             >
-              Warehouse
+              Stock
             </span>
           );
         }
-        if (value === "DIRECT_CONSUME") {
+
+        if (normalizedType === GRN_RECEIPT_TYPES.DIRECT) {
           return (
             <span
               className="px-2 py-1 rounded-full text-xs font-bold uppercase"
               style={{ backgroundColor: "#fff7ed", color: "#c2410c" }}
             >
-              Direct Consume
+              Direct
             </span>
           );
         }
@@ -242,14 +261,21 @@ export default function GoodReceivingNotesList() {
       },
     },
     {
-      header: "Warehouse",
+      header: "Warehouse / Project",
       field: "warehouseName",
-      render: (value, item) =>
-        item.receiptType === "WAREHOUSE_STOCK" && value
-          ? value
-          : item.receiptType === "DIRECT_CONSUME" && item.directConsumeProjectName
-          ? item.directConsumeProjectName
-          : "—",
+      render: (value, item) => {
+        const normalizedType = normalizeGrnReceiptType(item.receiptType);
+
+        if (normalizedType === GRN_RECEIPT_TYPES.STOCK) {
+          return value || "—";
+        }
+
+        if (normalizedType === GRN_RECEIPT_TYPES.DIRECT) {
+          return item.directProjectName || item.directConsumeProjectName || "—";
+        }
+
+        return "—";
+      },
     },
     {
       header: "Invoice Status",
@@ -315,7 +341,10 @@ export default function GoodReceivingNotesList() {
     setLoading(true);
     try {
       const response = await httpService.post(`/grn/cancel/${cancelGrnId}`);
-      notifySuccess(response?.responseMessage || "GRN cancelled successfully", 4000);
+      notifySuccess(
+        response?.responseMessage || "GRN cancelled successfully",
+        4000,
+      );
       fetchGrnList();
     } catch (err) {
       notifyError(err.message, err.data || "Failed to cancel GRN", 4000);
@@ -383,7 +412,58 @@ export default function GoodReceivingNotesList() {
   };
 
   const handleAddGrn = () => {
-    history.push(`/dashboard/add-good-receiving-notes/?poId=${poId}`);
+    if (poId) {
+      history.push(`/dashboard/add-good-receiving-notes/?poId=${poId}`);
+    } else {
+      history.push(`/dashboard/add-good-receiving-notes`);
+    }
+  };
+
+  const handleClearFilters = () => {
+    const resetPayload = {
+      poId: null,
+      vendorId: null,
+      status: "RECEIVED",
+      invoiceStatus: null,
+      receiptType: null,
+      warehouseId: null,
+    };
+    const resetDateRange = [null, null];
+    const resetFormattedDate = {
+      startDate: null,
+      endDate: null,
+    };
+
+    setPayloadData(resetPayload);
+    setDateRange(resetDateRange);
+    setFormattedDate(resetFormattedDate);
+    setPage(0);
+    fetchGrnList({
+      payloadData: resetPayload,
+      formattedDate: resetFormattedDate,
+      page: 0,
+    });
+  };
+
+  const hasActiveFilters = Boolean(
+    payloadData.poId ||
+    payloadData.vendorId ||
+    payloadData.invoiceStatus ||
+    payloadData.receiptType ||
+    (payloadData.status && payloadData.status !== "RECEIVED") ||
+    formattedDate.startDate ||
+    formattedDate.endDate,
+  );
+
+  const getReceiptTargetLabel = (grn) => {
+    const normalizedType = normalizeGrnReceiptType(grn?.receiptType);
+    if (normalizedType === GRN_RECEIPT_TYPES.STOCK) {
+      return grn?.warehouseName || "N/A";
+    }
+    if (normalizedType === GRN_RECEIPT_TYPES.DIRECT) {
+      return grn?.directProjectName || grn?.directConsumeProjectName || "N/A";
+    }
+    return "N/A";
   };
 
   return (
@@ -425,10 +505,10 @@ export default function GoodReceivingNotesList() {
                                     selectedPo.poStatus === "CLOSED"
                                       ? "bg-red-100 text-red-700"
                                       : selectedPo.poStatus === "PARTIAL"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : selectedPo.poStatus === "OPEN"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-gray-100 text-gray-600"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : selectedPo.poStatus === "OPEN"
+                                          ? "bg-green-100 text-green-700"
+                                          : "bg-gray-100 text-gray-600"
                                   }`}
                                 >
                                   ({selectedPo.poStatus})
@@ -469,58 +549,104 @@ export default function GoodReceivingNotesList() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-wrap w-full bg-white shadow-lg rounded-lg">
-                  <div className="p-4 w-full sm:w-6/12 lg:w-3/12">
-                    <SelectField
-                      label="Select Purchase Order"
-                      name="poId"
-                      value={payloadData.poId}
-                      disabled={false}
-                      onChange={handleChange}
-                      options={dropdowns.purchaseOrders}
-                    />
+                <div className="w-full booking-filter-shell">
+                  <div className="booking-filter-header">
+                    <div>
+                      <h4 className="booking-filter-title">
+                        <FaFilter className="booking-filter-title-icon" />
+                        Filter Good Receiving Notes
+                      </h4>
+                      <p className="booking-filter-subtitle">
+                        Search GRNs by purchase order, vendor, status, invoice
+                        status, or receipt type.
+                      </p>
+                    </div>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className="booking-filter-clear-btn"
+                      >
+                        <RxCross2 className="booking-filter-clear-icon" />
+                        Clear Filters
+                      </button>
+                    )}
                   </div>
 
-                  <div className="p-4 w-full sm:w-6/12 lg:w-3/12">
-                    <SelectField
-                      label="Select Vendor"
-                      name="vendorId"
-                      value={payloadData.vendorId}
-                      disabled={false}
-                      onChange={handleChange}
-                      options={dropdowns.vendors}
-                    />
+                  <div className="booking-filter-grid">
+                    <div className="booking-filter-field">
+                      <SelectField
+                        label="Select Purchase Order"
+                        name="poId"
+                        value={payloadData.poId}
+                        disabled={false}
+                        onChange={handleChange}
+                        options={dropdowns.purchaseOrders}
+                        labelClassName="booking-filter-label"
+                        selectClassName="booking-filter-select"
+                      />
+                    </div>
+
+                    <div className="booking-filter-field">
+                      <SelectField
+                        label="Select Vendor"
+                        name="vendorId"
+                        value={payloadData.vendorId}
+                        disabled={false}
+                        onChange={handleChange}
+                        options={dropdowns.vendors}
+                        labelClassName="booking-filter-label"
+                        selectClassName="booking-filter-select"
+                      />
+                    </div>
+
+                    <div className="booking-filter-field">
+                      <SelectField
+                        label="Select Status"
+                        name="status"
+                        value={payloadData.status}
+                        disabled={false}
+                        onChange={handleChange}
+                        options={dropdowns.status}
+                        labelClassName="booking-filter-label"
+                        selectClassName="booking-filter-select"
+                      />
+                    </div>
+
+                    <div className="booking-filter-field">
+                      <SelectField
+                        label="Invoice Status"
+                        name="invoiceStatus"
+                        value={payloadData.invoiceStatus || ""}
+                        disabled={false}
+                        onChange={handleChange}
+                        options={dropdowns.invoiceStatus}
+                        labelClassName="booking-filter-label"
+                        selectClassName="booking-filter-select"
+                      />
+                    </div>
+
+                    <div className="booking-filter-field">
+                      <SelectField
+                        label="Receipt Type"
+                        name="receiptType"
+                        value={payloadData.receiptType || ""}
+                        disabled={false}
+                        onChange={handleChange}
+                        options={dropdowns.receiptTypes}
+                        labelClassName="booking-filter-label"
+                        selectClassName="booking-filter-select"
+                      />
+                    </div>
                   </div>
 
-                  <div className="p-4 w-full sm:w-6/12 lg:w-3/12">
-                    <SelectField
-                      label="Select Status"
-                      name="status"
-                      value={payloadData.status}
-                      disabled={false}
-                      onChange={handleChange}
-                      options={dropdowns.status}
-                    />
-                  </div>
-
-                  <div className="p-4 w-full sm:w-6/12 lg:w-3/12">
-                    <SelectField
-                      label="Invoice Status"
-                      name="invoiceStatus"
-                      value={payloadData.invoiceStatus || ""}
-                      disabled={false}
-                      onChange={handleChange}
-                      options={dropdowns.invoiceStatus}
-                    />
-                  </div>
-
-                  <div className="w-full flex justify-center mt-2 pb-4">
+                  <div className="w-full flex justify-end mt-4">
                     <button
                       onClick={() => !poId && fetchGrnList()}
                       type="button"
-                      className="bg-emerald-500 text-white font-bold uppercase text-xs px-6 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none"
                     >
-                      <FaSearch className="w-4 h-4 inline-block mr-2" />
+                      <FaSearch className="w-4 h-4 inline-block mr-1" />
                       Search
                     </button>
                   </div>
@@ -612,6 +738,18 @@ export default function GoodReceivingNotesList() {
                     </span>
                   </div>
                   <div>
+                    <span className="text-gray-600">Receipt Type:</span>{" "}
+                    <span className="font-medium">
+                      {getGrnReceiptTypeLabel(grnItems.grn.receiptType)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Warehouse / Project:</span>{" "}
+                    <span className="font-medium">
+                      {getReceiptTargetLabel(grnItems.grn)}
+                    </span>
+                  </div>
+                  <div>
                     <span className="text-gray-600">Invoice Status:</span>{" "}
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -661,15 +799,24 @@ export default function GoodReceivingNotesList() {
   );
 }
 
-const SelectField = ({ label, name, value, onChange, options, disabled }) => (
+const SelectField = ({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  disabled,
+  labelClassName = "block text-xs font-small mb-1",
+  selectClassName = "border rounded-lg px-3 py-2 w-full disabled-styles",
+}) => (
   <div>
-    <label className="block text-xs font-small mb-1">{label}</label>
+    <label className={labelClassName}>{label}</label>
     <select
       name={name}
       value={value || ""}
       onChange={onChange}
       disabled={disabled}
-      className="border rounded-lg px-3 py-2 w-full disabled-styles"
+      className={selectClassName}
     >
       <option value="">Select</option>
       {options.map((opt) => (

@@ -5,6 +5,11 @@ import { useHistory, useLocation } from "react-router-dom/cjs/react-router-dom.m
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FaMoneyBillWave, FaFileInvoiceDollar, FaCheckCircle, FaClock, FaExclamationTriangle, FaTruck, FaCreditCard } from "react-icons/fa";
 import * as PurchaseService from "../../../../../service/PurchaseManagementService.js";
+import {
+  GRN_RECEIPT_TYPES,
+  getGrnReceiptTypeLabel,
+  normalizeGrnReceiptType,
+} from "utility/GrnReceiptType";
 
 const PAYMENT_MODES = [
   { value: "CASH", label: "Cash" },
@@ -39,6 +44,11 @@ const CreateVendorPayment = () => {
   // Invoice details for display
   const [invoiceDetails, setInvoiceDetails] = useState(null);
   const [paymentSummary, setPaymentSummary] = useState(null);
+  const [grnFlow, setGrnFlow] = useState({
+    receiptType: null,
+    warehouseName: "",
+    directProjectName: "",
+  });
 
   // Dropdowns
   const [invoices, setInvoices] = useState([]);
@@ -135,6 +145,28 @@ const CreateVendorPayment = () => {
     }
   };
 
+  // Fetch GRN flow context for selected invoice
+  const fetchGrnFlowContext = async (grnId) => {
+    if (!grnId) {
+      setGrnFlow({ receiptType: null, warehouseName: "", directProjectName: "" });
+      return;
+    }
+
+    try {
+      const grnResponse = await PurchaseService.getGRNById(grnId);
+      const grnData = grnResponse || {};
+
+      setGrnFlow({
+        receiptType: normalizeGrnReceiptType(grnData.receiptType),
+        warehouseName: grnData.warehouseName || "",
+        directProjectName: grnData.directProjectName || grnData.directConsumeProjectName || "",
+      });
+    } catch (err) {
+      console.error("Error fetching GRN flow context:", err);
+      setGrnFlow({ receiptType: null, warehouseName: "", directProjectName: "" });
+    }
+  };
+
   // Handle invoice selection change
   useEffect(() => {
     if (formData.invoiceId) {
@@ -144,12 +176,15 @@ const CreateVendorPayment = () => {
       setInvoiceDetails(selectedInvoice || null);
       if (selectedInvoice) {
         fetchPaymentSummary(formData.invoiceId);
+        fetchGrnFlowContext(selectedInvoice.grnId);
       } else {
         setPaymentSummary(null);
+        setGrnFlow({ receiptType: null, warehouseName: "", directProjectName: "" });
       }
     } else {
       setInvoiceDetails(null);
       setPaymentSummary(null);
+      setGrnFlow({ receiptType: null, warehouseName: "", directProjectName: "" });
     }
   }, [formData.invoiceId, invoices]);
 
@@ -262,6 +297,13 @@ const CreateVendorPayment = () => {
   };
 
   const isSubmitDisabled = loading || submitting;
+  const isDirectFlow = grnFlow.receiptType === GRN_RECEIPT_TYPES.DIRECT;
+  const flowTarget =
+    grnFlow.receiptType === GRN_RECEIPT_TYPES.STOCK
+      ? grnFlow.warehouseName
+      : grnFlow.receiptType === GRN_RECEIPT_TYPES.DIRECT
+        ? grnFlow.directProjectName
+        : "";
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
@@ -313,45 +355,76 @@ const CreateVendorPayment = () => {
 
             {/* Invoice Summary */}
             {invoiceDetails ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Invoice Number</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-gray-100 flex items-center justify-between">
-                    <span>{invoiceDetails.invoiceNumber}</span>
-                    <StatusBadge status={invoiceDetails.status} />
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Invoice Number</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-gray-100 flex items-center justify-between">
+                      <span>{invoiceDetails.invoiceNumber}</span>
+                      <StatusBadge status={invoiceDetails.status} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Vendor Name</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
+                      {invoiceDetails.vendorName || `Vendor #${invoiceDetails.vendorId}`}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Project</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
+                      {invoiceDetails.projectName || `Project #${invoiceDetails.projectId}`}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Total Amount</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
+                      ₹{invoiceDetails.totalAmount?.toLocaleString() || 0}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Paid Amount</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-gray-100 text-green-600 font-medium">
+                      ₹{invoiceDetails.paidAmount?.toLocaleString() || 0}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Pending Amount</label>
+                    <div className="w-full p-2 border rounded-lg text-sm bg-red-50 text-red-600 font-bold">
+                      ₹{invoiceDetails.pendingAmount?.toLocaleString() || 0}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Vendor Name</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
-                    {invoiceDetails.vendorName || `Vendor #${invoiceDetails.vendorId}`}
-                  </div>
+
+                <div
+                  className={`mt-4 rounded-lg border p-3 ${
+                    isDirectFlow
+                      ? "bg-amber-50 border-amber-200"
+                      : "bg-emerald-50 border-emerald-200"
+                  }`}
+                >
+                  <p
+                    className={`text-xs font-semibold uppercase tracking-wide ${
+                      isDirectFlow ? "text-amber-700" : "text-emerald-700"
+                    }`}
+                  >
+                    GRN Flow: {getGrnReceiptTypeLabel(grnFlow.receiptType)}
+                  </p>
+                  <p className="text-sm text-gray-700 mt-1">
+                    {isDirectFlow ? "Direct Project" : "Warehouse"}: {flowTarget || "N/A"}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {isDirectFlow
+                      ? "For DIRECT receipts, payment debits organization account and updates project construction amount automatically."
+                      : "For STOCK receipts, payment debits organization account for warehouse-stocked material."}
+                  </p>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Project</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
-                    {invoiceDetails.projectName || `Project #${invoiceDetails.projectId}`}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Total Amount</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-gray-100">
-                    ₹{invoiceDetails.totalAmount?.toLocaleString() || 0}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Paid Amount</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-gray-100 text-green-600 font-medium">
-                    ₹{invoiceDetails.paidAmount?.toLocaleString() || 0}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Pending Amount</label>
-                  <div className="w-full p-2 border rounded-lg text-sm bg-red-50 text-red-600 font-bold">
-                    ₹{invoiceDetails.pendingAmount?.toLocaleString() || 0}
-                  </div>
-                </div>
-              </div>
+              </>
             ) : (
               <div className="text-center py-6 bg-gray-100 rounded-lg">
                 <FaFileInvoiceDollar className="text-gray-400 text-3xl mx-auto mb-2" />

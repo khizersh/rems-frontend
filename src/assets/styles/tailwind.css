@@ -3346,3 +3346,16 @@ select {
     padding-top: 4rem;
   }
 }
+
+/* Explicit width utilities used by purchase order item rows */
+.w-32 {
+  width: 8rem;
+}
+
+.w-36 {
+  width: 9rem;
+}
+
+.w-40 {
+  width: 16rem;
+}

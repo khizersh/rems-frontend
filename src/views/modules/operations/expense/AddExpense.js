@@ -4,11 +4,10 @@ import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { FaTools, FaReceipt, FaMoneyBillAlt, FaSitemap, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt, FaBoxOpen } from "react-icons/fa";
+import { FaTools, FaReceipt, FaMoneyBillAlt, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { paymentTypes } from "utility/Utility";
 import { EXPENSE_TYPE_ID } from "utility/Utility";
-import { MdDeleteForever } from "react-icons/md";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -210,8 +209,7 @@ const AddExpense = () => {
       let itemsSelected = purchaseOrderItemList.every((item) => item.itemsId);
 
       if (
-        (formData.expenseType === "CONSTRUCTION" ||
-          formData.expenseType === "PURCHASE_ORDER") &&
+        formData.expenseType === "CONSTRUCTION" &&
         (!formData.vendorAccountId || !formData.projectId || !itemsSelected)
       ) {
         setSubmitting(false);
@@ -223,20 +221,7 @@ const AddExpense = () => {
         );
       }
 
-      if (formData.expenseType === "PURCHASE_ORDER") {
-        requestBody = {
-          orgId: Number(organization?.organizationId),
-          projectId: formData.projectId,
-          vendorId: formData.vendorAccountId,
-          totalAmount: formData.totalAmount,
-          purchaseOrderItemList,
-        };
-      }
-
-      const response =
-        formData.expenseType !== "PURCHASE_ORDER"
-          ? await httpService.post("/expense/addExpense", requestBody)
-          : await httpService.post("/purchaseOrder/createPO", requestBody);
+      const response = await httpService.post("/expense/addExpense", requestBody);
       await notifySuccess(response.responseMessage, 4000);
       resetForm();
     } catch (err) {
@@ -281,55 +266,8 @@ const AddExpense = () => {
     fetchDropdownData();
   }, []);
 
-  useEffect(() => {
-    if (formData.expenseType === "PURCHASE_ORDER") {
-      const poTotal = purchaseOrderItemList.reduce(
-        (sum, item) => sum + item.rate * item.quantity,
-        0,
-      );
-      setFormData((prev) => ({
-        ...prev,
-        totalAmount: poTotal,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        totalAmount: prev.totalAmount,
-      }));
-    }
-  }, [purchaseOrderItemList, formData.expenseType]);
 
-  const handleItemChange = (e, index) => {
-    const { name, value } = e.target;
 
-    setPurchaseOrderItemList((prev) => {
-      let updated = [...prev];
-      updated[index] = { ...updated[index], [name]: value === "" ? "" : Number(value) };
-      return updated;
-    });
-  };
-
-  const handleAddMoreItem = () => {
-    setPurchaseOrderItemList((prev) => [
-      ...prev,
-      {
-        itemsId: "",
-        quantity: 0,
-        rate: 0,
-      },
-    ]);
-  };
-
-  const handleItemDelete = (index) => {
-    setPurchaseOrderItemList((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const getItemUnitSymbol = (itemId) => {
-    const selectedItem = dropdowns.itemList.find(
-      (listItem) => Number(listItem.id) === Number(itemId),
-    );
-    return selectedItem?.itemsUnit?.symbol || "";
-  };
 
   const selectFields = [
     {
@@ -625,135 +563,7 @@ const AddExpense = () => {
                 </div>
               </div>
             </div>
-          ) : formData.expenseType === "PURCHASE_ORDER" && (
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                <FaMoneyBillAlt className="mr-2" style={{ fontSize: "14px", color: "#3b82f6" }} />
-                Purchase Order
-              </h3>
-              
-              {/* Main Fields */}
-              <div className="flex flex-wrap -mx-2 mb-4">
-                <div className="w-full lg:w-4/12 px-2 mb-3">
-                  <SelectField
-                    label="Select Project"
-                    name="projectId"
-                    value={formData.projectId}
-                    onChange={handleChange}
-                    options={dropdowns.projects}
-                  />
-                </div>
-                <div className="w-full lg:w-4/12 px-2 mb-3">
-                  <SelectField
-                    label="Select Vendor"
-                    name="vendorAccountId"
-                    value={formData.vendorAccountId}
-                    onChange={handleChange}
-                    options={dropdowns.vendors}
-                  />
-                </div>
-                <div className="w-full lg:w-4/12 px-2 mb-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Total Amount</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-500 font-medium">₹</span>
-                    <input
-                      type="number"
-                      name="totalAmount"
-                      value={formData.totalAmount}
-                      readOnly
-                      className="w-full pl-7 p-2 border rounded-lg bg-gray-100 cursor-not-allowed font-semibold text-gray-700"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Items Section */}
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-xs font-bold text-gray-600 uppercase flex items-center">
-                    <FaBoxOpen className="mr-2" style={{ fontSize: "12px", color: "#8b5cf6" }} />
-                    Order Items
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={handleAddMoreItem}
-                    className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-2 rounded shadow-sm hover:shadow-md transition-all inline-flex items-center"
-                  >
-                    <FaSitemap className="mr-1" style={{ fontSize: "10px", color: "white" }} />
-                    Add Item
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {purchaseOrderItemList.length === 0 ? (
-                    <div className="text-center py-6 bg-white rounded-lg border border-dashed border-gray-300">
-                      <FaBoxOpen className="text-2xl mx-auto mb-2" style={{ color: "#a5b4fc" }} />
-                      <p className="text-gray-500 text-sm">No items added yet</p>
-                    </div>
-                  ) : (
-                    purchaseOrderItemList.map((item, index) => {
-                      const unitSymbol = getItemUnitSymbol(item.itemsId);
-                      const unitSuffix = unitSymbol ? ` /${unitSymbol}` : "";
-                      return (
-                        <div
-                          key={index}
-                          className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-sm transition-shadow"
-                        >
-                          <div className="flex items-end flex-wrap" style={{ gap: "0.75rem" }}>
-                            <div className="flex-1 min-w-0" style={{ minWidth: "100px" }}>
-                              <SelectField
-                                label="Item"
-                                name="itemsId"
-                                value={item.itemsId}
-                                onChange={(e) => handleItemChange(e, index)}
-                                options={dropdowns.itemList}
-                              />
-                            </div>
-                            <div className="w-24">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Rate{unitSuffix}</label>
-                              <input
-                                onChange={(e) => handleItemChange(e, index)}
-                                name="rate"
-                                value={item.rate}
-                                type="number"
-                                placeholder="0"
-                                className="w-full p-2 border rounded-lg text-sm"
-                              />
-                            </div>
-                            <div className="w-24">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Qty{unitSuffix}</label>
-                              <input
-                                onChange={(e) => handleItemChange(e, index)}
-                                name="quantity"
-                                value={item.quantity}
-                                type="number"
-                                placeholder="0"
-                                className="w-full p-2 border rounded-lg text-sm"
-                              />
-                            </div>
-                            <div className="w-24">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Subtotal</label>
-                              <div className="p-2 bg-green-50 border border-green-200 rounded-lg text-sm font-semibold text-green-700">
-                                ₹{(item.rate * item.quantity).toLocaleString()}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleItemDelete(index)}
-                              type="button"
-                              className="hover:bg-red-50 rounded p-1.5 transition-all mt-7"
-                              title="Remove Item"
-                            >
-                              <MdDeleteForever style={{ fontSize: "20px", color: "#ef4444" }} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          ) : null}
 
           {/* Action Buttons */}
           <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">

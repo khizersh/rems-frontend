@@ -67,6 +67,7 @@ import ItemsList from "views/modules/operations/purchasemanagement/items/ItemsLi
 import UnitsList from "views/modules/operations/purchasemanagement/units/UnitsList";
 import PurchaseOrderList from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderList";
 import PurchaseOrderUpdate from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderUpdate";
+import AddPurchaseOrder from "views/modules/operations/purchasemanagement/purchaseOrders/AddPurchaseOrder";
 import GoodReceivingNotesList from "views/modules/operations/purchasemanagement/goodReceivingNotes/GoodReceivingNotesList";
 import AddGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/AddGoodReceivingNotes";
 import UpdateGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/UpdateGoodReceivingNotes";
@@ -263,6 +264,7 @@ export default function Admin() {
               { path: "/dashboard/material", component: ItemsList },
               { path: "/dashboard/material-unit", component: UnitsList },
               { path: "/dashboard/purchase-order-list", component: PurchaseOrderList },
+              { path: "/dashboard/add-purchase-order", component: AddPurchaseOrder },
               { path: "/dashboard/purchase-order-update/:purchaseOrderId", component: PurchaseOrderUpdate },
               { path: "/dashboard/add-good-receiving-notes", component: AddGoodReceivingNotes },
               { path: "/dashboard/good-receiving-notes-list", component: GoodReceivingNotesList },

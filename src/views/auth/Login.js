@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import httpService from "utility/httpService";
 import { FEATURE_ALIASES, resolveHomepageByRole } from "utility/RolesConfig";
+import "../../assets/styles/custom/login.css";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -10,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [sendBtnName, setSendBtnName] = useState("Send reset link");
-  const [isSendDisabled, setIsSendDisabled] = useState(false); // ✅ New state
+  const [isSendDisabled, setIsSendDisabled] = useState(false);
 
   const { loading, setLoading, notifySuccess, notifyError } =
     useContext(MainContext);
@@ -47,8 +48,6 @@ export default function Login() {
 
       console.log("role", role);
       console.log("homePath", homePath);
-      
-
 
       history.replace(homePath);
     } catch (err) {
@@ -63,7 +62,7 @@ export default function Login() {
     if (!forgotData.email) return setError("Please enter valid email.");
     setLoading(true);
     setError("");
-    setIsSendDisabled(true); // ✅ Disable immediately
+    setIsSendDisabled(true);
 
     try {
       const data = await httpService.get(
@@ -72,169 +71,216 @@ export default function Login() {
 
       notifySuccess(data.responseMessage || "Password reset email sent!", 3000);
 
-      // ✅ Start 10-second timer
       setTimeout(() => {
         setIsSendDisabled(false);
-        setSendBtnName("Didn’t get the reset link? Resend");
+        setSendBtnName("Didn't get the reset link? Resend");
       }, 20000);
     } catch (err) {
       notifyError(err.message || "Failed to send reset email", err.data, 4000);
       setError("Email not found");
-      setIsSendDisabled(false); // ✅ Re-enable if error
+      setIsSendDisabled(false);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 h-full">
-      <div className="flex content-center items-center justify-center h-full">
-        <div className="w-full lg:w-4/12 px-4">
-          <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
-            <div className="flex-auto px-4 lg:px-10 py-10 pt-0 my-6">
-              {/* ✅ Conditional Form Rendering */}
-              {!isForgotPassword ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSubmit();
-                  }}
-                >
-                  {/* Username */}
-                  <div className="relative w-full mb-3">
-                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Email"
-                      required
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="relative w-full mb-3">
-                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Password"
-                      required
-                    />
-                  </div>
-
-                  {error && (
-                    <p className="text-red-500 text-sm mb-3 text-center">
-                      {error}
-                    </p>
-                  )}
-
-                  {/* Sign In Button */}
-                  <div className="text-center mt-6">
-                    <button
-                      type="submit"
-                      className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150"
-                      disabled={loading}
-                    >
-                      {loading ? "Signing in..." : "Sign In"}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleForgotPassword();
-                  }}
-                >
-                  {/* Forgot Password Email Field */}
-                  <div className="relative w-full mb-3">
-                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                      Enter your registered email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={forgotData.email}
-                      onChange={handleChange}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Email"
-                      required
-                    />
-                  </div>
-
-                  {error && (
-                    <p className="text-red-500 text-sm mb-3 text-center">
-                      {error}
-                    </p>
-                  )}
-
-                  {/* Send Reset Link Button */}
-                  <div className="text-center mt-6">
-                    <button
-                      type="submit"
-                      className={`bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none w-full ease-linear transition-all duration-150 ${
-                        isSendDisabled || loading
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                      disabled={loading || isSendDisabled}
-                    >
-                      {loading ? "Sending..." : sendBtnName}
-                    </button>
-                  </div>
-                </form>
-              )}
+    <div className="login-page-wrapper">
+      <div className="login-card">
+        {/* Left Brand Panel */}
+        <div className="login-brand-panel">
+          <div className="login-brand-content">
+            <div className="login-brand-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 21h18" />
+                <path d="M5 21V7l8-4v18" />
+                <path d="M19 21V11l-6-4" />
+                <path d="M9 9v.01" />
+                <path d="M9 12v.01" />
+                <path d="M9 15v.01" />
+                <path d="M9 18v.01" />
+              </svg>
             </div>
+            <h1>REMS</h1>
+            <p className="login-brand-subtitle">
+              Real Estate Management System
+            </p>
+
+            <div className="login-brand-features">
+              <div className="login-brand-feature-item">
+                <span className="feature-icon">
+                  <i className="fas fa-building"></i>
+                </span>
+                <span>Property Management</span>
+              </div>
+              <div className="login-brand-feature-item">
+                <span className="feature-icon">
+                  <i className="fas fa-chart-line"></i>
+                </span>
+                <span>Sales & Revenue Tracking</span>
+              </div>
+              <div className="login-brand-feature-item">
+                <span className="feature-icon">
+                  <i className="fas fa-warehouse"></i>
+                </span>
+                <span>Inventory & Warehouse</span>
+              </div>
+              <div className="login-brand-feature-item">
+                <span className="feature-icon">
+                  <i className="fas fa-chart-pie"></i>
+                </span>
+                <span>Analytics Dashboard</span>
+              </div>
+            </div>
+
+            <div className="login-brand-divider"></div>
+            <p className="login-brand-quote">
+              Streamline your real estate operations with powerful tools and
+              insights.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Form Panel */}
+        <div className="login-form-panel">
+          <div className="login-form-header">
+            <h2>{isForgotPassword ? "Reset Password" : "Welcome Back"}</h2>
+            <p>
+              {isForgotPassword
+                ? "Enter your email to receive a reset link"
+                : "Sign in to continue to your dashboard"}
+            </p>
           </div>
 
-          {/* ✅ Toggle Links */}
-          <div className="flex flex-wrap mt-6 relative">
-            <div className="w-1/2">
-              {!isForgotPassword ? (
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsForgotPassword(true);
-                  }}
-                  className="text-blueGray-500 hover:text-blueGray-700"
-                >
-                  <small>Forgot password?</small>
-                </a>
-              ) : (
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsForgotPassword(false);
-                  }}
-                  className="text-blueGray-500 hover:text-blueGray-700"
-                >
-                  <small>Back to login</small>
-                </a>
-              )}
-            </div>
-
-            {/* {!isForgotPassword && (
-              <div className="w-1/2 text-right">
-                <Link
-                  to="/auth/register"
-                  className="text-blueGray-500 hover:text-blueGray-700"
-                >
-                  <small>Create new account</small>
-                </Link>
+          {!isForgotPassword ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+            >
+              <div className="login-field-group">
+                <label className="login-field-label">Username</label>
+                <div className="login-input-wrapper">
+                  <input
+                    type="text"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                  <span className="login-input-icon">
+                    <i className="fas fa-user"></i>
+                  </span>
+                </div>
               </div>
-            )} */}
+
+              <div className="login-field-group">
+                <label className="login-field-label">Password</label>
+                <div className="login-input-wrapper">
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <span className="login-input-icon">
+                    <i className="fas fa-lock"></i>
+                  </span>
+                </div>
+              </div>
+
+              {error && <div className="login-error">{error}</div>}
+
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={loading}
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleForgotPassword();
+              }}
+            >
+              <div className="login-field-group">
+                <label className="login-field-label">Registered Email</label>
+                <div className="login-input-wrapper">
+                  <input
+                    type="email"
+                    name="email"
+                    value={forgotData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email address"
+                    required
+                  />
+                  <span className="login-input-icon">
+                    <i className="fas fa-envelope"></i>
+                  </span>
+                </div>
+              </div>
+
+              {error && <div className="login-error">{error}</div>}
+
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={loading || isSendDisabled}
+                style={
+                  isSendDisabled
+                    ? { opacity: 0.6, cursor: "not-allowed" }
+                    : {}
+                }
+              >
+                {loading ? "Sending..." : sendBtnName}
+              </button>
+            </form>
+          )}
+
+          <div className="login-links-row">
+            {!isForgotPassword ? (
+              <a
+                href="#pablo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgotPassword(true);
+                  setError("");
+                }}
+                className="login-link"
+              >
+                Forgot password?
+              </a>
+            ) : (
+              <a
+                href="#pablo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgotPassword(false);
+                  setError("");
+                }}
+                className="login-link"
+              >
+                <i
+                  className="fas fa-arrow-left"
+                  style={{ marginRight: "6px", fontSize: "0.75rem" }}
+                ></i>
+                Back to login
+              </a>
+            )}
           </div>
         </div>
       </div>

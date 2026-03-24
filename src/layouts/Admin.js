@@ -92,6 +92,16 @@ import {
   StockLedger,
   MaterialIssue,
 } from "views/modules/warehouse";
+import {
+  HrDashboard,
+  DepartmentList,
+  EmployeeList,
+  AddEmployee,
+  AttendancePage,
+  LeaveList,
+  SalaryAmendments,
+  PayrollPage,
+} from "views/modules/payroll";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -285,6 +295,16 @@ export default function Admin() {
               { path: "/dashboard/warehouse/stock-adjustment", component: StockAdjustment },
               { path: "/dashboard/warehouse/stock-ledger", component: StockLedger },
               { path: "/dashboard/warehouse/material-issue", component: MaterialIssue },
+              // HR & Payroll
+              { path: "/dashboard/hr", exact: true, component: HrDashboard },
+              { path: "/dashboard/hr/departments", component: DepartmentList },
+              { path: "/dashboard/hr/employees", component: EmployeeList },
+              { path: "/dashboard/hr/add-employee", component: AddEmployee },
+              { path: "/dashboard/hr/edit-employee/:id", component: AddEmployee },
+              { path: "/dashboard/hr/attendance", component: AttendancePage },
+              { path: "/dashboard/hr/leaves", component: LeaveList },
+              { path: "/dashboard/hr/amendments", component: SalaryAmendments },
+              { path: "/dashboard/hr/payroll", component: PayrollPage },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

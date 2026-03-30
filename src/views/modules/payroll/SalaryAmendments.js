@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { MainContext } from "context/MainContext";
 import DynamicTableComponent from "components/table/DynamicTableComponent";
-import DynamicFormModal from "components/CustomerComponents/DynamicFormModal";
 import {
   getAmendmentsByOrg,
   createAmendment,
@@ -13,10 +12,25 @@ import {
   AMENDMENT_TYPES,
   MONTHS,
 } from "service/HrService";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaTimes,
+  FaFileInvoiceDollar,
+  FaCalendarAlt,
+  FaAlignLeft,
+  FaFilter,
+  FaTimesCircle,
+} from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
+import "../../../assets/styles/custom/custom.css";
+import "assets/styles/projects/project.css";
 
 export default function SalaryAmendments() {
-  const { loading, setLoading, notifySuccess, notifyError } = useContext(MainContext);
+  const { loading, setLoading, notifySuccess, notifyError, setBackdrop , backdrop } =
+    useContext(MainContext);
   const orgId = getOrgId();
   const now = new Date();
 
@@ -41,7 +55,9 @@ export default function SalaryAmendments() {
 
   useEffect(() => {
     if (orgId) {
-      getEmployeesByOrg(orgId, 0, 1000).then((res) => setEmployees(res.data?.content || [])).catch(() => {});
+      getEmployeesByOrg(orgId, 0, 1000)
+        .then((res) => setEmployees(res.data?.content || []))
+        .catch(() => {});
     }
   }, []);
 
@@ -58,7 +74,9 @@ export default function SalaryAmendments() {
     }
   };
 
-  useEffect(() => { fetchData(); }, [filterMonth, filterYear]);
+  useEffect(() => {
+    fetchData();
+  }, [filterMonth, filterYear]);
 
   const resetForm = () => {
     setEditId(null);
@@ -72,6 +90,7 @@ export default function SalaryAmendments() {
 
   const openCreate = () => {
     resetForm();
+    setBackdrop(!backdrop);
     setShowModal(true);
   };
 
@@ -84,6 +103,7 @@ export default function SalaryAmendments() {
     setEffectiveMonth(row.effectiveMonth || filterMonth);
     setEffectiveYear(row.effectiveYear || filterYear);
     setShowModal(true);
+     setBackdrop(!backdrop);
   };
 
   const handleSubmit = async () => {
@@ -110,6 +130,7 @@ export default function SalaryAmendments() {
         notifySuccess("Amendment created");
       }
       setShowModal(false);
+      setBackdrop(false);
       resetForm();
       fetchData();
     } catch (err) {
@@ -120,7 +141,12 @@ export default function SalaryAmendments() {
   };
 
   const handleDelete = async (row) => {
-    if (!window.confirm(`Delete this ${row.amendmentType?.toLowerCase()} for ${row.employeeName}?`)) return;
+    if (
+      !window.confirm(
+        `Delete this ${row.amendmentType?.toLowerCase()} for ${row.employeeName}?`,
+      )
+    )
+      return;
     try {
       setLoading(true);
       await deleteAmendment(row.id);
@@ -139,37 +165,55 @@ export default function SalaryAmendments() {
       header: "Type",
       field: "amendmentType",
       render: (val) => (
-        <span className={`text-xs font-bold px-2 py-1 rounded-full text-white ${val === "ADDITION" ? "bg-emerald-500" : "bg-red-500"}`}>
+        <span
+          className={`text-xs font-bold px-2 py-1 rounded-full text-white ${val === "ADDITION" ? "bg-emerald-500" : "bg-red-500"}`}
+        >
           {val}
         </span>
       ),
     },
-    { header: "Description", field: "description", render: (val) => val || "—" },
+    {
+      header: "Description",
+      field: "description",
+      render: (val) => val || "—",
+    },
     {
       header: "Amount",
       field: "amount",
-      render: (val) => val ? `Rs ${formatCurrency(val)}` : "—",
+      render: (val) => (val ? `Rs ${formatCurrency(val)}` : "—"),
     },
     {
       header: "Effective",
       field: "effectiveMonth",
-      render: (val, row) => `${MONTHS.find((m) => m.value === val)?.label || val} ${row.effectiveYear || ""}`,
+      render: (val, row) =>
+        `${MONTHS.find((m) => m.value === val)?.label || val} ${row.effectiveYear || ""}`,
     },
   ];
 
   const actions = [
-    { icon: FaEdit, title: "Edit", className: "text-indigo-500", onClick: openEdit },
-    { icon: FaTrash, title: "Delete", className: "text-red-500", onClick: handleDelete },
+    {
+      icon: FaEdit,
+      title: "Edit",
+      className: "text-indigo-500",
+      onClick: openEdit,
+    },
+    {
+      icon: FaTrash,
+      title: "Delete",
+      className: "text-red-500",
+      onClick: handleDelete,
+    },
   ];
 
-  const formFields = [
-    { name: "employeeId", label: "Employee", type: "select", value: employeeId, setter: setEmployeeId, col: 6, options: employees.map((e) => ({ value: e.id, label: `${e.fullName} (${e.employeeCode || "N/A"})` })) },
-    { name: "amendmentType", label: "Type", type: "select", value: amendmentType, setter: setAmendmentType, col: 6, options: AMENDMENT_TYPES },
-    { name: "amount", label: "Amount", type: "number", value: amount, setter: setAmount, col: 6 },
-    { name: "effectiveMonth", label: "Month", type: "select", value: effectiveMonth, setter: setEffectiveMonth, col: 3, options: MONTHS.map((m) => ({ value: m.value, label: m.label })) },
-    { name: "effectiveYear", label: "Year", type: "select", value: effectiveYear, setter: setEffectiveYear, col: 3, options: Array.from({ length: 5 }, (_, i) => ({ value: now.getFullYear() - 1 + i, label: String(now.getFullYear() - 1 + i) })) },
-    { name: "description", label: "Description", type: "textarea", value: description, setter: setDescription, col: 12 },
-  ];
+  const inputClass = "w-full p-2 border rounded-lg text-sm bg-white";
+  const hasActiveFilters =
+    filterMonth !== now.getMonth() + 1 || filterYear !== now.getFullYear();
+
+  const handleClearFilters = () => {
+    setFilterMonth(now.getMonth() + 1);
+    setFilterYear(now.getFullYear());
+    setPage(0);
+  };
 
   // Paginated slice for table
   const paginatedData = data.slice(page * pageSize, (page + 1) * pageSize);
@@ -177,18 +221,70 @@ export default function SalaryAmendments() {
   return (
     <div className="pt-8 pb-4">
       {/* Filters */}
-      <div className="px-4 mb-4 flex flex-wrap gap-3 items-end">
-        <div>
-          <label className="block text-xs text-gray-500 font-semibold mb-1">Month</label>
-          <select value={filterMonth} onChange={(e) => setFilterMonth(Number(e.target.value))} className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
-            {MONTHS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 font-semibold mb-1">Year</label>
-          <select value={filterYear} onChange={(e) => setFilterYear(Number(e.target.value))} className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300">
-            {Array.from({ length: 5 }, (_, i) => now.getFullYear() - 1 + i).map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+      <div className="container mx-auto py-4 mb-4">
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Amendments
+              </h4>
+              <p className="booking-filter-subtitle">
+                Filter amendments by month and year.
+              </p>
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <FaTimesCircle className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Month</label>
+              <select
+                value={filterMonth}
+                onChange={(e) => {
+                  setFilterMonth(Number(e.target.value));
+                  setPage(0);
+                }}
+                className="booking-filter-select"
+              >
+                {MONTHS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Year</label>
+              <select
+                value={filterYear}
+                onChange={(e) => {
+                  setFilterYear(Number(e.target.value));
+                  setPage(0);
+                }}
+                className="booking-filter-select"
+              >
+                {Array.from(
+                  { length: 5 },
+                  (_, i) => now.getFullYear() - 1 + i,
+                ).map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -214,13 +310,209 @@ export default function SalaryAmendments() {
         }}
       />
 
-      <DynamicFormModal
-        isOpen={showModal}
-        onClose={() => { setShowModal(false); resetForm(); }}
-        formTitle={editId ? "Edit Amendment" : "New Salary Amendment"}
-        fields={formFields}
-        onSubmit={handleSubmit}
-      />
+      {showModal && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black bg-opacity-30"
+            onClick={() => {
+              setShowModal(false);
+              resetForm();
+            }}
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="salary-amendment-modal-title"
+            className="bg-white rounded modal-height-add-unit inset-0 z-50 mx-auto fixed-unit-position modal-height border border-gray-200 shadow-lg"
+          >
+            <div className="flex items-center justify-between mb-4 p-4 bg-lightBlue-500 rounded-t">
+              <h3
+                id="salary-amendment-modal-title"
+                className="text-white text-lg font-bold uppercase flex items-center"
+              >
+                <FaFileInvoiceDollar className="mr-2" />
+                {editId ? "Edit Amendment" : "New Salary Amendment"}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                  setBackdrop(false);
+                }}
+                className="text-white transition-colors hover:text-red-100"
+                type="button"
+              >
+                <RxCross2 className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              className="max-h-[calc(83vh-96px)] overflow-y-auto p-2 payback-form p-4 "
+            >
+              <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <h3 className="mb-4 border-b border-gray-200 pb-2 text-sm font-bold text-gray-700 flex items-center">
+                  <FaFileInvoiceDollar className="mr-2 text-indigo-500" />
+                  Amendment Information
+                </h3>
+
+                <div className="flex flex-wrap -mx-2">
+                  <div className="mb-3 w-full px-2 lg:w-6/12">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Employee <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={employeeId}
+                      onChange={(e) => setEmployeeId(e.target.value)}
+                      className={inputClass}
+                      required
+                    >
+                      <option value="">Select Employee</option>
+                      {employees.map((emp) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.fullName} ({emp.employeeCode || "N/A"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3 w-full px-2 lg:w-6/12">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={amendmentType}
+                      onChange={(e) => setAmendmentType(e.target.value)}
+                      className={inputClass}
+                      required
+                    >
+                      {AMENDMENT_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3 w-full px-2 lg:w-6/12">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Amount <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <h3 className="mb-4 border-b border-gray-200 pb-2 text-sm font-bold text-gray-700 flex items-center">
+                  <FaCalendarAlt className="mr-2 text-emerald-500" />
+                  Effective Period
+                </h3>
+
+                <div className="flex flex-wrap -mx-2">
+                  <div className="mb-3 w-full px-2 lg:w-6/12">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Month <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={effectiveMonth}
+                      onChange={(e) =>
+                        setEffectiveMonth(Number(e.target.value))
+                      }
+                      className={inputClass}
+                      required
+                    >
+                      {MONTHS.map((m) => (
+                        <option key={m.value} value={m.value}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3 w-full px-2 lg:w-6/12">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Year <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={effectiveYear}
+                      onChange={(e) => setEffectiveYear(Number(e.target.value))}
+                      className={inputClass}
+                      required
+                    >
+                      {Array.from(
+                        { length: 5 },
+                        (_, i) => now.getFullYear() - 1 + i,
+                      ).map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <h3 className="mb-4 border-b border-gray-200 pb-2 text-sm font-bold text-gray-700 flex items-center">
+                  <FaAlignLeft className="mr-2 text-amber-500" />
+                  Notes
+                </h3>
+
+                <div className="flex flex-wrap -mx-2">
+                  <div className="mb-1 w-full px-2">
+                    <label className="mb-1 block text-xs font-medium text-gray-700">
+                      Description
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={3}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end border-t border-gray-200 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="mr-3 inline-flex items-center rounded bg-gray-100 px-5 py-2 text-xs font-bold uppercase text-gray-700 shadow-sm transition-all hover:bg-gray-200 hover:shadow-md"
+                >
+                  <FaTimes className="mr-1" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center rounded bg-lightBlue-500 px-5 py-2 text-xs font-bold uppercase text-white shadow-sm outline-none transition-all duration-150 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <FaSave className="mr-1" />
+                  {loading
+                    ? "Saving..."
+                    : editId
+                      ? "Update Amendment"
+                      : "Create Amendment"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { MainContext } from "context/MainContext";
 import {
-  createEmployee,
   updateEmployee,
   getEmployeeById,
   getActiveDepartments,
@@ -11,16 +10,31 @@ import {
   GENDERS,
 } from "service/HrService";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { FaSave, FaPlus, FaTrash, FaUser, FaBriefcase, FaUniversity, FaPlusCircle, FaMinusCircle, FaCalculator, FaMoneyBillWave, FaArrowUp, FaArrowDown, FaWallet } from "react-icons/fa";
+import {
+  FaSave,
+  FaPlus,
+  FaTrash,
+  FaUser,
+  FaBriefcase,
+  FaUniversity,
+  FaPlusCircle,
+  FaMinusCircle,
+  FaCalculator,
+  FaMoneyBillWave,
+  FaArrowUp,
+  FaArrowDown,
+  FaWallet,
+} from "react-icons/fa";
 
-export default function AddEmployee() {
+export default function UpdateEmployee() {
   const { id } = useParams();
-  const isEdit = !!id;
   const history = useHistory();
   const { setLoading, notifySuccess, notifyError } = useContext(MainContext);
   const orgId = getOrgId();
 
   const [departments, setDepartments] = useState([]);
+  const [allowances, setAllowances] = useState([]);
+  const [deductions, setDeductions] = useState([]);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -35,21 +49,21 @@ export default function AddEmployee() {
     designation: "",
     departmentId: "",
     employmentType: "FULL_TIME",
-    joiningDate: new Date().toISOString().slice(0, 10),
+    joiningDate: "",
     basicSalary: "",
     bankName: "",
     bankAccountNumber: "",
     bankBranchCode: "",
     organizationId: orgId,
   });
-  const [allowances, setAllowances] = useState([]);
-  const [deductions, setDeductions] = useState([]);
 
   useEffect(() => {
     if (orgId) {
-      getActiveDepartments(orgId).then((res) => setDepartments(res.data || [])).catch(() => {});
+      getActiveDepartments(orgId)
+        .then((res) => setDepartments(res.data || []))
+        .catch(() => {});
     }
-    if (isEdit) loadEmployee();
+    loadEmployee();
   }, []);
 
   const loadEmployee = async () => {
@@ -93,18 +107,26 @@ export default function AddEmployee() {
   };
 
   const handleAllowanceChange = (index, field, value) => {
-    setAllowances((prev) => prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)));
+    setAllowances((prev) =>
+      prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)),
+    );
   };
 
   const handleDeductionChange = (index, field, value) => {
-    setDeductions((prev) => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
+    setDeductions((prev) =>
+      prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)),
+    );
   };
 
-  const addAllowance = () => setAllowances((prev) => [...prev, { allowanceName: "", amount: "" }]);
-  const removeAllowance = (i) => setAllowances((prev) => prev.filter((_, idx) => idx !== i));
+  const addAllowance = () =>
+    setAllowances((prev) => [...prev, { allowanceName: "", amount: "" }]);
+  const removeAllowance = (i) =>
+    setAllowances((prev) => prev.filter((_, idx) => idx !== i));
 
-  const addDeduction = () => setDeductions((prev) => [...prev, { deductionName: "", amount: "" }]);
-  const removeDeduction = (i) => setDeductions((prev) => prev.filter((_, idx) => idx !== i));
+  const addDeduction = () =>
+    setDeductions((prev) => [...prev, { deductionName: "", amount: "" }]);
+  const removeDeduction = (i) =>
+    setDeductions((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,20 +139,24 @@ export default function AddEmployee() {
       const payload = {
         ...formData,
         basicSalary: Number(formData.basicSalary),
-        allowances: allowances.filter((a) => a.allowanceName && a.amount).map((a) => ({ ...a, amount: Number(a.amount) })),
-        deductions: deductions.filter((d) => d.deductionName && d.amount).map((d) => ({ ...d, amount: Number(d.amount) })),
+        allowances: allowances
+          .filter((a) => a.allowanceName && a.amount)
+          .map((a) => ({
+            allowanceName: a.allowanceName,
+            amount: Number(a.amount),
+          })),
+        deductions: deductions
+          .filter((d) => d.deductionName && d.amount)
+          .map((d) => ({
+            deductionName: d.deductionName,
+            amount: Number(d.amount),
+          })),
       };
-
-      if (isEdit) {
-        await updateEmployee(id, payload);
-        notifySuccess("Employee updated successfully");
-      } else {
-        await createEmployee(payload);
-        notifySuccess("Employee created successfully");
-      }
+      await updateEmployee(id, payload);
+      notifySuccess("Employee updated successfully");
       history.push("/dashboard/hr/employees");
     } catch (err) {
-      notifyError(err.message || "Operation failed");
+      notifyError(err.message || "Update failed");
     } finally {
       setLoading(false);
     }
@@ -144,21 +170,37 @@ export default function AddEmployee() {
       {/* Header */}
       <div className="mb-4 py-4">
         <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
-          <button type="button" onClick={() => history.goBack()} className="mr-2">
-            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          <button
+            type="button"
+            onClick={() => history.goBack()}
+            className="mr-2"
+          >
+            <IoArrowBackOutline
+              className="text-xl"
+              style={{ color: "#64748b" }}
+            />
           </button>
           <FaUser className="mr-2" style={{ color: "#6366f1" }} />
-          {isEdit ? "Edit Employee" : "Add New Employee"}
+          Edit Employee
         </h6>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-gray-200">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg border border-gray-200"
+      >
         <div className="p-6 space-y-6">
-
-             {(() => {
+          {/* Salary Summary */}
+          {(() => {
             const basic = Number(formData.basicSalary) || 0;
-            const totalAllowances = allowances.reduce((s, a) => s + (Number(a.amount) || 0), 0);
-            const totalDeductions = deductions.reduce((s, d) => s + (Number(d.amount) || 0), 0);
+            const totalAllowances = allowances.reduce(
+              (s, a) => s + (Number(a.amount) || 0),
+              0,
+            );
+            const totalDeductions = deductions.reduce(
+              (s, d) => s + (Number(d.amount) || 0),
+              0,
+            );
             const net = basic + totalAllowances - totalDeductions;
             return (
               <div>
@@ -219,44 +261,102 @@ export default function AddEmployee() {
           {/* Personal Information */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-              <FaUser className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
+              <FaUser
+                className="mr-2"
+                style={{ fontSize: "14px", color: "#8b5cf6" }}
+              />
               Personal Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={inputClass} required />
+                <label className={labelClass}>
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                />
               </div>
               <div>
                 <label className={labelClass}>Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>Phone</label>
-                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>CNIC</label>
-                <input type="text" name="cnic" value={formData.cnic} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="cnic"
+                  value={formData.cnic}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="12345-6789012-3"
+                />
               </div>
               <div>
                 <label className={labelClass}>Gender</label>
-                <select name="gender" value={formData.gender} onChange={handleChange} className={inputClass}>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
                   <option value="">Select Gender</option>
-                  {GENDERS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+                  {GENDERS.map((g) => (
+                    <option key={g.value} value={g.value}>
+                      {g.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className={labelClass}>Date of Birth</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass} />
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
-              <div className="md:col-span-2 lg:col-span-2">
+              <div className="md:col-span-2">
                 <label className={labelClass}>Address</label>
-                <textarea name="address" value={formData.address} onChange={handleChange} className={inputClass} rows="2" />
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className={inputClass}
+                  rows="2"
+                />
               </div>
             </div>
           </div>
@@ -264,38 +364,102 @@ export default function AddEmployee() {
           {/* Job Information */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-              <FaBriefcase className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+              <FaBriefcase
+                className="mr-2"
+                style={{ fontSize: "14px", color: "#10b981" }}
+              />
               Job Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className={labelClass}>Employee Code</label>
-                <input type="text" name="employeeCode" value={formData.employeeCode} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="employeeCode"
+                  value={formData.employeeCode}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>Designation</label>
-                <input type="text" name="designation" value={formData.designation} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="designation"
+                  value={formData.designation}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
-                <label className={labelClass}>Department <span className="text-red-500">*</span></label>
-                <select name="departmentId" value={formData.departmentId} onChange={handleChange} className={inputClass} required>
+                <label className={labelClass}>
+                  Department <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="departmentId"
+                  value={formData.departmentId}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                >
                   <option value="">Select Department</option>
-                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className={labelClass}>Employment Type</label>
-                <select name="employmentType" value={formData.employmentType} onChange={handleChange} className={inputClass}>
-                  {EMPLOYMENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                <select
+                  name="employmentType"
+                  value={formData.employmentType}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  {EMPLOYMENT_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
               <div>
                 <label className={labelClass}>Joining Date</label>
-                <input type="date" name="joiningDate" value={formData.joiningDate} onChange={handleChange} className={inputClass} />
+                <input
+                  type="date"
+                  name="joiningDate"
+                  value={formData.joiningDate}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
-                <label className={labelClass}>Basic Salary <span className="text-red-500">*</span></label>
-                <input type="number" name="basicSalary" value={formData.basicSalary} onChange={handleChange} className={inputClass} required min="0" />
+                <label className={labelClass}>
+                  Basic Salary <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="basicSalary"
+                  value={formData.basicSalary}
+                  onChange={handleChange}
+                  className={inputClass}
+                  required
+                  min="0"
+                />
               </div>
             </div>
           </div>
@@ -303,21 +467,42 @@ export default function AddEmployee() {
           {/* Bank Information */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-              <FaUniversity className="mr-2" style={{ fontSize: "14px", color: "#3b82f6" }} />
+              <FaUniversity
+                className="mr-2"
+                style={{ fontSize: "14px", color: "#3b82f6" }}
+              />
               Bank Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelClass}>Bank Name</label>
-                <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="bankName"
+                  value={formData.bankName}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>Account Number</label>
-                <input type="text" name="bankAccountNumber" value={formData.bankAccountNumber} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="bankAccountNumber"
+                  value={formData.bankAccountNumber}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
               <div>
                 <label className={labelClass}>Branch Code</label>
-                <input type="text" name="bankBranchCode" value={formData.bankBranchCode} onChange={handleChange} className={inputClass} />
+                <input
+                  type="text"
+                  name="bankBranchCode"
+                  value={formData.bankBranchCode}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
             </div>
           </div>
@@ -326,7 +511,10 @@ export default function AddEmployee() {
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2 justify-between">
               <span className="flex items-center">
-                <FaPlusCircle className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                <FaPlusCircle
+                  className="mr-2"
+                  style={{ fontSize: "14px", color: "#10b981" }}
+                />
                 Allowances
               </span>
               <button
@@ -341,17 +529,40 @@ export default function AddEmployee() {
               <p className="text-sm text-gray-400">No allowances added</p>
             )}
             {allowances.map((a, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 items-end">
+              <div
+                key={i}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 items-end"
+              >
                 <div>
-                  <label className={labelClass}>Name</label>
-                  <input type="text" value={a.allowanceName} onChange={(e) => handleAllowanceChange(i, "allowanceName", e.target.value)} className={inputClass} placeholder="e.g. House Rent Allowance" />
+                  <label className={labelClass}>Allowance Type</label>
+                  <input
+                    type="text"
+                    value={a.allowanceName}
+                    onChange={(e) =>
+                      handleAllowanceChange(i, "allowanceName", e.target.value)
+                    }
+                    className={inputClass}
+                    placeholder="e.g. House Rent Allowance"
+                  />
                 </div>
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className={labelClass}>Amount</label>
-                    <input type="number" value={a.amount} onChange={(e) => handleAllowanceChange(i, "amount", e.target.value)} className={inputClass} min="0" />
+                    <input
+                      type="number"
+                      value={a.amount}
+                      onChange={(e) =>
+                        handleAllowanceChange(i, "amount", e.target.value)
+                      }
+                      className={inputClass}
+                      min="0"
+                    />
                   </div>
-                  <button type="button" onClick={() => removeAllowance(i)} className="text-red-500 hover:text-red-700 mt-5">
+                  <button
+                    type="button"
+                    onClick={() => removeAllowance(i)}
+                    className="text-red-500 hover:text-red-700 mt-5"
+                  >
                     <FaTrash />
                   </button>
                 </div>
@@ -363,7 +574,10 @@ export default function AddEmployee() {
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2 justify-between">
               <span className="flex items-center">
-                <FaMinusCircle className="mr-2" style={{ fontSize: "14px", color: "#ef4444" }} />
+                <FaMinusCircle
+                  className="mr-2"
+                  style={{ fontSize: "14px", color: "#ef4444" }}
+                />
                 Deductions
               </span>
               <button
@@ -378,17 +592,40 @@ export default function AddEmployee() {
               <p className="text-sm text-gray-400">No deductions added</p>
             )}
             {deductions.map((d, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 items-end">
+              <div
+                key={i}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 items-end"
+              >
                 <div>
-                  <label className={labelClass}>Name</label>
-                  <input type="text" value={d.deductionName} onChange={(e) => handleDeductionChange(i, "deductionName", e.target.value)} className={inputClass} placeholder="e.g. Income Tax" />
+                  <label className={labelClass}>Deduction Type</label>
+                  <input
+                    type="text"
+                    value={d.deductionName}
+                    onChange={(e) =>
+                      handleDeductionChange(i, "deductionName", e.target.value)
+                    }
+                    className={inputClass}
+                    placeholder="e.g. Income Tax"
+                  />
                 </div>
                 <div className="flex gap-2 items-end">
                   <div className="flex-1">
                     <label className={labelClass}>Amount</label>
-                    <input type="number" value={d.amount} onChange={(e) => handleDeductionChange(i, "amount", e.target.value)} className={inputClass} min="0" />
+                    <input
+                      type="number"
+                      value={d.amount}
+                      onChange={(e) =>
+                        handleDeductionChange(i, "amount", e.target.value)
+                      }
+                      className={inputClass}
+                      min="0"
+                    />
                   </div>
-                  <button type="button" onClick={() => removeDeduction(i)} className="text-red-500 hover:text-red-700 mt-5">
+                  <button
+                    type="button"
+                    onClick={() => removeDeduction(i)}
+                    className="text-red-500 hover:text-red-700 mt-5"
+                  >
                     <FaTrash />
                   </button>
                 </div>
@@ -396,17 +633,17 @@ export default function AddEmployee() {
             ))}
           </div>
 
-          {/* Salary Summary */}
-       
-
-          {/* Submit */}
+          {/* Action Buttons */}
           <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={() => history.goBack()}
               className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
             >
-              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              <IoArrowBackOutline
+                className="mr-1"
+                style={{ color: "#64748b" }}
+              />
               Cancel
             </button>
             <button
@@ -414,10 +651,9 @@ export default function AddEmployee() {
               className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
             >
               <FaSave className="mr-1" />
-              {isEdit ? "Update Employee" : "Create Employee"}
+              Update Employee
             </button>
           </div>
-
         </div>
       </form>
     </div>

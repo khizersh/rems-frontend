@@ -27,6 +27,8 @@ export { default as HrDashboard } from './HrDashboard';
 export { default as DepartmentList } from './DepartmentList';
 export { default as EmployeeList } from './EmployeeList';
 export { default as AddEmployee } from './AddEmployee';
+export { default as UpdateEmployee } from './UpdateEmployee';
+export { default as ViewEmployee } from './ViewEmployee';
 export { default as AttendancePage } from './AttendancePage';
 export { default as LeaveList } from './LeaveList';
 export { default as SalaryAmendments } from './SalaryAmendments';

@@ -82,6 +82,12 @@ export const FEATURE_ALIASES = {
     "/dashboard/hr/payroll",
     "/dashboard/hr/payroll-history",
   ],
+
+  "/dashboard/hr/employees": [
+    "/dashboard/hr/add-employee",
+    "/dashboard/hr/edit-employee",
+    "/dashboard/hr/employee",
+  ],
 };
 
 export const ROLE_DASHBOARD_PRIORITY = {

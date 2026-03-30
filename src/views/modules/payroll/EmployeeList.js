@@ -13,7 +13,8 @@ import {
   EMPLOYEE_STATUS_BADGE,
   EMPLOYMENT_TYPES,
 } from "service/HrService";
-import { FaPlus, FaEye, FaEdit, FaUserSlash, FaSearch } from "react-icons/fa";
+import { FaPlus, FaEye, FaEdit, FaUserSlash, FaSearch, FaFilter, FaTimesCircle } from "react-icons/fa";
+import "assets/styles/projects/project.css";
 
 export default function EmployeeList() {
   const { loading, setLoading, notifySuccess, notifyError } = useContext(MainContext);
@@ -133,38 +134,77 @@ export default function EmployeeList() {
     },
   ];
 
+  const hasActiveFilters = Boolean(filterDept || searchKeyword.trim());
+
+  const handleClearFilters = () => {
+    setFilterDept("");
+    setSearchKeyword("");
+    setPage(0);
+  };
+
   return (
     <div className="pt-8 pb-4">
       {/* Filters */}
-      <div className="px-4 mb-4 flex flex-wrap gap-3 items-end">
-        <div>
-          <label className="block text-xs text-gray-500 font-semibold mb-1">Department</label>
-          <select
-            value={filterDept}
-            onChange={(e) => { setFilterDept(e.target.value); setPage(0); setSearchKeyword(""); }}
-            className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300"
-          >
-            <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-        </div>
-        <form onSubmit={handleSearch} className="flex gap-2 items-end">
-          <div>
-            <label className="block text-xs text-gray-500 font-semibold mb-1">Search</label>
-            <input
-              type="text"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              placeholder="Name, email, code..."
-              className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-300 w-56"
-            />
+      <div className="container mx-auto py-4 mb-4">
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Employees
+              </h4>
+              <p className="booking-filter-subtitle">
+                Search by name, code or filter by department.
+              </p>
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <FaTimesCircle className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
           </div>
-          <button type="submit" className="bg-indigo-500 text-white px-3 py-2 rounded text-sm font-bold">
-            <FaSearch className="inline-block" style={{ paddingBottom: "2px" }} /> Search
-          </button>
-        </form>
+
+          <form onSubmit={handleSearch} className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Department</label>
+              <select
+                value={filterDept}
+                onChange={(e) => { setFilterDept(e.target.value); setPage(0); setSearchKeyword(""); }}
+                className="booking-filter-select"
+              >
+                <option value="">All Departments</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Search</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  placeholder="Name, email, code..."
+                  className="booking-filter-select"
+                />
+                <button
+                  type="submit"
+                  className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 flex items-center gap-1"
+                >
+                  <FaSearch style={{ fontSize: "12px" }} />
+                  Search
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
 
       <DynamicTableComponent

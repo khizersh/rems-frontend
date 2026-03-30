@@ -63,6 +63,7 @@ import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
 import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
+import PdcPayments from "views/modules/operations/expense/PdcPayments";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -154,6 +155,7 @@ export default function Admin() {
                 path: "/dashboard/update-vendor-account/:accountId",
                 component: UpdateVendorComponent,
               },
+              { path: "/dashboard/pdc-payments", component: PdcPayments },
               { path: "/dashboard/expense-list", component: ExpenseList },
               { path: "/dashboard/add-expense", component: AddExpense },
               { path: "/dashboard/expense-account-group", component: AccountGroupList },

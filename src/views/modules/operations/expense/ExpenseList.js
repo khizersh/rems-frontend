@@ -671,6 +671,10 @@ export default function ExpenseList() {
     history.push("/dashboard/add-expense");
   };
 
+  const handlePdcPayments = () => {
+    history.push("/dashboard/pdc-payments");
+  };
+
   return (
     <>
       <DynamicDetailsModal
@@ -995,6 +999,12 @@ export default function ExpenseList() {
             onClick: handlePrintReport,
             icon: TbFileExport,
             className: "bg-emerald-500",
+          }}
+          thirdButton={{
+            title: "PDC Payments",
+            onClick: handlePdcPayments,
+            icon: TbFileExport,
+            className: "bg-amber-500",
           }}
         />
       </div>

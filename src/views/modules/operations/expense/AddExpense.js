@@ -245,6 +245,13 @@ const AddExpense = () => {
 
   const history = useHistory();
 
+  const isFutureDate = (dateStr) => {
+    if (!dateStr) return false;
+    const selectedDate = new Date(dateStr).toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    return selectedDate > today;
+  };
+
   const getPaymentTypes = () => {
     const formattedType = paymentTypes.map((type) => {
       return { id: type, name: type };
@@ -394,6 +401,11 @@ const AddExpense = () => {
                           onChange={handleChange}
                           readOnly={false}
                         />
+                        {formData.paymentType === "CHEQUE" && isFutureDate(formData.paymentDocDate) && (
+                          <p className="text-xs text-amber-600 mt-1 font-semibold">
+                            ⓘ This is a post-dated cheque which does not deduct amount immediately
+                          </p>
+                        )}
                       </div>
                     </>
                   ) : (
@@ -479,6 +491,11 @@ const AddExpense = () => {
                         onChange={handleChange}
                         readOnly={false}
                       />
+                      {formData.paymentType === "CHEQUE" && isFutureDate(formData.paymentDocDate) && (
+                        <p className="text-xs text-amber-600 mt-1 font-semibold">
+                          ⓘ This is a post-dated cheque which does not deduct amount immediately
+                        </p>
+                      )}
                     </div>
                   </>
                 ) : (

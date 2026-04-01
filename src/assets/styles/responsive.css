@@ -239,6 +239,24 @@ button:hover {
 }
 
 /* ===========================
+   Missing Tailwind lg: utilities
+   (pre-compiled tailwind.css doesn't include these)
+=========================== */
+@media (min-width: 1024px) {
+  .lg\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .lg\:w-auto {
+    width: auto;
+  }
+  .lg\:px-0 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ===========================
    Table Footer Responsive
 =========================== */
 

@@ -92,7 +92,7 @@ const PaymentModal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="p-4 bg-white rounded fixed-left-13p inset-0 z-50 mx-auto  modal-width modal-height"
+        className="p-4 bg-white rounded fixed-left-13p inset-0 z-50 mx-auto modal-width modal-height overflow-y-auto"
       >
         <div className="flex justify-between items-center border-b pb-2 mb-4">
           <h2 id="modal-title" className="text-lg font-bold">
@@ -108,16 +108,16 @@ const PaymentModal = ({
 
         <>
           <>
-            <div className={`px-4 mt-5`}>
-              <h6 className=" text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between">
-                <div className="flex justify-between">
-                  <div className="pt-2 border-right-grey px-2">
+            <div className={`lg:px-4 mt-5`}>
+              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex flex-row justify-between items-center gap-3">
+                <div className="flex flex-col lg:flex-row">
+                  <div className="pt-2 lg:border-right-grey px-2">
                     Original Amount :{" "}
                     <span style={{ fontSize: "23px" }}>
                       {selectedPayment.totalAmount}
                     </span>
                   </div>
-                  <div className="pt-2 pr-2 border-right-grey px-2">
+                  <div className="pt-2 pr-2 lg:border-right-grey px-2">
                     Remaining Amount :{" "}
                     <span style={{ fontSize: "23px" }}>
                       {remainingAmountState}
@@ -127,7 +127,7 @@ const PaymentModal = ({
                 <button
                   type="button"
                   onClick={onAddDetailRow}
-                  className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                  className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
                 >
                   <IoMdAddCircle
                     className="w-5 h-5 inline-block"
@@ -142,10 +142,10 @@ const PaymentModal = ({
                   {detail.paymentType == CHEQUE ? (
                     <>
                       <div
-                        className="flex flex-wrap border-bottom-grey"
+                        className="flex flex-wrap border-bottom-grey py-3 gap-y-3"
                         key={ind}
                       >
-                        <div className="flex flex-wrap" key={ind}>
+                        <div className="flex flex-wrap gap-y-3" key={ind}>
                           <div className={`w-full lg:w-2/12 `}>
                             <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                               Received Amount
@@ -247,11 +247,11 @@ const PaymentModal = ({
                             </div>
                           </div>
                           <div className="w-full lg:w-1/12">
-                            <div className=" mt-7">
+                            <div className="flex justify-center lg:justify-start mt-3 lg:mt-7">
                               <button
                                 type="button"
                                 onClick={() => onRemoveDetailRow(ind)}
-                                className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                                className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                               >
                                 <MdDeleteForever
                                   style={{
@@ -268,10 +268,10 @@ const PaymentModal = ({
                   ) : (
                     <>
                       <div
-                        className="flex flex-wrap border-bottom-grey"
+                        className="flex flex-wrap border-bottom-grey py-3 gap-y-3"
                         key={ind}
                       >
-                        <div className={`w-full lg:w-3/12  my-2 `}>
+                        <div className={`w-full lg:w-3/12 my-2`}>
                           <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                             Received Amount
                           </label>
@@ -284,9 +284,9 @@ const PaymentModal = ({
                             required
                           />
                         </div>
-                        <div className="w-full lg:w-9/12 px-4 my-2">
-                          <div className="flex flex-wrap" key={ind}>
-                            <div className="w-full lg:w-3/12 px-4">
+                        <div className="w-full lg:w-9/12 lg:px-4 my-2">
+                          <div className="flex flex-wrap gap-y-3" key={ind}>
+                            <div className="w-full lg:w-3/12 lg:px-4">
                               <div className="relative w-full mb-3">
                                 <label
                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -310,7 +310,7 @@ const PaymentModal = ({
                                 </select>
                               </div>
                             </div>
-                            <div className="w-full lg:w-3/12 px-4">
+                            <div className="w-full lg:w-3/12 lg:px-4">
                               <div className="relative w-full mb-3">
                                 <label
                                   className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
@@ -334,7 +334,7 @@ const PaymentModal = ({
                                 </select>
                               </div>
                             </div>
-                            <div className="w-full lg:w-4/12 px-4">
+                            <div className="w-full lg:w-4/12 lg:px-4">
                               <div className="relative w-full mb-3">
                                 <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                                   Created Date
@@ -348,12 +348,12 @@ const PaymentModal = ({
                                 />
                               </div>
                             </div>
-                            <div className="w-full lg:w-1/12 px-4">
-                              <div className=" mt-7">
+                            <div className="w-full lg:w-1/12 lg:px-4">
+                              <div className="flex justify-center lg:justify-start mt-3 lg:mt-7">
                                 <button
                                   type="button"
                                   onClick={() => onRemoveDetailRow(ind)}
-                                  className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                                  className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                                 >
                                   <MdDeleteForever
                                     style={{
@@ -373,14 +373,14 @@ const PaymentModal = ({
               ))}
 
               <div className="mt-10 ">
-                <div className={`flex justify-between`}>
+                <div className="flex flex-row justify-between items-center">
                   <h2 id="modal-title" className="text-lg font-bold">
                     Posting Account
                   </h2>
                   <button
                     type="button"
                     onClick={onAddAccountRow}
-                    className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                    className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
                   >
                     <IoMdAddCircle
                       className="w-5 h-5 inline-block"
@@ -390,8 +390,8 @@ const PaymentModal = ({
                   </button>
                 </div>
                 {fields?.organizationAccountDetails?.map((detail, ind) => (
-                  <div className="flex flex-wrap border-bottom-grey">
-                    <div className={`w-full lg:w-4/12  my-2 p-2 `}>
+                  <div className="flex flex-wrap border-bottom-grey pt-3 gap-y-3">
+                    <div className={`w-full lg:w-4/12 mb-3 p-2`}>
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Received Amount
                       </label>
@@ -404,15 +404,15 @@ const PaymentModal = ({
                         required
                       />
                     </div>
-                    <div className="w-full lg:w-8/12  my-2 p-2 ">
-                      <div className="flex flex-wrap">
+                    <div className="w-full lg:w-8/12 mb-3 p-2">
+                      <div className="flex flex-wrap gap-y-3">
                         <div className="w-full lg:w-6/12">
                           <label className="block text-sm font-medium mb-1">
                             Select Account
                           </label>
                           <select
                             name="organizationAcctId"
-                            value={detail.name}
+                            value={detail.organizationAcctId}
                             onChange={(e) => onChangeAccountDetail(e, ind)}
                             className="border rounded px-3 py-2 w-full"
                           >
@@ -424,7 +424,7 @@ const PaymentModal = ({
                             ))}
                           </select>
                         </div>
-                        <div className="w-full lg:w-4/12 px-4">
+                        <div className="w-full lg:w-4/12 lg:px-4">
                           <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                             Created Date
                           </label>
@@ -436,12 +436,12 @@ const PaymentModal = ({
                             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
                           />
                         </div>
-                        <div className="w-full lg:w-1/12   ">
-                          <div className=" mt-7 ml-5">
+                        <div className="w-full lg:w-1/12">
+                          <div className="flex justify-center lg:justify-start mt-3 lg:mt-7 lg:ml-5">
                             <button
                               type="button"
                               onClick={() => onRemoveAccountRow(ind)}
-                              className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                              className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                             >
                               <MdDeleteForever
                                 style={{ fontSize: "25px", marginTop: "7px" }}
@@ -456,11 +456,11 @@ const PaymentModal = ({
               </div>
             </div>
           </>
-          <div className="margin-dynamic-modal">
+          <div className="margin-dynamic-modal px-2 lg:px-0">
             <button
               onClick={handleSubmit}
               type="submit"
-              className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+              className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-3 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 w-full lg:w-auto"
             >
               PAY
             </button>

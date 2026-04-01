@@ -19,6 +19,7 @@ export default function FloorList() {
     notifySuccess,
     backdrop,
     setBackdrop,
+    isSidebarCollapsed,
   } = useContext(MainContext);
   const { projectId } = useParams();
   const history = useHistory();
@@ -170,48 +171,72 @@ export default function FloorList() {
   return (
     <div className="container mx-auto p-4">
       {addFloorModal ? (
-        <div>
-          <div className="payback-modal inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded shadow-lg  w-full max-w-xl">
-              <div className="flex justify-between items-center mb-4 p-4">
-                <h2 className="text-xl font-bold uppercase">Add Floor Form</h2>
-                <button onClick={toggleAdd}>
-                  <RxCross2 className="w-5 h-5 text-red-500" />
-                </button>
-              </div>
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/30 px-4 py-6 ${
+            isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
+          }`}
+        >
+          <div className="w-full max-w-xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-blueGray-700 text-lg font-bold uppercase">
+                Add Floor
+              </h2>
+              <button
+                onClick={toggleAdd}
+                type="button"
+                className="text-gray-500 transition-colors hover:text-red-500"
+              >
+                <RxCross2 className="h-5 w-5" />
+              </button>
+            </div>
 
-              <div className="grid grid-cols-12 gap-4 payback-form">
-                <div className="flex flex-wrap bg-white">
-                  <div className="w-full lg:w-6/12 px-4 mb-3">
-                    <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                      Floor No
-                    </label>
-                    <input
-                      type="number"
-                      value={floor.floor}
-                      onChange={(e) =>
-                        setFloor({ ...floor, floor: e.target.value })
-                      }
-                      className="border rounded px-3 py-2 w-full"
-                      placeholder="Enter Floor No"
-                    />
-                  </div>
-                  <div className="w-full lg:w-6/12 px-4 mb-3">
-                    <button
-                      type="submit"
-                      onClick={onClickAddFloor}
-                      className="w-full mt-7 ml-4 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                    >
-                      <FaLayerGroup
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "7px" }}
-                      />
-                      Add Floor
-                    </button>
-                  </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                onClickAddFloor();
+              }}
+              className="p-6"
+            >
+              <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <h3 className="mb-4 border-b border-gray-200 pb-2 text-sm font-bold text-gray-700">
+                  Floor Information
+                </h3>
+
+                <div className="w-full">
+                  <label className="mb-1 block text-xs font-medium text-gray-700">
+                    Floor No
+                  </label>
+                  <input
+                    type="number"
+                    value={floor.floor}
+                    onChange={(e) => setFloor({ ...floor, floor: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 p-2 text-sm"
+                    placeholder="Enter Floor No"
+                  />
                 </div>
               </div>
-            </div>
+
+              <div className="mt-6 flex justify-end border-t border-gray-200 pt-4">
+                <button
+                  type="button"
+                  onClick={toggleAdd}
+                  className="mr-3 inline-flex items-center rounded bg-gray-100 px-5 py-2 text-xs font-bold uppercase text-gray-700 shadow-sm transition-all hover:bg-gray-200 hover:shadow-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center rounded bg-lightBlue-500 px-5 py-2 text-xs font-bold uppercase text-white shadow-sm outline-none transition-all duration-150 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <FaLayerGroup
+                    className="mr-1 inline-block h-4 w-4"
+                    style={{ paddingBottom: "1px" }}
+                  />
+                  {loading ? "Saving..." : "Add Floor"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       ) : (

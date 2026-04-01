@@ -4,7 +4,7 @@ import { Switch, Route, Redirect } from "react-router-dom";
 // components
 
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
-import Sidebar from "components/Sidebar/Sidebar.js";
+import SidebarWrapper from "components/Sidebar/SidebarWrapper.js";
 import HeaderStats from "components/Headers/HeaderStats.js";
 import FooterAdmin from "components/Footers/FooterAdmin.js";
 
@@ -63,6 +63,35 @@ import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
 import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
+import ItemsList from "views/modules/operations/purchasemanagement/items/ItemsList";
+import UnitsList from "views/modules/operations/purchasemanagement/units/UnitsList";
+import PurchaseOrderList from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderList";
+import PurchaseOrderUpdate from "views/modules/operations/purchasemanagement/purchaseOrders/PurchaseOrderUpdate";
+import AddPurchaseOrder from "views/modules/operations/purchasemanagement/purchaseOrders/AddPurchaseOrder";
+import GoodReceivingNotesList from "views/modules/operations/purchasemanagement/goodReceivingNotes/GoodReceivingNotesList";
+import AddGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/AddGoodReceivingNotes";
+import UpdateGoodReceivingNotes from "views/modules/operations/purchasemanagement/goodReceivingNotes/UpdateGoodReceivingNotes";
+import {
+  VendorInvoiceDashboard,
+  VendorInvoiceList,
+  CreateVendorInvoice,
+  UpdateVendorInvoice,
+  VendorInvoiceDetails,
+  VendorInvoicePendingSummary
+} from "views/modules/operations/purchasemanagement/vendorinvoice";
+import {
+  VendorPaymentList,
+  CreateVendorPayment
+} from "views/modules/operations/purchasemanagement/vendorpayment";
+import {
+  WarehouseList,
+  AddWarehouse,
+  StockOverview,
+  StockTransfer,
+  StockAdjustment,
+  StockLedger,
+  MaterialIssue,
+} from "views/modules/warehouse";
 import PdcPayments from "views/modules/operations/expense/PdcPayments";
 
 export default function Admin() {
@@ -73,10 +102,10 @@ export default function Admin() {
   }
 
   function isRouteAllowed(pathname, sidebar) {
-    const current = normalize(pathname); // e.g., /dashboard/floor
+    const current = normalize(pathname);
 
     for (const menu of sidebar) {
-      const base = normalize(menu.url); // e.g., /dashboard
+      const base = normalize(menu.url);
 
       // 1️⃣ Direct match with menu
       if (current === base) return true;
@@ -91,6 +120,24 @@ export default function Admin() {
       for (const child of menu.childList || []) {
         const childBase = normalize(child.url);
         if (current === childBase) return true;
+
+        // 4️⃣ Grandchild menu match
+        for (const grandChild of child.grandChildList || []) {
+          const gcBase = normalize(grandChild.url);
+          if (current === gcBase) return true;
+
+          // 5️⃣ Match FEATURE_ALIASES for grandchild URLs
+          const gcAliases = FEATURE_ALIASES[gcBase] || [];
+          if (gcAliases.some((a) => current === normalize(a))) {
+            return true;
+          }
+        }
+
+        // 6️⃣ Match FEATURE_ALIASES for child URLs
+        const childAliases = FEATURE_ALIASES[childBase] || [];
+        if (childAliases.some((a) => current === normalize(a))) {
+          return true;
+        }
       }
     }
 
@@ -100,7 +147,7 @@ export default function Admin() {
 
   return (
     <MainProvider>
-      <Sidebar />
+      <SidebarWrapper />
 
       <div className="main-content md:ml-64 bg-blueGray-50">
         <AdminNavbar />
@@ -216,6 +263,30 @@ export default function Admin() {
               { path: "/dashboard/map", component: Maps },
               { path: "/dashboard/settings", component: Settings },
               { path: "/dashboard/tables", component: Tables },
+              { path: "/dashboard/material", component: ItemsList },
+              { path: "/dashboard/material-unit", component: UnitsList },
+              { path: "/dashboard/purchase-order-list", component: PurchaseOrderList },
+              { path: "/dashboard/add-purchase-order", component: AddPurchaseOrder },
+              { path: "/dashboard/purchase-order-update/:purchaseOrderId", component: PurchaseOrderUpdate },
+              { path: "/dashboard/add-good-receiving-notes", component: AddGoodReceivingNotes },
+              { path: "/dashboard/good-receiving-notes-list", component: GoodReceivingNotesList },
+              { path: "/dashboard/update-good-receiving-notes/:grnId", component: UpdateGoodReceivingNotes },
+              { path: "/dashboard/vendor-invoice-dashboard", component: VendorInvoiceDashboard },
+              { path: "/dashboard/vendor-invoices", component: VendorInvoiceList },
+              { path: "/dashboard/create-vendor-invoice", component: CreateVendorInvoice },
+              { path: "/dashboard/update-vendor-invoice/:invoiceId", component: UpdateVendorInvoice },
+              { path: "/dashboard/vendor-invoice-details/:invoiceId", component: VendorInvoiceDetails },
+              { path: "/dashboard/vendor-invoice-pending-summary", component: VendorInvoicePendingSummary },
+              { path: "/dashboard/vendor-invoice-payments", component: VendorPaymentList },
+              { path: "/dashboard/create-vendor-invoice-payment", component: CreateVendorPayment },
+              { path: "/dashboard/warehouse/list", component: WarehouseList },
+              { path: "/dashboard/warehouse/add", component: AddWarehouse },
+              { path: "/dashboard/warehouse/edit/:id", component: AddWarehouse },
+              { path: "/dashboard/warehouse/stock-overview", component: StockOverview },
+              { path: "/dashboard/warehouse/stock-transfer", component: StockTransfer },
+              { path: "/dashboard/warehouse/stock-adjustment", component: StockAdjustment },
+              { path: "/dashboard/warehouse/stock-ledger", component: StockLedger },
+              { path: "/dashboard/warehouse/material-issue", component: MaterialIssue },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

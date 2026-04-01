@@ -4,7 +4,10 @@ import { Switch, Route, Redirect } from "react-router-dom";
 // components
 
 import Navbar from "components/Navbars/AuthNavbar.js";
-import FooterSmall from "components/Footers/FooterSmall.js";
+// FooterSmall replaced with inline auth-footer
+
+// styles
+import "assets/styles/custom/login.css";
 
 // views
 
@@ -20,16 +23,8 @@ export default function Auth() {
       <MainProvider>
         <Navbar transparent />
         <main>
-          <section className="relative w-full h-full py-40 min-h-screen">
-            <div
-              className="absolute top-0 w-full h-full bg-blueGray-800 bg-no-repeat bg-full"
-              style={{
-                backgroundImage:
-                  "url(" +
-                  require("assets/img/register_bg_2.png").default +
-                  ")",
-              }}
-            ></div>
+          <section className="relative w-full min-h-screen auth-bg-modern auth-layout-section">
+         
             <NotificationContainer />
             <Switch>
               <Route path="/auth/login" exact component={Login} />
@@ -37,7 +32,13 @@ export default function Auth() {
               <Route path="/auth/reset-password" exact component={ResetPasswordLanding} />
               <Redirect from="/auth" to="/auth/login" />
             </Switch>
-            <FooterSmall absolute />
+            <footer className="auth-footer">
+              <div className="auth-footer-inner">
+                <span className="auth-footer-text">
+                  &copy; {new Date().getFullYear()} REMS &mdash; Real Estate Management System
+                </span>
+              </div>
+            </footer>
           </section>
         </main>
       </MainProvider>

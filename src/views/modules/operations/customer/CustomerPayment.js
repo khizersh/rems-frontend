@@ -7,7 +7,7 @@ import {
   useParams,
   useLocation,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaFilter, FaPen, FaTrashAlt } from "react-icons/fa";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import DynamicFormModal from "components/CustomerComponents/DynamicFormModal.js";
@@ -16,12 +16,14 @@ import PaymentModalFetch from "./component/PaymentModalFetch.js";
 import PaymentModalPostAccount from "./component/PaymentModalPostAccount.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
+import { RxCross2 } from "react-icons/rx";
 import {
   formatPaymentSchedule,
   getOrdinal,
 } from "../../../../utility/Utility.js";
 import PaymentSchedule from "components/PaymentSchedule/PaymentSchedule.js";
 import { MdAccountBalance } from "react-icons/md";
+import "../../../../assets/styles/projects/project.css";
 
 import Card from "views/analytics/Card.js";
 
@@ -53,6 +55,7 @@ export default function CustomerPayment() {
   const [filterProject, setFilterProject] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [defaultCustomerName, setDefaultCustomerName] = useState("");
   const [payInstallment, setPayInstallment] = useState({
     id: 0,
     receivedAmount: 0,
@@ -84,6 +87,7 @@ export default function CustomerPayment() {
   });
   const [customerAccountList, setCustomerAccountList] = useState([]);
   const [customerAccount, setCustomerAccount] = useState(null);
+  const [bookingComplete, setBookingComplete] = useState(false);
   const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null);
   const [customerPaymentList, setCustomerPaymentList] = useState([]);
   const [scheduleBreakdown, setScheduleBreakdown] = useState([]);
@@ -106,7 +110,8 @@ export default function CustomerPayment() {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const myParam = queryParams.get("cName");
-    setCustomerName(myParam);
+    setCustomerName(myParam || "");
+    setDefaultCustomerName(myParam || "");
   }, []);
 
   const fetchCustomerAccountList = async (id, filteredBy) => {
@@ -287,7 +292,21 @@ export default function CustomerPayment() {
         `/customerAccount/getById/${accountId}`
       );
       setCustomerAccount(response?.data);
+      // Check if booking is complete
+      if (response?.data?.bookingId) {
+        try {
+          const bookingResponse = await httpService.get(
+            `/booking/getDetailById/${response.data.bookingId}`
+          );
+          setBookingComplete(bookingResponse?.data?.bookingComplete || false);
+        } catch (err) {
+          setBookingComplete(false);
+        }
+      } else {
+        setBookingComplete(false);
+      }
     } catch (error) {
+      setBookingComplete(false);
     } finally {
       setLoading(false);
     }
@@ -309,20 +328,60 @@ export default function CustomerPayment() {
   };
 
   const changeSelectedProjected = (projectId) => {
+    setPage(0);
+    setFilterProject(projectId);
+    setSelectedCustomerAccount(null);
+    setCustomerAccountFilterId("");
+
     if (projectId) {
-      setFilterProject(projectId);
       fetchCustomerAccountList(projectId, "project");
+    } else {
+      const organization =
+        JSON.parse(localStorage.getItem("organization")) || null;
+      if (organization) {
+        fetchCustomerAccountList(organization.organizationId, "organization");
+      }
+      setCustomerName(defaultCustomerName || "");
     }
   };
 
   const changeCustomerAccount = (accountId) => {
     if (accountId) {
+      setPage(0);
       setSelectedCustomerAccount(accountId);
       setCustomerAccountFilterId(accountId);
-      let customerName = customerAccountList.find(
+      const selectedAccount = customerAccountList.find(
         (customer) => customer.accountId == accountId
       );
-      setCustomerName(customerName.customerName);
+      setCustomerName(selectedAccount?.customerName || defaultCustomerName || "");
+    } else {
+      setSelectedCustomerAccount(null);
+      setCustomerAccountFilterId("");
+      setCustomerName(defaultCustomerName || "");
+    }
+  };
+
+  const handleClearFilters = () => {
+    const organization =
+      JSON.parse(localStorage.getItem("organization")) || null;
+
+    setPage(0);
+    setFilterProject("");
+    setSelectedCustomerAccount(null);
+    setCustomerAccountFilterId("");
+    setCustomerName(defaultCustomerName || "");
+
+    if (organization) {
+      fetchCustomerAccountList(organization.organizationId, "organization");
+    }
+
+    if (!customerAccountId) {
+      setCustomerAccount(null);
+      setCustomerPaymentList([]);
+      setScheduleBreakdown([]);
+      setTotalPages(0);
+      setTotalElements(0);
+      setBookingComplete(false);
     }
   };
 
@@ -364,6 +423,13 @@ export default function CustomerPayment() {
   const handlePaymentModalAdd = () => {
     if (customerAccount == null) {
       return notifyWarning("Please select Account!");
+    }
+    if (bookingComplete) {
+      return notifyError(
+        "Booking Complete",
+        "This booking is marked complete. No further payments are allowed.",
+        4000
+      );
     }
     toggleModal();
   };
@@ -693,7 +759,18 @@ export default function CustomerPayment() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const hasActiveFilters = Boolean(filterProject || selectedCustomerAccount);
+
   const handleSubmit = async () => {
+    // Check if booking is complete
+    if (bookingComplete) {
+      return notifyError(
+        "Booking Complete",
+        "This booking is marked complete. No further payments are allowed.",
+        4000
+      );
+    }
+
     const validAmount =
       payInstallment.receivedAmount > 0 ||
       payInstallment.customerPaymentDetails.some((detail) => detail.amount > 0);
@@ -1028,41 +1105,83 @@ export default function CustomerPayment() {
       )}
 
       <div className="container mx-auto p-4">
-        <div className="flex flex-wrap py-3 md:justify-content-between">
-          <div className=" bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-            <label className="block text-sm font-medium mb-1">Project</label>
-            <select
-              value={filterProject}
-              onChange={(e) => changeSelectedProjected(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
-            >
-              <option value="">All Projects</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Customer Payments
+              </h4>
+              <p className="booking-filter-subtitle">
+                Choose project and account to view payment history and actions.
+              </p>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <RxCross2 className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
           </div>
-          <div className="bg-white shadow-lg p-5 mx-4 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-            <label className="block text-sm font-medium mb-1">
-              Customer Account
-            </label>
-            <select
-              value={selectedCustomerAccount}
-              onChange={(e) => changeCustomerAccount(e.target.value)}
-              className="border rounded px-3 py-2 w-full"
-            >
-              <option value="">Select Account</option>
-              {customerAccountList.map((account) => (
-                <option key={account.accountId} value={account.accountId}>
-                  {account.customerName} - {account.unitSerial}
-                </option>
-              ))}
-            </select>
+
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
+              <select
+                value={filterProject}
+                onChange={(e) => changeSelectedProjected(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Customer Account</label>
+              <select
+                value={selectedCustomerAccount || ""}
+                onChange={(e) => changeCustomerAccount(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">Select Account</option>
+                {customerAccountList.map((account) => (
+                  <option key={account.accountId} value={account.accountId}>
+                    {account.customerName} - {account.unitSerial}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Booking Complete Warning Banner */}
+      {bookingComplete && customerAccount && (
+        <div className="container mx-auto px-4">
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-md mb-4">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="font-bold">Booking Complete</p>
+                <p className="text-sm">This booking is marked as complete. No further payments are allowed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Table */}
       <div className="container mx-auto p-4">
         {/* Month-wise Table */}

@@ -149,7 +149,7 @@
 }
 
 .sidebar-child-container.expanded {
-  max-height: 500px;
+  max-height: 1500px;
   opacity: 1;
 }
 
@@ -183,6 +183,56 @@
   background-color: #dbeafe;
   color: #1e40af !important;
   font-weight: 600;
+}
+
+/* Grandchild routes styling */
+.sidebar-grandchild-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+  opacity: 0;
+}
+
+.sidebar-grandchild-container.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.sidebar-grandchild-link {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  border-radius: 5px;
+  margin: 1px 0;
+  padding-left: 12px;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-grandchild-link:hover {
+  background-color: #f1f5f9;
+  transform: translateX(2px);
+  border-left-color: #93c5fd;
+}
+
+.sidebar-grandchild-link-active {
+  background-color: #eff6ff;
+  color: #1e40af !important;
+  font-weight: 600;
+  border-left: 2px solid #3b82f6;
+}
+
+/* Center grandchild icons when collapsed */
+.sidebar-collapsed .sidebar-grandchild-link {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-left: none;
+}
+
+.sidebar-collapsed .sidebar-grandchild-link .flex {
+  justify-content: center;
+  width: 100%;
 }
 
 

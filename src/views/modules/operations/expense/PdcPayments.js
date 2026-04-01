@@ -3,10 +3,13 @@ import httpService from "../../../../utility/httpService.js";
 import { MainContext } from "context/MainContext.js";
 import { FaEye, FaCheck, FaTimes } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
+import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
+import { FaFilter, FaTimesCircle } from "react-icons/fa";
+import "../../../../assets/styles/projects/project.css";
 
 const PDC_FILTERS = [
   { id: "all", name: "All" },
-  { id: "dueToday", name: "Due Today" },
+  { id: "duetoday", name: "Due Today" },
   { id: "overdue", name: "Overdue" },
   { id: "upcoming", name: "Upcoming" },
 ];
@@ -23,7 +26,7 @@ export default function PdcPayments() {
 
   const [pdcList, setPdcList] = useState([]);
   const [page, setPage] = useState(0);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -31,6 +34,8 @@ export default function PdcPayments() {
   const [vendors, setVendors] = useState([]);
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("");
+  const [appliedProject, setAppliedProject] = useState("");
+  const [appliedVendor, setAppliedVendor] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPdc, setSelectedPdc] = useState(null);
 
@@ -42,8 +47,8 @@ export default function PdcPayments() {
       const requestBody = {
         organizationId: org.organizationId,
         filter: activeFilter,
-        vendorAccountId: selectedVendor || null,
-        projectId: selectedProject || null,
+        vendorAccountId: appliedVendor || null,
+        projectId: appliedProject || null,
         page,
         size: pageSize,
         sortBy: "chequeDate",
@@ -80,17 +85,17 @@ export default function PdcPayments() {
 
   useEffect(() => {
     fetchPdcList();
-  }, [page, activeFilter]);
+  }, [page, pageSize, activeFilter, appliedProject, appliedVendor]);
 
   const handleProcess = async (pdc) => {
     const confirmed = window.confirm(
-      `Are you sure you want to clear cheque ${pdc.chequeNumber} for Rs. ${Number(pdc.totalAmount).toLocaleString()}?`
+      `Are you sure you want to clear cheque ${pdc.chequeNumber} for Rs. ${Number(pdc.amount).toLocaleString()}?`
     );
     if (!confirmed) return;
 
     setLoading(true);
     try {
-      const response = await httpService.post(`/payments/process-pdc/${pdc.id}`);
+      const response = await httpService.post(`/payments/pdc/process/${pdc.id}`);
       notifySuccess(response.responseMessage || "PDC cleared successfully", 3000);
       await fetchPdcList();
     } catch (err) {
@@ -108,7 +113,7 @@ export default function PdcPayments() {
 
     setLoading(true);
     try {
-      const response = await httpService.post(`/payments/mark-failed/${pdc.id}`);
+      const response = await httpService.post(`/payments/pdc/mark-failed/${pdc.id}`);
       notifySuccess(response.responseMessage || "PDC marked as failed", 3000);
       await fetchPdcList();
     } catch (err) {
@@ -128,13 +133,11 @@ export default function PdcPayments() {
           "Cheque Number": data.chequeNumber,
           "Cheque Date": data.chequeDate,
           "Bank Name": data.bankName || "-",
-          "PDC Status": data.pdcStatus,
-          "Payment Status": data.paymentStatus,
+          "PDC Status": data.status,
         },
         "Expense Details": {
-          "Expense Title": data.expenseTitle,
+          "Expense Title": data.title,
           "Expense Type": data.expenseType,
-          "Amount": Number(data.totalAmount).toLocaleString(),
           "Project": data.projectName,
           "Vendor": data.vendorName,
           "Account": data.orgAccountTitle,
@@ -160,13 +163,16 @@ export default function PdcPayments() {
   };
 
   const handleSearch = () => {
+    setAppliedProject(selectedProject);
+    setAppliedVendor(selectedVendor);
     setPage(0);
-    fetchPdcList();
   };
 
   const clearFilters = () => {
     setSelectedProject("");
     setSelectedVendor("");
+    setAppliedProject("");
+    setAppliedVendor("");
     setActiveFilter("all");
     setPage(0);
   };
@@ -185,225 +191,181 @@ export default function PdcPayments() {
     return chequeDate < today;
   };
 
+  const hasActiveFilters = Boolean(
+    selectedProject || selectedVendor || activeFilter !== "all"
+  );
+
+  const columns = [
+    { header: "Vendor", field: "vendorName" },
+    { header: "Project", field: "projectName" },
+    { header: "Expense", field: "title" },
+    { header: "Cheque No", field: "chequeNumber" },
+    {
+      header: "Cheque Date",
+      field: "chequeDate",
+      render: (value, row) => (
+        <span
+          className={
+            row.status === "PENDING" && isOverdue(row.chequeDate)
+              ? "text-red-600 font-semibold"
+              : ""
+          }
+        >
+          {formatDate(value)}
+        </span>
+      ),
+    },
+    { header: "Bank", field: "bankName" },
+    {
+      header: "Amount",
+      field: "amount",
+      render: (value) => `Rs. ${Number(value || 0).toLocaleString()}`,
+    },
+    {
+      header: "Status",
+      field: "status",
+      render: (value) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            STATUS_BADGE[value] || "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {value}
+        </span>
+      ),
+    },
+  ];
+
+  const actions = [
+    {
+      icon: FaEye,
+      onClick: handleView,
+      title: "View Details",
+      className: "text-blue-600",
+    },
+    {
+      icon: FaCheck,
+      onClick: handleProcess,
+      title: "Clear / Process PDC",
+      className: "text-green-600",
+      condition: (row) => row.status === "PENDING",
+    },
+    {
+      icon: FaTimes,
+      onClick: handleMarkFailed,
+      title: "Mark as Failed",
+      className: "text-red-600",
+      condition: (row) => row.status === "PENDING",
+    },
+  ];
+
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
-      <div className="mb-0 py-6">
-        <h6 className="text-blueGray-700 text-xl font-bold uppercase">
-          PDC Payments
-        </h6>
-      </div>
+    <>
+      <div className="container mx-auto p-4">
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter PDC Payments
+              </h4>
+              <p className="booking-filter-subtitle">
+                Narrow down payments by status, project and vendor.
+              </p>
+            </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {PDC_FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => {
-              setActiveFilter(f.id);
-              setPage(0);
-            }}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${
-              activeFilter === f.id
-                ? "bg-lightBlue-500 text-white shadow"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {f.name}
-            {f.id === "overdue" && activeFilter !== "overdue" && (
-              <span className="ml-1 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <FaTimesCircle className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
             )}
-          </button>
-        ))}
-      </div>
+          </div>
 
-      {/* Filters Row */}
-      <div className="bg-white rounded-12 shadow-lg p-4 mb-4">
-        <div className="flex flex-wrap gap-3 items-end">
-          <div className="w-full lg:w-3/12">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Project</label>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="border rounded-lg px-3 py-2 w-full"
-            >
-              <option value="">All Projects</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name || p.title}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-full lg:w-3/12">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Vendor</label>
-            <select
-              value={selectedVendor}
-              onChange={(e) => setSelectedVendor(e.target.value)}
-              className="border rounded-lg px-3 py-2 w-full"
-            >
-              <option value="">All Vendors</option>
-              {vendors.map((v) => (
-                <option key={v.id} value={v.id}>{v.name || v.title}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleSearch}
-              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg transition-all duration-150"
-            >
-              Search
-            </button>
-            <button
-              onClick={clearFilters}
-              className="bg-gray-300 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg transition-all duration-150"
-            >
-              Clear
-            </button>
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Status</label>
+              <select
+                value={activeFilter}
+                onChange={(e) => {
+                  setActiveFilter(e.target.value);
+                  setPage(0);
+                }}
+                className="booking-filter-select"
+              >
+                {PDC_FILTERS.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
+              <select
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name || project.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Vendor</label>
+              <select
+                value={selectedVendor}
+                onChange={(e) => setSelectedVendor(e.target.value)}
+                className="booking-filter-select"
+              >
+                <option value="">All Vendors</option>
+                {vendors.map((vendor) => (
+                  <option key={vendor.id} value={vendor.id}>
+                    {vendor.name || vendor.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="booking-filter-field">
+              <label className="booking-filter-label text-transparent">Action</label>
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg transition-all duration-150 w-full"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-12 shadow-lg overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 text-left">
-              <th className="px-4 py-3 font-semibold text-gray-600">#</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Vendor</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Project</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Expense</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Cheque No</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Cheque Date</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Bank</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 text-right">Amount</th>
-              <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pdcList.length === 0 ? (
-              <tr>
-                <td colSpan="10" className="text-center py-8 text-gray-400">
-                  No PDC payments found
-                </td>
-              </tr>
-            ) : (
-              pdcList.map((pdc, index) => (
-                <tr
-                  key={pdc.id}
-                  className={`border-t hover:bg-gray-50 transition-colors ${
-                    pdc.pdcStatus === "PENDING" && isOverdue(pdc.chequeDate)
-                      ? "bg-red-50"
-                      : ""
-                  }`}
-                >
-                  <td className="px-4 py-3 text-gray-500">
-                    {page * pageSize + index + 1}
-                  </td>
-                  <td className="px-4 py-3 font-medium">{pdc.vendorName}</td>
-                  <td className="px-4 py-3">{pdc.projectName}</td>
-                  <td className="px-4 py-3">{pdc.expenseTitle}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{pdc.chequeNumber}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        pdc.pdcStatus === "PENDING" && isOverdue(pdc.chequeDate)
-                          ? "text-red-600 font-semibold"
-                          : ""
-                      }
-                    >
-                      {formatDate(pdc.chequeDate)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">{pdc.bankName || "-"}</td>
-                  <td className="px-4 py-3 text-right font-semibold">
-                    {Number(pdc.totalAmount).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        STATUS_BADGE[pdc.pdcStatus] || "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {pdc.pdcStatus}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleView(pdc)}
-                        title="View Details"
-                        className="text-gray-500 hover:text-blue-600 transition-colors"
-                      >
-                        <FaEye />
-                      </button>
-                      {pdc.pdcStatus === "PENDING" && (
-                        <>
-                          <button
-                            onClick={() => handleProcess(pdc)}
-                            title="Clear / Process PDC"
-                            className="text-green-500 hover:text-green-700 transition-colors"
-                          >
-                            <FaCheck />
-                          </button>
-                          <button
-                            onClick={() => handleMarkFailed(pdc)}
-                            title="Mark as Failed"
-                            className="text-red-400 hover:text-red-600 transition-colors"
-                          >
-                            <FaTimes />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        {totalPages > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t">
-            <span className="text-sm text-gray-600">
-              Showing {page * pageSize + 1} –{" "}
-              {Math.min((page + 1) * pageSize, totalElements)} of {totalElements}
-            </span>
-            <div className="flex gap-1">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-3 py-1 rounded text-sm border disabled:opacity-40 hover:bg-gray-100"
-              >
-                Prev
-              </button>
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                const start = Math.max(0, Math.min(page - 2, totalPages - 5));
-                const pageNum = start + i;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`px-3 py-1 rounded text-sm border ${
-                      page === pageNum
-                        ? "bg-lightBlue-500 text-white"
-                        : "hover:bg-gray-100"
-                    }`}
-                  >
-                    {pageNum + 1}
-                  </button>
-                );
-              })}
-              <button
-                disabled={page >= totalPages - 1}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-3 py-1 rounded text-sm border disabled:opacity-40 hover:bg-gray-100"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+      <div className="container mx-auto p-4">
+        <DynamicTableComponent
+          fetchDataFunction={fetchPdcList}
+          setPage={setPage}
+          setPageSize={setPageSize}
+          page={page}
+          pageSize={pageSize}
+          data={pdcList}
+          columns={columns}
+          totalPages={totalPages}
+          totalElements={totalElements}
+          loading={loading}
+          title="PDC Payments"
+          actions={actions}
+        />
       </div>
 
       {/* View Detail Modal */}
@@ -415,6 +377,6 @@ export default function PdcPayments() {
           title="PDC Payment Detail"
         />
       )}
-    </div>
+    </>
   );
 }

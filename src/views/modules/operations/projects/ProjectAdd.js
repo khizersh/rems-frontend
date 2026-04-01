@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { projectTypes, unitTypes } from "utility/Utility";
-import { FaLayerGroup } from "react-icons/fa";
+import { FaLayerGroup, FaBuilding, FaMapMarkerAlt, FaCalendarAlt, FaInfoCircle, FaMoneyBillAlt, FaMoneyBillWave, FaCreditCard, FaCalendarCheck } from "react-icons/fa";
 import { HiMiniBuildingStorefront } from "react-icons/hi2";
 import { IoMdAddCircle } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
@@ -416,110 +416,44 @@ export default function AddProject() {
     Number(project.registrationAmount || 0);
 
   return (
-    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 bg-blueGray-50 mt-12">
-      {/* Page header */}
-      <div className="mb-0 px-6 py-6">
-        <div className="flex justify-between items-center">
-          <h6 className="text-blueGray-700 text-xl font-bold uppercase flex items-center gap-2">
-            <button className="">
-              <IoArrowBackOutline
-                onClick={() => history.goBack()}
-                className="back-button-icon inline-block back-button"
-                style={{
-                  paddingBottom: "3px",
-                  paddingRight: "7px",
-                  marginBottom: "3px",
-                }}
-              />
-            </button>
-            Create Project
-          </h6>
-        </div>
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
+      {/* Header */}
+      <div className="mb-4 py-4">
+        <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
+          <button onClick={() => history.goBack()} className="mr-3">
+            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+          </button>
+          <FaBuilding className="mr-2" style={{ color: "#6366f1" }} />
+          Create Project
+        </h6>
       </div>
 
-      {/* Project summary strip */}
-      <div className="bg-white rounded-12 shadow-md px-4 md:px-6 -mt-2">
-        <div className="  px-4 py-3 flex flex-wrap gap-4 md:gap-8">
-          <div className="flex items-center gap-3 mr-4">
-            <PiBuildingsLight className="text-lightBlue-500 w-5 h-5 mb-5" />
-            <div className="ml-2">
-              <div className="text-sm text-blueGray-400 uppercase">Project</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {project.name || "--"}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mr-4">
-            <FaLayerGroup className="text-emerald-500 w-4 h-4 mb-5" />
-            <div className="ml-2">
-              <div className="text-xs text-blueGray-400 uppercase">Floors</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalFloors}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mr-3">
-            <RiHome4Line className="text-indigo-500 w-4 h-4 mb-5" />
-            <div className="ml-2">
-              <div className="text-xs text-blueGray-400 uppercase">Units</div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalUnits}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-8 h-8 mb-5 rounded-full bg-lightBlue-50 text-lightBlue-600 text-xs font-bold">
-              Rs
-            </span>
-            <div>
-              <div className="text-xs text-blueGray-400 uppercase">
-                Total Amount
-              </div>
-              <div className="text-sm font-semibold text-blueGray-700">
-                {totalProjectAmount.toLocaleString()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main form card */}
-      <div className="rounded-12 flex-auto px-4 bg-white py-6 mt-6 shadow-md">
-        <form>
-          <div className="flex flex-wrap">
-            <div className="w-full lg:w-6/12 px-4  border-right-grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
-                <BiCommentDetail className="text-lightBlue-500 w-4 h-4 mr-1" />
-                Basic Details
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="name"
-                    >
+      <form onSubmit={createProject} className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="p-6">
+          <div className="flex flex-wrap -mx-2">
+            {/* Project Details Section */}
+            <div className="w-full lg:w-6/12 px-2 mb-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                  <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                  Project Details
+                </h3>
+                <div className="flex flex-wrap -mx-2">
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Name
                     </label>
                     <input
                       type="text"
                       name="name"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.name}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="address"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Address
                     </label>
                     <input
@@ -527,24 +461,19 @@ export default function AddProject() {
                       type="text"
                       name="address"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.address}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="projectType"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Type
                     </label>
                     <select
                       id="projectType"
                       name="projectType"
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.projectType}
                       onChange={changeProjectFields}
                     >
@@ -556,14 +485,9 @@ export default function AddProject() {
                       ))}
                     </select>
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="monthDuration"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Month Duration
                     </label>
                     <input
@@ -571,17 +495,12 @@ export default function AddProject() {
                       type="number"
                       name="monthDuration"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.monthDuration}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-12/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="information"
-                    >
+                  <div className="w-full px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Project Information
                     </label>
                     <textarea
@@ -589,25 +508,24 @@ export default function AddProject() {
                       name="information"
                       rows="3"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.information}
                     ></textarea>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w-full lg:w-6/12 px-4 grey mt-2">
-              <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex items-center gap-2">
-                <GrMoney className="text-emerald-500 w-4 h-4 mr-1" />
-                Financial Details
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="purchasingAmount"
-                    >
+
+            {/* Financial Details Section */}
+            <div className="w-full lg:w-6/12 px-2 mb-4">
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                  <FaMoneyBillAlt className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                  Financial Details
+                </h3>
+                <div className="flex flex-wrap -mx-2">
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Purchasing Amount
                     </label>
                     <input
@@ -615,17 +533,12 @@ export default function AddProject() {
                       type="number"
                       name="purchasingAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.purchasingAmount}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="registrationAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Registration Amount
                     </label>
                     <input
@@ -633,17 +546,12 @@ export default function AddProject() {
                       type="number"
                       name="registrationAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.registrationAmount}
                     />
                   </div>
-                </div>
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="additionalAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Additional Amount
                     </label>
                     <input
@@ -651,25 +559,21 @@ export default function AddProject() {
                       type="number"
                       name="additionalAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      className="w-full p-2 border rounded-lg text-sm"
                       value={project.additionalAmount}
                     />
                   </div>
-                </div>
 
-                <div className="w-full lg:w-6/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                      htmlFor="totalAmount"
-                    >
+                  <div className="w-full lg:w-6/12 px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
                       Total Amount
                     </label>
                     <input
                       id="totalAmount"
                       type="number"
                       name="totalAmount"
-                      className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      readOnly
+                      className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                       value={
                         Number(project.additionalAmount) +
                         Number(project.purchasingAmount) +
@@ -682,96 +586,86 @@ export default function AddProject() {
             </div>
           </div>
 
-          <hr className="mt-6 border-b-1 border-blueGray-300" />
-
-          <h6 className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between px-4">
-            <div>
-            <FaLayerGroup
-                className="text-emerald-500 w-5 h-5 inline-block"
-                style={{ paddingBottom: "3px", paddingRight: "7px" }}
-              />
-              Floor List</div>
-            <button
-              type="button"
-              onClick={addFloor}
-              className="bg-lightBlue-500 text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-            >
-              <FaLayerGroup
-                className="w-5 h-5 inline-block"
-                style={{ paddingBottom: "3px", paddingRight: "7px" }}
-              />
-              Add Floor
-            </button>
-          </h6>
+          {/* Floor List Section */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+            <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-4">
+              <h3 className="text-sm font-bold text-gray-700 flex items-center">
+                <FaLayerGroup className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                Floor List
+              </h3>
+              <button
+                type="button"
+                onClick={addFloor}
+                className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+              >
+                <FaLayerGroup className="mr-1" style={{ fontSize: "12px" }} />
+                Add Floor
+              </button>
+            </div>
 
           {floors.map((floor, floorIndex) => (
-            <div key={floorIndex} className="">
-              <h6
-                className="text-blueGray-600 text-sm mt-3 mb-6 font-bold uppercase flex justify-between border-bottom-grey p-3 cursor-pointer  hover:shadow-md"
-                // onClick={() => changeCollapseFloor(floorIndex)}
+            <div key={floorIndex} className="bg-white rounded-lg border border-gray-200 mb-3">
+              <div
+                className="text-sm font-bold text-gray-700 flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50"
               >
-                <div>Floor# {floorIndex}</div>
-                <div className="flex justify-between">
+                <div className="flex items-center">
+                  <FaLayerGroup className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                  Floor# {floorIndex}
+                </div>
+                <div className="flex items-center">
                   <div>
                     <button
                       type="button"
                       onClick={() => addUnit(floorIndex)}
-                      className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
                     >
-                      <HiMiniBuildingStorefront
-                        className="w-5 h-5 inline-block "
-                        style={{ paddingBottom: "3px", paddingRight: "5px" }}
-                      />
+                      <HiMiniBuildingStorefront className="mr-1" style={{ fontSize: "12px" }} />
                       Add Unit
                     </button>
                   </div>
-                  <div className="ml-6 ">
+                  <div className="ml-3">
                     <button
                       type="button"
                       onClick={() => removeFloor(floorIndex)}
-                      className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                      className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                     >
-                      <MdDeleteForever
-                        style={{ fontSize: "25px", marginTop: "7px" }}
-                      />
+                      <MdDeleteForever style={{ fontSize: "22px" }} />
                     </button>
                   </div>
                   <div
-                    className="ml-6 "
+                    className="ml-3 cursor-pointer"
                     onClick={() => changeCollapseFloor(floorIndex)}
                   >
                     {indexes.some((floor) => floor.floor === floorIndex) ? (
-                      <i class="cursor-pointer fas fa-chevron-up text-blue pt-2 text-xl"></i>
+                      <i className="fas fa-chevron-up text-gray-500 text-sm"></i>
                     ) : (
-                      <i class="cursor-pointer fas fa-chevron-down text-blue pt-2 text-xl"></i>
+                      <i className="fas fa-chevron-down text-gray-500 text-sm"></i>
                     )}
                   </div>
                 </div>
-              </h6>
+              </div>
               {indexes.some((fIndex) => fIndex.floor == floorIndex) && (
-                <div className="space-y-3 ">
+                <div className="p-3 border-t border-gray-200">
                   {floor.unitList.map((unit, unitIndex) => (
                     <div
                       key={unitIndex}
-                      className="mb-3 border-bottom-grey px-3 cursor-pointer pb-4 hover:shadow-md"
+                      className="bg-white rounded-lg border border-gray-200 mb-3 p-3"
                     >
-                      <div
-                        className="flex justify-between p-3"
-                        // onClick={() => toggleUnitIndex(floorIndex, unitIndex)}
-                      >
-                        <div className="text-blueGray-600 font-bold uppercase ">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm font-bold text-gray-700 flex items-center">
+                          <HiMiniBuildingStorefront className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
                           Unit# {unitIndex + 1}
                         </div>
-                        <div className="flex justify-between pt-1">
+                        <div className="flex items-center">
                           <button
                             type="button"
                             onClick={() => removeUnit(floorIndex, unitIndex)}
-                            className=" text-red-500   outline-none focus:outline-none ease-linear transition-all duration-150"
+                            className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                           >
-                            <MdDeleteForever style={{ fontSize: "25px" }} />
+                            <MdDeleteForever style={{ fontSize: "22px" }} />
                           </button>
                           <div
-                            className="ml-6 z-50"
+                            className="ml-3 cursor-pointer"
                             onClick={() =>
                               toggleUnitIndex(floorIndex, unitIndex)
                             }
@@ -779,9 +673,9 @@ export default function AddProject() {
                             {indexes
                               .find((floor) => floor.floor === floorIndex)
                               .unitIndexes.some((ui) => ui == unitIndex) ? (
-                              <i class="cursor-pointer fas fa-chevron-up text-blue text-xl"></i>
+                              <i className="fas fa-chevron-up text-gray-500 text-sm"></i>
                             ) : (
-                              <i class="cursor-pointer fas fa-chevron-down text-blue text-xl"></i>
+                              <i className="fas fa-chevron-down text-gray-500 text-sm"></i>
                             )}
                           </div>
                         </div>
@@ -790,20 +684,20 @@ export default function AddProject() {
                         .find((fIndex) => fIndex.floor == floorIndex)
                         .unitIndexes.some((uIndex) => uIndex == unitIndex) && (
                         <>
-                          <div className="flex flex-wrap mt-4">
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
+                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+                            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                              <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
+                              Unit Details
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Serial No
                                 </label>
                                 <input
-                                  id="name"
                                   type="text"
                                   name="serialNo"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -813,20 +707,14 @@ export default function AddProject() {
                                   }
                                 />
                               </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Square Foot
                                 </label>
                                 <input
-                                  id="name"
                                   type="number"
                                   name="squareFoot"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -836,19 +724,13 @@ export default function AddProject() {
                                   }
                                 />
                               </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="projectType"
-                                >
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Unit Type
                                 </label>
                                 <select
-                                  id="projectType"
                                   name="unitType"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   value={
                                     floors[floorIndex].unitList[unitIndex]
                                       .unitType
@@ -865,20 +747,14 @@ export default function AddProject() {
                                   ))}
                                 </select>
                               </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Room Count
                                 </label>
                                 <input
-                                  id="name"
-                                  type="text"
+                                  type="number"
                                   name="roomCount"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -888,20 +764,14 @@ export default function AddProject() {
                                   }
                                 />
                               </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="name"
-                                >
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Bathroom Count
                                 </label>
                                 <input
-                                  id="name"
-                                  type="text"
+                                  type="number"
                                   name="bathroomCount"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   onChange={(e) =>
                                     changeUnitFields(floorIndex, unitIndex, e)
                                   }
@@ -911,19 +781,13 @@ export default function AddProject() {
                                   }
                                 />
                               </div>
-                            </div>
-                            <div className="w-full lg:w-4/12 px-4">
-                              <div className="relative w-full mb-3">
-                                <label
-                                  className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                  htmlFor="projectType"
-                                >
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
                                   Payment Plan Type
                                 </label>
                                 <select
-                                  id="projectType"
                                   name="paymentPlanType"
-                                  className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                  className="w-full p-2 border rounded-lg text-sm"
                                   value={
                                     floors[floorIndex].unitList[unitIndex]
                                       .paymentPlanType
@@ -944,790 +808,554 @@ export default function AddProject() {
                               </div>
                             </div>
                           </div>
-                          <div className="px-4 lg:px-0 mt-7">
-                            <div className=" flex flex-wrap ">
-                              <div className="w-full px-4 lg:w-6/12 border-right-grey md:px-0">
-                                {/* Payment Schedule Heading */}
-                                <div className="mt-3 mb-8 text-blueGray-600 text-md uppercase font-bold">
-                                  Unit Costing
-                                  <text className="ml-3 text-green-600">
-                                    (
-                                    {parseFloat(
-                                      floors?.[floorIndex]?.unitList?.[
-                                        unitIndex
-                                      ]?.paymentSchedule?.unitCost
-                                    ).toLocaleString()}
+                          {/* Unit Costing Section */}
+                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+                            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                              <FaMoneyBillWave className="mr-2" style={{ fontSize: "14px", color: "#f59e0b" }} />
+                              Unit Costing
+                              <span className="ml-3 text-green-600 font-bold">
+                                ({parseFloat(
+                                  floors?.[floorIndex]?.unitList?.[
+                                    unitIndex
+                                  ]?.paymentSchedule?.unitCost
+                                ).toLocaleString()})
+                              </span>
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Duration In Months
+                                </label>
+                                <input
+                                  type="number"
+                                  name="durationInMonths"
+                                  className="w-full p-2 border rounded-lg text-sm"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(
+                                      floorIndex,
+                                      unitIndex,
+                                      e
                                     )
-                                  </text>
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[
+                                      unitIndex
+                                    ].paymentSchedule.durationInMonths
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Actual Amount
+                                </label>
+                                <input
+                                  type="number"
+                                  name="actualAmount"
+                                  className="w-full p-2 border rounded-lg text-sm"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(
+                                      floorIndex,
+                                      unitIndex,
+                                      e
+                                    )
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[
+                                      unitIndex
+                                    ].paymentSchedule.actualAmount
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Miscellaneous Amount
+                                </label>
+                                <input
+                                  type="number"
+                                  name="miscellaneousAmount"
+                                  className="w-full p-2 border rounded-lg text-sm"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(
+                                      floorIndex,
+                                      unitIndex,
+                                      e
+                                    )
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[
+                                      unitIndex
+                                    ].paymentSchedule
+                                      .miscellaneousAmount
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Development Amount
+                                </label>
+                                <input
+                                  type="number"
+                                  name="developmentAmount"
+                                  className="w-full p-2 border rounded-lg text-sm"
+                                  onChange={(e) =>
+                                    changePaymentScheduleFields(
+                                      floorIndex,
+                                      unitIndex,
+                                      e
+                                    )
+                                  }
+                                  value={
+                                    floors[floorIndex].unitList[
+                                      unitIndex
+                                    ].paymentSchedule.developmentAmount
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Total Amount
+                                </label>
+                                <input
+                                  type="text"
+                                  name="totalAmount"
+                                  disabled
+                                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 text-gray-500"
+                                  value={
+                                    Number(
+                                      floors[floorIndex].unitList[
+                                        unitIndex
+                                      ].paymentSchedule.actualAmount
+                                    ) +
+                                    Number(
+                                      floors[floorIndex].unitList[
+                                        unitIndex
+                                      ].paymentSchedule
+                                        .miscellaneousAmount
+                                    ) +
+                                    Number(
+                                      floors[floorIndex].unitList[
+                                        unitIndex
+                                      ].paymentSchedule
+                                        .developmentAmount
+                                    )
+                                  }
+                                />
+                              </div>
+                            </div>
+
+                          </div>
+
+                          {/* Customer Payment Schedule - INSTALLMENT_RANGE */}
+                          {floors[floorIndex]?.unitList[unitIndex]
+                            ?.paymentPlanType == "INSTALLMENT_RANGE" && (
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+                              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                                <FaCreditCard
+                                  className="mr-2"
+                                  style={{
+                                    fontSize: "12px",
+                                    color: "#ffffff",
+                                    backgroundColor: "#6366f1",
+                                    borderRadius: "9999px",
+                                    padding: "4px",
+                                  }}
+                                />
+                                Customer Payment Schedule
+                                {(() => {
+                                  const unitCost =
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.unitCost;
+                                  const customerCost =
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.customerCost +
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.monthWiseTotal;
+                                  const classColor =
+                                    unitCost == customerCost
+                                      ? "text-green-600"
+                                      : unitCost > customerCost
+                                      ? "text-blue-600"
+                                      : "text-red-600";
+                                  return (
+                                    <span className={`ml-3 font-bold ${classColor}`}>
+                                      ({parseFloat(customerCost).toLocaleString()})
+                                    </span>
+                                  );
+                                })()}
+                              </h3>
+
+                              <div className="grid grid-cols-2 gap-6">
+                                {/* Left Section - Fixed Payments */}
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="text-xs font-bold text-indigo-600 uppercase mb-4 flex items-center border-b border-gray-100 pb-2">
+                                    <FaMoneyBillWave
+                                      className="mr-2"
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#4f46e5",
+                                        backgroundColor: "#e0e7ff",
+                                        borderRadius: "9999px",
+                                        padding: "4px",
+                                      }}
+                                    />
+                                    Fixed Payments
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Down Payment</label>
+                                      <input
+                                        type="number"
+                                        name="downPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.downPayment}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Quarterly Payment</label>
+                                      <input
+                                        type="number"
+                                        name="quarterlyPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.quarterlyPayment}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Half-Yearly Payment</label>
+                                      <input
+                                        type="number"
+                                        name="halfYearlyPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.halfYearlyPayment}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Yearly Payment</label>
+                                      <input
+                                        type="number"
+                                        name="yearlyPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.yearlyPayment}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">On Possession</label>
+                                      <input
+                                        type="number"
+                                        name="onPossessionPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.onPossessionPayment}
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div className="px-4 flex flex-wrap md:px-0">
-                                  {/* === First Section: Payment Overview === */}
-                                  <div className="w-full flex flex-wrap   border-blueGray-200 pb-4 mb-4">
-                                    {/* Duration In Months */}
-                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                      <div className="relative w-full mb-3">
-                                        <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                          htmlFor="durationInMonths"
-                                        >
-                                          Duration In Months
-                                        </label>
-                                        <input
-                                          id="durationInMonths"
-                                          type="text"
-                                          name="durationInMonths"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                          onChange={(e) =>
-                                            changePaymentScheduleFields(
-                                              floorIndex,
-                                              unitIndex,
-                                              e
-                                            )
-                                          }
-                                          value={
-                                            floors[floorIndex].unitList[
-                                              unitIndex
-                                            ].paymentSchedule.durationInMonths
-                                          }
-                                        />
-                                      </div>
-                                    </div>
+                                {/* Right Section - Month Wise Payment */}
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                                    <h4 className="text-xs font-bold text-purple-600 uppercase flex items-center">
+                                      <FaCalendarCheck
+                                        className="mr-2"
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#7c3aed",
+                                          backgroundColor: "#ede9fe",
+                                          borderRadius: "9999px",
+                                          padding: "4px",
+                                        }}
+                                      />
+                                      Monthly Installments
+                                    </h4>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onClickAddMonthlyRow(floorIndex, unitIndex)
+                                      }
+                                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+                                    >
+                                      <IoMdAddCircle className="mr-1" />
+                                      Row
+                                    </button>
+                                  </div>
 
-                                    {/* Actual Amount */}
-                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                      <div className="relative w-full mb-3">
-                                        <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                          htmlFor="actualAmount"
-                                        >
-                                          Actual Amount
-                                        </label>
-                                        <input
-                                          id="actualAmount"
-                                          type="number"
-                                          name="actualAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                          onChange={(e) =>
-                                            changePaymentScheduleFields(
-                                              floorIndex,
-                                              unitIndex,
-                                              e
-                                            )
-                                          }
-                                          value={
-                                            floors[floorIndex].unitList[
-                                              unitIndex
-                                            ].paymentSchedule.actualAmount
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-
-                                    {/* Miscellaneous Amount */}
-                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                      <div className="relative w-full mb-3">
-                                        <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                          htmlFor="miscellaneousAmount"
-                                        >
-                                          Miscellaneous Amount
-                                        </label>
-                                        <input
-                                          id="miscellaneousAmount"
-                                          type="number"
-                                          name="miscellaneousAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                          onChange={(e) =>
-                                            changePaymentScheduleFields(
-                                              floorIndex,
-                                              unitIndex,
-                                              e
-                                            )
-                                          }
-                                          value={
-                                            floors[floorIndex].unitList[
-                                              unitIndex
-                                            ].paymentSchedule
-                                              .miscellaneousAmount
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-
-                                    {/* Development Amount */}
-                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                      <div className="relative w-full mb-3">
-                                        <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                          htmlFor="miscellaneousAmount"
-                                        >
-                                          Development Amount
-                                        </label>
-                                        <input
-                                          id="developmentAmount"
-                                          type="number"
-                                          name="developmentAmount"
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                          onChange={(e) =>
-                                            changePaymentScheduleFields(
-                                              floorIndex,
-                                              unitIndex,
-                                              e
-                                            )
-                                          }
-                                          value={
-                                            floors[floorIndex].unitList[
-                                              unitIndex
-                                            ].paymentSchedule.developmentAmount
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-
-                                    {/* Total Amount */}
-                                    <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                      <div className="relative w-full mb-3">
-                                        <label
-                                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                          htmlFor="totalAmount"
-                                        >
-                                          Total Amount
-                                        </label>
-                                        <input
-                                          id="totalAmount"
-                                          type="text"
-                                          name="totalAmount"
-                                          disabled
-                                          className="px-3 py-3 placeholder-blueGray-300 text-blueGray-400 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                          value={
-                                            Number(
-                                              floors[floorIndex].unitList[
-                                                unitIndex
-                                              ].paymentSchedule.actualAmount
-                                            ) +
-                                            Number(
-                                              floors[floorIndex].unitList[
-                                                unitIndex
-                                              ].paymentSchedule
-                                                .miscellaneousAmount
-                                            ) +
-                                            Number(
-                                              floors[floorIndex].unitList[
-                                                unitIndex
-                                              ].paymentSchedule
-                                                .developmentAmount
-                                            )
-                                          }
-                                        />
-                                      </div>
-                                    </div>
+                                  <div className="space-y-3">
+                                    {unit?.paymentSchedule?.monthWisePaymentList?.map(
+                                      (monthly, mIndex) => (
+                                        <div key={mIndex} className="bg-gray-50 rounded-lg px-3 py-2">
+                                          <div className="grid grid-cols-4 gap-2">
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">From</label>
+                                              <input
+                                                type="text"
+                                                name="fromMonth"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlyPaymentFields(floorIndex, unitIndex, mIndex, e)
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthWisePaymentList[mIndex].fromMonth
+                                                }
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">To</label>
+                                              <input
+                                                type="text"
+                                                name="toMonth"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlyPaymentFields(floorIndex, unitIndex, mIndex, e)
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthWisePaymentList[mIndex].toMonth
+                                                }
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                                              <input
+                                                type="text"
+                                                name="amount"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlyPaymentFields(floorIndex, unitIndex, mIndex, e)
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthWisePaymentList[mIndex].amount
+                                                }
+                                              />
+                                            </div>
+                                            <div className="flex items-end justify-center pb-1 mt-5">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeMonthWisePayment(floorIndex, unitIndex, mIndex)
+                                                }
+                                                className="text-red-500 hover:text-red-700"
+                                              >
+                                                <MdDeleteForever style={{ fontSize: "20px" }} />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
                                   </div>
                                 </div>
                               </div>
-
-                              {floors[floorIndex]?.unitList[unitIndex]
-                                ?.paymentPlanType == "INSTALLMENT_RANGE" ? (
-                                <div className="w-full lg:w-6/12 ">
-                                  <div className="relative w-full">
-                                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
-                                      Customer Payment Schedule
-                                      {(() => {
-                                        const unitCost =
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule?.unitCost;
-
-                                        const customerCost =
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule?.customerCost +
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule?.monthWiseTotal;
-
-                                        const classColor =
-                                          unitCost == customerCost
-                                            ? "text-green-600"
-                                            : unitCost > customerCost
-                                            ? "text-blue-600"
-                                            : "text-red-600";
-                                        return (
-                                          <text
-                                            className={`ml-3 ${classColor}`}
-                                          >
-                                            (
-                                            {parseFloat(
-                                              customerCost
-                                            ).toLocaleString()}
-                                            )
-                                          </text>
-                                        );
-                                      })()}
-                                    </div>
-                                    <div className="mt-6 flex flex-wrap">
-                                      <>
-                                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="downPayment"
-                                            >
-                                              Down Payment
-                                            </label>
-                                            <input
-                                              id="downPayment"
-                                              type="number"
-                                              name="downPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule.downPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                        {/* Quarterly Payment */}
-                                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="quarterlyPayment"
-                                            >
-                                              Quarterly Payment
-                                            </label>
-                                            <input
-                                              id="quarterlyPayment"
-                                              type="text"
-                                              name="quarterlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule
-                                                  .quarterlyPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                        {/* Half-Yearly Payment */}
-                                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="halfYearlyPayment"
-                                            >
-                                              Half-Yearly Payment
-                                            </label>
-                                            <input
-                                              id="halfYearlyPayment"
-                                              type="text"
-                                              name="halfYearlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule
-                                                  .halfYearlyPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="yearlyPayment"
-                                            >
-                                              Yearly Payment
-                                            </label>
-                                            <input
-                                              id="yearlyPayment"
-                                              type="text"
-                                              name="yearlyPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule.yearlyPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="w-full px-4 lg:w-6/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="onPossessionPayment"
-                                            >
-                                              On Possession Payment
-                                            </label>
-                                            <input
-                                              id="onPossessionPayment"
-                                              type="text"
-                                              name="onPossessionPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule
-                                                  .onPossessionPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                      </>
-                                    </div>
-
-                                    <div>
-                                      <div className="px-4 mt-3 mb-3 rounded-12 md:px-0">
-                                        <div className="flex justify-between">
-                                          <div className="uppercase text-blueGray-600 font-bold text-sm text-center">
-                                            Month Wise Payment
-                                          </div>
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              onClickAddMonthlyRow(
-                                                floorIndex,
-                                                unitIndex
-                                              )
-                                            }
-                                            className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
-                                          >
-                                            <IoMdAddCircle
-                                              className="inline-block w-3 h-3"
-                                              style={{ paddingRight: "0px" }}
-                                            />{" "}
-                                            Row
-                                          </button>
-                                        </div>
-
-                                        {unit?.paymentSchedule?.monthWisePaymentList?.map(
-                                          (monthly, mIndex) => (
-                                            <div className="mt-6 flex flex-wrap">
-                                              <div className="mt-6 text-left pt-4">
-                                                {mIndex + 1} -
-                                              </div>
-                                              <div className="w-full lg:w-3/12 ">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    From Month
-                                                  </label>
-                                                  <input
-                                                    id="name"
-                                                    type="text"
-                                                    name="fromMonth"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlyPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthWisePaymentList[
-                                                        mIndex
-                                                      ].fromMonth
-                                                    }
-                                                  />
-                                                </div>
-                                              </div>
-                                              <div className="w-full lg:w-3/12 px-2 md:px-0">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    To Month
-                                                  </label>
-                                                  <input
-                                                    id="name"
-                                                    type="text"
-                                                    name="toMonth"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlyPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthWisePaymentList[
-                                                        mIndex
-                                                      ].toMonth
-                                                    }
-                                                  />
-                                                </div>
-                                              </div>
-                                              <div className="w-full lg:w-4/12">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    Amount
-                                                  </label>
-                                                  <input
-                                                    id="name"
-                                                    type="number"
-                                                    name="amount"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlyPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthWisePaymentList[
-                                                        mIndex
-                                                      ].amount
-                                                    }
-                                                  />
-                                                </div>
-                                              </div>
-                                              <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    removeMonthWisePayment(
-                                                      floorIndex,
-                                                      unitIndex,
-                                                      mIndex
-                                                    )
-                                                  }
-                                                  className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
-                                                >
-                                                  <MdDeleteForever
-                                                    style={{
-                                                      fontSize: "25px",
-                                                      marginTop: "9px",
-                                                    }}
-                                                  />
-                                                </button>
-                                              </div>
-                                              <hr className="mt-6 border-b-1 border-blueGray-300" />
-                                            </div>
-                                          )
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : floors[floorIndex]?.unitList[unitIndex]
-                                  ?.paymentPlanType ==
-                                "INSTALLMENT_SPECIFIC" ? (
-                                <div className="w-full lg:w-6/12 ">
-                                  <div className="relative w-full">
-                                    <div className="ml-3 mt-3  text-blueGray-600 text-md uppercase font-bold">
-                                      Customer Payment Schedule
-                                      {(() => {
-                                        const unitCost =
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule?.unitCost;
-
-                                        const customerCost =
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule?.customerCost +
-                                          floors?.[floorIndex]?.unitList?.[
-                                            unitIndex
-                                          ]?.paymentSchedule
-                                            ?.monthSpecificTotal;
-
-                                        const classColor =
-                                          unitCost == customerCost
-                                            ? "text-green-600"
-                                            : unitCost > customerCost
-                                            ? "text-blue-600"
-                                            : "text-red-600";
-                                        return (
-                                          <text
-                                            className={`ml-3 ${classColor}`}
-                                          >
-                                            (
-                                            {parseFloat(
-                                              customerCost
-                                            ).toLocaleString()}
-                                            )
-                                          </text>
-                                        );
-                                      })()}
-                                    </div>
-                                    <div className="mt-6 flex flex-wrap">
-                                      <>
-                                        <div className="w-full px-4 lg:w-12/12 md:px-0">
-                                          <div className="relative w-full mb-3">
-                                            <label
-                                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                              htmlFor="downPayment"
-                                            >
-                                              Down Payment
-                                            </label>
-                                            <input
-                                              id="downPayment"
-                                              type="number"
-                                              name="downPayment"
-                                              className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                              onChange={(e) =>
-                                                changePaymentScheduleFields(
-                                                  floorIndex,
-                                                  unitIndex,
-                                                  e
-                                                )
-                                              }
-                                              value={
-                                                floors[floorIndex].unitList[
-                                                  unitIndex
-                                                ].paymentSchedule.downPayment
-                                              }
-                                            />
-                                          </div>
-                                        </div>
-                                      </>
-                                    </div>
-
-                                    <div>
-                                      <div className="px-4 mt-3 mb-3 rounded-12 md:px-0">
-                                        <div className="flex justify-between">
-                                          <div className="uppercase text-blueGray-600 font-bold text-sm text-center">
-                                            Month Specific Payment
-                                          </div>
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              onClickAddMonthlySpecificRow(
-                                                floorIndex,
-                                                unitIndex
-                                              )
-                                            }
-                                            className="bg-red-500 text-white  font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
-                                          >
-                                            <IoMdAddCircle
-                                              className="inline-block w-3 h-3"
-                                              style={{ paddingRight: "0px" }}
-                                            />{" "}
-                                            Row
-                                          </button>
-                                        </div>
-
-                                        {unit?.paymentSchedule?.monthSpecificPaymentList?.map(
-                                          (monthly, mIndex) => (
-                                            <div className="mt-6 flex flex-wrap">
-                                              <div className="mt-6 text-left pt-4">
-                                                {mIndex + 1} -
-                                              </div>
-                                              <div className="w-full lg:w-3/12 ">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    Month
-                                                  </label>
-                                                  <select
-                                                    id="name"
-                                                    type="text"
-                                                    name="month"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlySpecificPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthSpecificPaymentList[
-                                                        mIndex
-                                                      ].month
-                                                    }
-                                                  >
-                                                    <option>
-                                                      Select Month
-                                                    </option>
-                                                    {MONTH_LABELS.map(
-                                                      (month) => (
-                                                        <option
-                                                          key={month}
-                                                          value={month}
-                                                        >
-                                                          {month}
-                                                        </option>
-                                                      )
-                                                    )}
-                                                  </select>
-                                                </div>
-                                              </div>
-                                              <div className="w-full lg:w-3/12 px-2 md:px-0">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    Year
-                                                  </label>
-                                                  <select
-                                                    id="name"
-                                                    type="text"
-                                                    name="year"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlySpecificPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthSpecificPaymentList[
-                                                        mIndex
-                                                      ].year
-                                                    }
-                                                  >
-                                                    <option>Select Year</option>
-                                                    {generateYears(10, 10).map(
-                                                      (year) => (
-                                                        <option
-                                                          key={year}
-                                                          value={year}
-                                                        >
-                                                          {year}
-                                                        </option>
-                                                      )
-                                                    )}
-                                                  </select>
-                                                </div>
-                                              </div>
-                                              <div className="w-full lg:w-4/12">
-                                                <div className="relative w-full mb-3">
-                                                  <label
-                                                    className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                                    htmlFor="name"
-                                                  >
-                                                    Amount
-                                                  </label>
-                                                  <input
-                                                    id="name"
-                                                    type="number"
-                                                    name="amount"
-                                                    className="px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded-lg text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                                    onChange={(e) =>
-                                                      changeMonthlySpecificPaymentFields(
-                                                        floorIndex,
-                                                        unitIndex,
-                                                        mIndex,
-                                                        e
-                                                      )
-                                                    }
-                                                    value={
-                                                      floors[floorIndex]
-                                                        .unitList[unitIndex]
-                                                        .paymentSchedule
-                                                        .monthSpecificPaymentList[
-                                                        mIndex
-                                                      ].amount
-                                                    }
-                                                  />
-                                                </div>
-                                              </div>
-                                              <div className="pl-7 mt-6 text-right pt-1 md:ml-auto md:mt-2 lg:ml-auto lg:pt-0">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    removeMonthSpecificPayment(
-                                                      floorIndex,
-                                                      unitIndex,
-                                                      mIndex
-                                                    )
-                                                  }
-                                                  className=" text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
-                                                >
-                                                  <MdDeleteForever
-                                                    style={{
-                                                      fontSize: "25px",
-                                                      marginTop: "9px",
-                                                    }}
-                                                  />
-                                                </button>
-                                              </div>
-                                              <hr className="mt-6 border-b-1 border-blueGray-300" />
-                                            </div>
-                                          )
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <></>
-                              )}
                             </div>
-                          </div>
+                          )}
+
+                          {/* Customer Payment Schedule - INSTALLMENT_SPECIFIC */}
+                          {floors[floorIndex]?.unitList[unitIndex]
+                            ?.paymentPlanType == "INSTALLMENT_SPECIFIC" && (
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
+                              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                                <FaCreditCard
+                                  className="mr-2"
+                                  style={{
+                                    fontSize: "12px",
+                                    color: "#ffffff",
+                                    backgroundColor: "#6366f1",
+                                    borderRadius: "9999px",
+                                    padding: "4px",
+                                  }}
+                                />
+                                Customer Payment Schedule
+                                {(() => {
+                                  const unitCost =
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.unitCost;
+                                  const customerCost =
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.customerCost +
+                                    floors?.[floorIndex]?.unitList?.[
+                                      unitIndex
+                                    ]?.paymentSchedule?.monthSpecificTotal;
+                                  const classColor =
+                                    unitCost == customerCost
+                                      ? "text-green-600"
+                                      : unitCost > customerCost
+                                      ? "text-blue-600"
+                                      : "text-red-600";
+                                  return (
+                                    <span className={`ml-3 font-bold ${classColor}`}>
+                                      ({parseFloat(customerCost).toLocaleString()})
+                                    </span>
+                                  );
+                                })()}
+                              </h3>
+
+                              <div className="grid grid-cols-2 gap-6">
+                                {/* Left Section - Fixed Payments */}
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <h4 className="text-xs font-bold text-indigo-600 uppercase mb-4 flex items-center border-b border-gray-100 pb-2">
+                                    <FaMoneyBillWave
+                                      className="mr-2"
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#4f46e5",
+                                        backgroundColor: "#e0e7ff",
+                                        borderRadius: "9999px",
+                                        padding: "4px",
+                                      }}
+                                    />
+                                    Fixed Payments
+                                  </h4>
+                                  <div className="grid grid-cols-1 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-700 mb-1">Down Payment</label>
+                                      <input
+                                        type="number"
+                                        name="downPayment"
+                                        className="w-full p-1.5 border rounded-lg text-sm"
+                                        onChange={(e) =>
+                                          changePaymentScheduleFields(floorIndex, unitIndex, e)
+                                        }
+                                        value={floors[floorIndex].unitList[unitIndex].paymentSchedule.downPayment}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Right Section - Month Specific Payment */}
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                  <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                                    <h4 className="text-xs font-bold text-purple-600 uppercase flex items-center">
+                                      <FaCalendarCheck
+                                        className="mr-2"
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#7c3aed",
+                                          backgroundColor: "#ede9fe",
+                                          borderRadius: "9999px",
+                                          padding: "4px",
+                                        }}
+                                      />
+                                      Monthly Installments
+                                    </h4>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onClickAddMonthlySpecificRow(floorIndex, unitIndex)
+                                      }
+                                      className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+                                    >
+                                      <IoMdAddCircle className="mr-1" />
+                                      Row
+                                    </button>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    {unit?.paymentSchedule?.monthSpecificPaymentList?.map(
+                                      (monthly, mIndex) => (
+                                        <div key={mIndex} className="bg-gray-50 rounded-lg px-3 py-2">
+                                          <div className="grid grid-cols-4 gap-2">
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">Month</label>
+                                              <select
+                                                name="month"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlySpecificPaymentFields(
+                                                    floorIndex, unitIndex, mIndex, e
+                                                  )
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthSpecificPaymentList[mIndex].month
+                                                }
+                                              >
+                                                <option>Select</option>
+                                                {MONTH_LABELS.map((month) => (
+                                                  <option key={month} value={month}>
+                                                    {month}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">Year</label>
+                                              <select
+                                                name="year"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlySpecificPaymentFields(
+                                                    floorIndex, unitIndex, mIndex, e
+                                                  )
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthSpecificPaymentList[mIndex].year
+                                                }
+                                              >
+                                                <option>Select</option>
+                                                {generateYears(10, 10).map((year) => (
+                                                  <option key={year} value={year}>
+                                                    {year}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                                              <input
+                                                type="number"
+                                                name="amount"
+                                                className="w-full p-1.5 border rounded-lg text-sm"
+                                                onChange={(e) =>
+                                                  changeMonthlySpecificPaymentFields(
+                                                    floorIndex, unitIndex, mIndex, e
+                                                  )
+                                                }
+                                                value={
+                                                  floors[floorIndex].unitList[unitIndex]
+                                                    .paymentSchedule.monthSpecificPaymentList[mIndex].amount
+                                                }
+                                              />
+                                            </div>
+                                            <div className="flex items-end justify-center pb-1">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeMonthSpecificPayment(floorIndex, unitIndex, mIndex)
+                                                }
+                                                className="text-red-500 hover:text-red-700"
+                                              >
+                                                <MdDeleteForever style={{ fontSize: "20px" }} />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -1736,20 +1364,28 @@ export default function AddProject() {
               )}
             </div>
           ))}
+          </div>
 
-          <button
-            onClick={(e) => createProject(e)}
-            type="submit"
-            className="mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 float-right"
-          >
-            <BsBuildingFillAdd
-              className="w-5 h-5 inline-block "
-              style={{ paddingBottom: "3px", paddingRight: "5px" }}
-            />
-            Add Project
-          </button>
-        </form>
-      </div>
+          {/* Action Buttons */}
+          <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => history.goBack()}
+              className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+            >
+              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+            >
+              <FaBuilding className="mr-1" style={{ color: "white" }} />
+              Add Project
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

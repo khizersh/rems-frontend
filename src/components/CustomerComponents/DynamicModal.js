@@ -15,10 +15,21 @@ const formatKey = (key) => {
 // Get status badge styling
 const getStatusStyle = (value) => {
   const val = String(value).toUpperCase();
-  if (val === "PAID" || val === "ACTIVE" || val === "COMPLETED" || val === "SUCCESS" || val === "TRUE") {
+  if (
+    val === "PAID" ||
+    val === "ACTIVE" ||
+    val === "COMPLETED" ||
+    val === "SUCCESS" ||
+    val === "TRUE"
+  ) {
     return { background: "#d1fae5", color: "#065f46" };
   }
-  if (val === "UNPAID" || val === "INACTIVE" || val === "FAILED" || val === "FALSE") {
+  if (
+    val === "UNPAID" ||
+    val === "INACTIVE" ||
+    val === "FAILED" ||
+    val === "FALSE"
+  ) {
     return { background: "#fee2e2", color: "#991b1b" };
   }
   if (val === "PENDING" || val === "PROCESSING" || val === "PARTIAL") {
@@ -38,9 +49,11 @@ const isAmountField = (key) => {
 };
 
 const formatValue = (key, value) => {
-  if (value === null || value === undefined) return <span className="text-blueGray-400 italic">N/A</span>;
+  if (value === null || value === undefined)
+    return <span className="text-blueGray-400 italic">N/A</span>;
   if (typeof value === "boolean") return value ? "Yes" : "No";
-  if (typeof value !== "string" && typeof value !== "number") return String(value);
+  if (typeof value !== "string" && typeof value !== "number")
+    return String(value);
 
   // Format amount
   if (isAmountField(key)) {
@@ -48,7 +61,11 @@ const formatValue = (key, value) => {
     if (!isNaN(num)) {
       return (
         <span className="font-semibold text-emerald-600">
-          Rs. {num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          Rs.{" "}
+          {num.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </span>
       );
     }
@@ -91,14 +108,106 @@ const formatValue = (key, value) => {
   return String(value);
 };
 
-const RenderObject = ({ data, level = 0 }) => {
+const RenderObject = ({ data, level = 0, arrayKey = null }) => {
   const [openKeys, setOpenKeys] = useState({});
 
-  const toggleKey = (key) => {
+  const toggleKey = (e, key) => {
+    e.stopPropagation();
     setOpenKeys((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   if (!data || typeof data !== "object") return null;
+
+  // Handle when data is directly an array - render as table
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      return (
+        <div className="text-center py-4 text-blueGray-400 text-sm italic">
+          No items available
+        </div>
+      );
+    }
+
+    // Get all unique keys from array items for table headers
+    const allKeys = [
+      ...new Set(
+        data.flatMap((item) =>
+          typeof item === "object" && item !== null ? Object.keys(item) : [],
+        ),
+      ),
+    ];
+
+    // If items are not objects, render simple list
+    if (allKeys.length === 0) {
+      return (
+        <div className="space-y-1">
+          {data.map((item, index) => (
+            <div
+              key={index}
+              className="px-3 py-2 bg-blueGray-50 rounded text-sm text-blueGray-600"
+            >
+              {formatValue(arrayKey || "item", item)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full overflow-x-auto rounded-lg border border-blueGray-200">
+        <table className="w-full table-auto divide-y divide-blueGray-200">
+          <thead>
+            <tr
+              style={{
+                background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+              }}
+            >
+              <th
+                className="px-4 py-2 text-left text-xs font-bold text-blueGray-600 uppercase tracking-wider border-b border-blueGray-200"
+                style={{ width: "50px" }}
+              >
+                #
+              </th>
+              {allKeys.map((key) => (
+                <th
+                  key={key}
+                  className="px-4 py-2 text-left text-xs font-bold text-blueGray-600 uppercase tracking-wider border-b border-blueGray-200"
+                >
+                  {formatKey(key)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-blueGray-100">
+            {data.map((item, index) => (
+              <tr
+                key={index}
+                className={`hover:bg-lightBlue-50 transition-colors duration-150 ${
+                  index % 2 === 0 ? "bg-white" : "bg-blueGray-50"
+                }`}
+              >
+                <td className="px-4 py-2.5" style={{ width: "50px" }}>
+                  <span>
+                    <strong>{index + 1}</strong>
+                  </span>
+                </td>
+                {allKeys.map((key) => (
+                  <td
+                    key={key}
+                    className="px-4 py-2.5 text-sm text-blueGray-700"
+                  >
+                    {typeof item === "object" && item !== null
+                      ? formatValue(key, item[key])
+                      : formatValue(key, item)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1">
@@ -107,17 +216,32 @@ const RenderObject = ({ data, level = 0 }) => {
           {typeof value === "object" && value !== null ? (
             <div className="my-2">
               <button
-                onClick={() => toggleKey(key)}
+                type="button"
+                onClick={(e) => toggleKey(e, key)}
                 className="flex items-center w-full px-3 py-2 text-sm font-semibold text-blueGray-700 bg-blueGray-50 hover:bg-blueGray-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lightBlue-500 focus:ring-opacity-50"
               >
                 <span
                   className="w-6 h-6 rounded-full mr-2 flex items-center justify-center text-white text-xs"
-                  style={{ background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)" }}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  }}
                 >
-                  {Array.isArray(value) ? value.length : <i className="fas fa-folder text-xs"></i>}
+                  {Array.isArray(value) ? (
+                    value.length
+                  ) : (
+                    <i className="fas fa-folder text-xs"></i>
+                  )}
                 </span>
                 <span className="flex-1 text-left">{formatKey(key)}</span>
-                <span className="ml-2 text-blueGray-400 transition-transform duration-200" style={{ transform: openKeys[key] ? "rotate(0deg)" : "rotate(-90deg)" }}>
+                <span
+                  className="ml-2 text-blueGray-400 transition-transform duration-200"
+                  style={{
+                    transform: openKeys[key]
+                      ? "rotate(0deg)"
+                      : "rotate(-90deg)",
+                  }}
+                >
                   <FaChevronDown className="w-3 h-3" />
                 </span>
               </button>
@@ -128,9 +252,13 @@ const RenderObject = ({ data, level = 0 }) => {
                   {Array.isArray(value) ? (
                     <div className="space-y-2">
                       {value.map((item, index) => (
-                        <div key={`${key}-${index}`} className="bg-white rounded-lg border border-blueGray-100 overflow-hidden">
+                        <div
+                          key={`${key}-${index}`}
+                          className="bg-white rounded-lg border border-blueGray-100 overflow-hidden"
+                        >
                           <button
-                            onClick={() => toggleKey(`${key}-${index}`)}
+                            type="button"
+                            onClick={(e) => toggleKey(e, `${key}-${index}`)}
                             className="flex items-center w-full px-3 py-2 text-sm font-medium text-blueGray-600 hover:bg-blueGray-50 transition-colors duration-150 focus:outline-none"
                           >
                             <span
@@ -139,8 +267,17 @@ const RenderObject = ({ data, level = 0 }) => {
                             >
                               {index + 1}
                             </span>
-                            <span className="flex-1 text-left">Item #{index + 1}</span>
-                            <span className="ml-2 text-blueGray-400 transition-transform duration-200" style={{ transform: openKeys[`${key}-${index}`] ? "rotate(0deg)" : "rotate(-90deg)" }}>
+                            <span className="flex-1 text-left">
+                              Item #{index + 1}
+                            </span>
+                            <span
+                              className="ml-2 text-blueGray-400 transition-transform duration-200"
+                              style={{
+                                transform: openKeys[`${key}-${index}`]
+                                  ? "rotate(0deg)"
+                                  : "rotate(-90deg)",
+                              }}
+                            >
                               <FaChevronDown className="w-3 h-3" />
                             </span>
                           </button>
@@ -151,7 +288,9 @@ const RenderObject = ({ data, level = 0 }) => {
                               {typeof item === "object" && item !== null ? (
                                 <RenderObject data={item} level={level + 1} />
                               ) : (
-                                <div className="text-sm text-blueGray-600">{formatValue(key, item)}</div>
+                                <div className="text-sm text-blueGray-600">
+                                  {formatValue(key, item)}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -167,8 +306,11 @@ const RenderObject = ({ data, level = 0 }) => {
               </div>
             </div>
           ) : (
-            <div className="flex items-start px-3 py-2 hover:bg-blueGray-50 rounded-lg transition-colors duration-150">
-              <span className="text-sm font-medium text-blueGray-500 min-w-0 flex-shrink-0" style={{ width: "40%" }}>
+            <div className="flex items-start px-3  hover:bg-blueGray-50 rounded-lg transition-colors duration-150">
+              <span
+                className="text-sm font-medium text-blueGray-500 min-w-0 flex-shrink-0"
+                style={{ width: "40%" }}
+              >
                 {formatKey(key)}
               </span>
               <span className="text-sm text-blueGray-700 flex-1 text-right break-words">
@@ -206,12 +348,13 @@ const DynamicDetailsModal = ({ isOpen, onClose, data, title = "Details" }) => {
   };
 
   return (
-    <div 
+    <div
       className="rounded fixed inset-0 z-50 flex items-center justify-center modal-width modal-height"
       style={{
         backgroundColor: "rgba(15, 23, 42, 0.6)",
         backdropFilter: "blur(4px)",
         left: "5%",
+        top: "6%",
       }}
       onClick={handleBackdropClick}
     >
@@ -227,7 +370,8 @@ const DynamicDetailsModal = ({ isOpen, onClose, data, title = "Details" }) => {
         <div
           className="flex-shrink-0 flex justify-between items-center px-6 py-4 rounded-t-2xl z-10 relative"
           style={{
-            background: "linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)",
+            background:
+              "linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)",
           }}
         >
           <div className="flex items-center">
@@ -252,32 +396,41 @@ const DynamicDetailsModal = ({ isOpen, onClose, data, title = "Details" }) => {
               {Object.entries(data).map(([sectionKey, sectionValue]) => (
                 <div
                   key={sectionKey}
-                  className="w-full lg:w-6/12 px-2 mb-4"
+                  className={`px-2 mb-4 ${Array.isArray(sectionValue) ? "w-full" : "w-full lg:w-6/12"}`}
                 >
                   <div className="bg-white border border-blueGray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
-                  <div
-                    className="px-4 py-3 border-b border-blueGray-100"
-                    style={{
-                      background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-                    }}
-                  >
-                    <h3 className="text-sm font-bold text-blueGray-700 uppercase tracking-wide flex items-center">
-                      <span
-                        className="w-2 h-2 rounded-full mr-2"
-                        style={{ background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)" }}
-                      ></span>
-                      {formatKey(sectionKey)}
-                    </h3>
-                  </div>
-                  <div className="p-3">
-                    {sectionValue && typeof sectionValue === "object" ? (
-                      <RenderObject data={sectionValue} />
-                    ) : (
-                      <div className="px-3 py-2 text-sm text-blueGray-600">
-                        {formatValue(sectionKey, sectionValue)}
-                      </div>
-                    )}
-                  </div>
+                    <div
+                      className="px-4 py-3 border-b border-blueGray-100"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                      }}
+                    >
+                      <h3 className="text-sm font-bold text-blueGray-700 uppercase tracking-wide flex items-center">
+                        <span
+                          className="w-2 h-2 rounded-full mr-2"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                          }}
+                        ></span>
+                        {formatKey(sectionKey)}
+                      </h3>
+                    </div>
+                    <div className="p-3">
+                      {sectionValue && typeof sectionValue === "object" ? (
+                        <RenderObject
+                          data={sectionValue}
+                          arrayKey={
+                            Array.isArray(sectionValue) ? sectionKey : null
+                          }
+                        />
+                      ) : (
+                        <div className="px-3 py-2 text-sm text-blueGray-600">
+                          {formatValue(sectionKey, sectionValue)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

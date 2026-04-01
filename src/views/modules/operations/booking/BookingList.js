@@ -6,14 +6,16 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
-import { FaEye, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaPen, FaTrashAlt, FaFilter, FaTimesCircle } from "react-icons/fa";
 import { MdPrint } from "react-icons/md";
 import { generateBookingHtml } from "utility/Utility.js";
 import { getOrdinal } from "utility/Utility.js";
 import { BsBuildingFillAdd } from "react-icons/bs";
 import { MdSchedule, MdCancel } from "react-icons/md";
+import { FaCheckCircle, FaLockOpen } from "react-icons/fa";
 import CancelBookingModal from "./CancelBookingModal.js";
 import "../../../../assets/styles/custom/uploadImage.css";
+import "../../../../assets/styles/projects/project.css";
 
 export default function BookingList() {
   const { loading, setLoading, notifyError, setBackdrop, backdrop } =
@@ -111,10 +113,14 @@ export default function BookingList() {
       setFileteredId(projectId);
       setFilteredBy("project");
       setFilterProject(projectId);
+      setFilterFloor("");
       fetchFloors(projectId);
     } else {
       setFileteredId("");
+      setFilteredBy("organization");
       setFilterProject("");
+      setFilterFloor("");
+      setFloorOptions([]);
     }
   };
 
@@ -124,11 +130,19 @@ export default function BookingList() {
       setFilteredBy("floor");
       setFilterFloor(floorId);
     } else {
-      setFileteredId(filterProject);
-      setFilteredBy("project");
+      setFileteredId(filterProject || "");
+      setFilteredBy(filterProject ? "project" : "organization");
       setFilterFloor("");
-      setFilterProject(Number(filterProject) + Number(0));
     }
+  };
+
+  const handleClearFilters = () => {
+    setFilterProject("");
+    setFilterFloor("");
+    setFloorOptions([]);
+    setFileteredId("");
+    setFilteredBy("organization");
+    setPage(0);
   };
 
   const handleSchedule = async (unit) => {
@@ -178,12 +192,27 @@ export default function BookingList() {
       },
     },
     { header: "Customer Name", field: "customerName" },
-    { header: "Customer Name", field: "customerName" },
     { header: "Unit Serial", field: "unitSerial" },
     { header: "Project", field: "project" },
     { header: "Floor No", field: "floorNo" },
     { header: "Total Amount", field: "totalAmount" },
-    { header: "Created Date", field: "createdDate" },
+    {
+      header: "Status",
+      field: "bookingComplete",
+      render: (value) => {
+        if (value === true)
+          return (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+              Complete
+            </span>
+          );
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            Open
+          </span>
+        );
+      },
+    },
   ];
 
   const onClickPrintBooking = async (data) => {
@@ -274,6 +303,50 @@ export default function BookingList() {
     console.log("Delete Floor:", floor);
   };
 
+  const handleMarkComplete = async (booking) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to mark this booking as complete? No further payments will be allowed.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const response = await httpService.post(`/booking/markComplete`, {
+        bookingId: booking.id,
+        bookingComplete: true,
+      });
+      if (response?.responseCode === "0000") {
+        fetchBookingList();
+      }
+    } catch (err) {
+      notifyError(err?.message || "Failed to mark booking complete", 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReopenBooking = async (booking) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to reopen this booking? Payments will be allowed again.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const response = await httpService.post(`/booking/markComplete`, {
+        bookingId: booking.id,
+        bookingComplete: false,
+      });
+      if (response?.responseCode === "0000") {
+        fetchBookingList();
+      }
+    } catch (err) {
+      notifyError(err?.message || "Failed to reopen booking", 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const actions = [
     {
       icon: FaEye,
@@ -295,6 +368,20 @@ export default function BookingList() {
       className: "yellow",
     },
     {
+      icon: FaCheckCircle,
+      onClick: handleMarkComplete,
+      title: "Mark Complete",
+      className: "text-green-600",
+      condition: (row) => !row.bookingComplete,
+    },
+    {
+      icon: FaLockOpen,
+      onClick: handleReopenBooking,
+      title: "Reopen Booking",
+      className: "text-orange-500",
+      condition: (row) => row.bookingComplete === true,
+    },
+    {
       icon: MdCancel,
       onClick: onClickCancelBooking,
       title: "Cancel Booking",
@@ -307,17 +394,42 @@ export default function BookingList() {
     setIsOpen(!isOpen);
   };
 
+  const hasActiveFilters = Boolean(filterProject || filterFloor);
+
   return (
     <>
       <div className="container mx-auto p-4">
-        <div className="w-full">
-          <div className="flex flex-wrap py-3 md:justify-content-between">
-            <div className="bg-white shadow-lg p-5 rounded-12 lg:w-4/12 md:w-6/12 sm:w-12/12">
-              <label className="block text-sm font-medium mb-1">Project</label>
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Bookings
+              </h4>
+              <p className="booking-filter-subtitle">
+                Narrow down bookings by project and floor for faster lookup.
+              </p>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <FaTimesCircle className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="booking-filter-grid">
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Project</label>
               <select
                 value={filterProject}
                 onChange={(e) => changeSelectedProjected(e.target.value)}
-                className="border rounded-lg px-3 py-2 w-full"
+                className="booking-filter-select"
               >
                 <option value="">All Projects</option>
                 {projects.map((project) => (
@@ -328,14 +440,17 @@ export default function BookingList() {
               </select>
             </div>
 
-            <div className="bg-white shadow-lg p-5 rounded-12 mx-4 lg:w-4/12 md:w-6/12 sm:w-12/12 md:mx-0 sm:mt-5">
-              <label className="block text-sm font-medium mb-1">Floor</label>
+            <div className="booking-filter-field">
+              <label className="booking-filter-label">Floor</label>
               <select
                 value={filterFloor}
                 onChange={(e) => changeSelectedFloor(e.target.value)}
-                className="border rounded-lg px-3 py-2 w-full"
+                className="booking-filter-select"
+                disabled={!filterProject}
               >
-                <option value="">All Floors</option>
+                <option value="">
+                  {filterProject ? "All Floors" : "Select a project first"}
+                </option>
                 {filterProject &&
                   floorOptions.map((floor) => (
                     <option key={floor.id} value={floor.id}>

@@ -10,6 +10,7 @@ import {
   FaDownload,
   FaEdit,
   FaEye,
+  FaFilter,
   FaPen,
   FaTrashAlt,
   FaSearch,
@@ -26,6 +27,7 @@ import {
   EXPENSE_TYPE_ID,
 } from "utility/Utility.js";
 import { PAYMENT_STATUS } from "utility/Utility.js";
+import "../../../../assets/styles/projects/project.css";
 
 export default function ExpenseList() {
   const {
@@ -671,9 +673,16 @@ export default function ExpenseList() {
     history.push("/dashboard/add-expense");
   };
 
-  const handlePdcPayments = () => {
-    history.push("/dashboard/pdc-payments");
-  };
+  const hasActiveFilters = Boolean(
+    expenseType !== "ALL" ||
+      accountGroupId ||
+      coaId ||
+      filterProject ||
+      filterVendor ||
+      (selectedPaymentStatus && selectedPaymentStatus !== "ALL") ||
+      formattedDate.startDate ||
+      formattedDate.endDate
+  );
 
   return (
     <>
@@ -839,135 +848,145 @@ export default function ExpenseList() {
       )}
 
       <div className="container mx-auto p-4">
-        <div className="w-full mb-6 bg-white  shadow-lg rounded p-4">
-          <div className=" flex flex-wrap  py-3 justify-between">
-            <div className="w-full mb-4 flex justify-center">
-              <div className="flex items-center space-x-6 max-sm-flex-col">
-                {["ALL", "MISCELLANEOUS", "CONSTRUCTION"].map((type) => (
-                  <label key={type} className="flex items-center mx-4">
-                    <input
-                      type="radio"
-                      name="expenseTypeRadioTop"
-                      value={type}
-                      checked={expenseType === type}
-                      onChange={handleExpenseTypeChange}
-                      className="form-radio"
-                    />
-                    <span className="text-sm font-medium ml-1">{type}</span>
-                  </label>
-                ))}
-              </div>
+        <div className="booking-filter-shell">
+          <div className="booking-filter-header">
+            <div>
+              <h4 className="booking-filter-title">
+                <FaFilter className="booking-filter-title-icon" />
+                Filter Expenses
+              </h4>
+              <p className="booking-filter-subtitle">
+                Use expense type and account filters to refine records.
+              </p>
             </div>
 
-            {expenseType === "MISCELLANEOUS" ? (
-              <>
-                <div className="p-5 rounded w-47">
-                  <label className="block text-sm font-medium mb-1">
-                    Account Expense Group
-                  </label>
-                  <select
-                    value={accountGroupId || ""}
-                    onChange={(e) => setAccountGroupId(e.target.value)}
-                    className="border rounded px-3 py-2 w-full"
-                  >
-                    <option value="">All Groups</option>
-                    {accountGroups.map((ag) => (
-                      <option key={ag.id} value={ag.id}>
-                        {ag.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="booking-filter-clear-btn"
+              >
+                <RxCross2 className="booking-filter-clear-icon" />
+                Clear Filters
+              </button>
+            )}
+          </div>
 
-                <div className="p-5 rounded w-47">
-                  <label className="block text-sm font-medium mb-1">
-                    Select Expense Account
-                  </label>
-                  <select
-                    value={coaId || ""}
-                    onChange={(e) => setCoaId(e.target.value)}
-                    className="border rounded px-3 py-2 w-full"
-                  >
-                    <option value="">All Accounts</option>
-                    {coaList.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            ) : expenseType === "CONSTRUCTION" ? (
-              <>
-                <div className="w-full flex items-center justify-between gap-4">
-                  <div className="p-5 rounded flex-1 min-w-0">
-                    <label className="block text-sm font-medium mb-1 ">
-                      Select Project
-                    </label>
-                    <select
-                      value={filterProject}
-                      onChange={(e) => changeSelectedProjected(e.target.value)}
-                      className="border rounded px-3 py-2 w-full"
-                    >
-                      <option value="">All Projects</option>
-                      {projects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="w-full mb-4 flex justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {["ALL", "MISCELLANEOUS", "CONSTRUCTION"].map((type) => (
+                <label key={type} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="expenseTypeRadioTop"
+                    value={type}
+                    checked={expenseType === type}
+                    onChange={handleExpenseTypeChange}
+                    className="form-radio"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {type}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-                  <div className="p-5 rounded flex-1 min-w-0">
-                    <label className="block text-sm font-medium mb-1">
-                      Select Vendor
-                    </label>
-                    <select
-                      value={filterVendor}
-                      onChange={(e) => changeSelectedVendor(e.target.value)}
-                      className="border rounded px-3 py-2 w-full"
-                    >
-                      <option value="">All Vendors</option>
-                      {vendorList.map((vendor) => (
-                        <option key={vendor.id} value={vendor.id}>
-                          {vendor.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="p-5 rounded flex-1 min-w-0">
-                    <label className="block text-sm font-medium mb-1">
-                      Select Payment State
-                    </label>
-                    <select
-                      value={selectedPaymentStatus}
-                      onChange={(e) => setSelectedPaymentStatus(e.target.value)}
-                      className="border rounded px-3 py-2 w-full"
-                    >
-                      <option value="">All Status</option>
-                      {PAYMENT_STATUS.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </>
-            ) : null}
-            <div className="w-full flex justify-center mt-4">
-              <div className="space-x-3">
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="bg-emerald-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow-sm hover:shadow-lg"
+          {expenseType === "MISCELLANEOUS" ? (
+            <div className="booking-filter-grid">
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Account Group</label>
+                <select
+                  value={accountGroupId || ""}
+                  onChange={(e) => setAccountGroupId(e.target.value)}
+                  className="booking-filter-select"
                 >
-                  <FaSearch className="w-4 h-4 inline-block mr-2" />
-                  Search
-                </button>
+                  <option value="">All Groups</option>
+                  {accountGroups.map((ag) => (
+                    <option key={ag.id} value={ag.id}>
+                      {ag.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Expense Account</label>
+                <select
+                  value={coaId || ""}
+                  onChange={(e) => setCoaId(e.target.value)}
+                  className="booking-filter-select"
+                >
+                  <option value="">All Accounts</option>
+                  {coaList.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+          ) : expenseType === "CONSTRUCTION" ? (
+            <div className="booking-filter-grid">
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Project</label>
+                <select
+                  value={filterProject}
+                  onChange={(e) => changeSelectedProjected(e.target.value)}
+                  className="booking-filter-select"
+                >
+                  <option value="">All Projects</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Vendor</label>
+                <select
+                  value={filterVendor}
+                  onChange={(e) => changeSelectedVendor(e.target.value)}
+                  className="booking-filter-select"
+                >
+                  <option value="">All Vendors</option>
+                  {vendorList.map((vendor) => (
+                    <option key={vendor.id} value={vendor.id}>
+                      {vendor.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="booking-filter-field">
+                <label className="booking-filter-label">Payment State</label>
+                <select
+                  value={selectedPaymentStatus}
+                  onChange={(e) => setSelectedPaymentStatus(e.target.value)}
+                  className="booking-filter-select"
+                >
+                  <option value="ALL">All Status</option>
+                  {PAYMENT_STATUS.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="w-full flex justify-end mt-4">
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="bg-emerald-500 text-white font-bold uppercase text-xs px-4 py-2 rounded shadow-sm hover:shadow-lg"
+            >
+              <FaSearch className="w-4 h-4 inline-block mr-2" />
+              Search
+            </button>
           </div>
         </div>
       </div>
@@ -1002,7 +1021,7 @@ export default function ExpenseList() {
           }}
           thirdButton={{
             title: "PDC Payments",
-            onClick: handlePdcPayments,
+            // onClick: handlePdcPayments,
             icon: TbFileExport,
             className: "bg-amber-500",
           }}

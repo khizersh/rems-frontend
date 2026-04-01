@@ -4,7 +4,7 @@ import { Switch, Route, Redirect } from "react-router-dom";
 // components
 
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
-import Sidebar from "components/Sidebar/Sidebar.js";
+import SidebarWrapper from "components/Sidebar/SidebarWrapper.js";
 import FooterAdmin from "components/Footers/FooterAdmin.js";
 
 // views
@@ -19,7 +19,7 @@ import NotificationContainer from "components/Notification/NotificationContainer
 export default function User() {
   return (
     <>
-      <Sidebar />
+      <SidebarWrapper />
       <div className="main-content relative md:ml-64 bg-blueGray-100">
         <AdminNavbar />
         {/* Header - Customer Dashboard has its own stats */}

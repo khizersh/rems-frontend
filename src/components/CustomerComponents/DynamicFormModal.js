@@ -16,56 +16,68 @@ const DynamicFormModal = ({
   };
 
   const renderField = (field) => {
-    const { name, label, type, value, setter, options = [] } = field;
+    const { name, label, type, value, setter, options = [], error } = field;
 
     switch (type) {
       case "textarea":
         return (
-          <textarea
-            id={name}
-            value={value}
-            onChange={(e) => setter(e.target.value)}
-            className="w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-            required
-          />
+          <>
+            <textarea
+              id={name}
+              value={value}
+              onChange={(e) => setter(e.target.value)}
+              className={`w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${error ? "border border-red-500" : ""}`}
+              required
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </>
         );
       case "select":
         return (
-          <select
-            id={name}
-            value={value}
-            onChange={(e) => setter(e.target.value)}
-            className="w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-            required
-          >
-            <option value="">Select {label}</option>
-            {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          <>
+            <select
+              id={name}
+              value={value}
+              onChange={(e) => setter(e.target.value)}
+              className={`w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150 ${error ? "border border-red-500" : ""}`}
+              required
+            >
+              <option value="">Select {label}</option>
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </>
         );
       case "checkbox":
         return (
-          <input
-            id={name}
-            type="checkbox"
-            checked={value}
-            onChange={(e) => setter(e.target.checked)}
-            className="w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-          />
+          <>
+            <input
+              id={name}
+              type="checkbox"
+              checked={value}
+              onChange={(e) => setter(e.target.checked)}
+              className="w-full border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-500 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </>
         );
       default:
         return (
-          <input
-            id={name}
-            type={type}
-            value={value}
-            onChange={(e) => setter(e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            required
-          />
+          <>
+            <input
+              id={name}
+              type={type}
+              value={value}
+              onChange={(e) => setter(e.target.value)}
+              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 ${error ? "border-red-500" : ""}`}
+              required
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </>
         );
     }
   };

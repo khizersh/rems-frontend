@@ -142,125 +142,112 @@ const PaymentModal = ({
                   {detail.paymentType == CHEQUE ? (
                     <>
                       <div
-                        className="flex flex-wrap border-bottom-grey py-3 gap-y-3"
+                        className="flex flex-wrap border-bottom-grey py-3"
                         key={ind}
                       >
-                        <div className="flex flex-wrap gap-y-3" key={ind}>
-                          <div className={`w-full lg:w-2/12 `}>
-                            <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              Received Amount
-                            </label>
-                            <input
-                              name="amount"
-                              type="number"
-                              value={detail.amount}
-                              onChange={(e) => onChangeAmount(e, ind)}
-                              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                              required
-                            />
-                          </div>
-                          <div className="w-full lg:w-1/12 px-2">
-                            <div className="relative w-full mb-3">
-                              <label
-                                className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                                htmlFor="projectType"
-                              >
-                                Payment Type
-                              </label>
-                              <select
-                                id="paymentType"
-                                name="paymentType"
-                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                                value={detail.paymentType}
-                                onChange={(e) => onChangeFormDetail(e, ind)}
-                              >
-                                <option value="">SELECT PAYMENT TYPE</option>
-                                {paymentTypes.map((type, index) => (
-                                  <option key={index} value={type}>
-                                    {type}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                          <div className={`w-full lg:w-1/12  `}>
-                            <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              Cheque No
-                            </label>
-                            <input
-                              name="chequeNo"
-                              type="text"
-                              value={detail.chequeNo}
-                              onChange={(e) => onChangeFormDetail(e, ind)}
-                              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                              required
-                            />
-                          </div>
-                          <div className={`w-full lg:w-2/12  px-2`}>
-                            <label
-                              className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                              htmlFor="projectType"
+                        <div className="w-full lg:w-2/12 mb-3">
+                          <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                            Received Amount
+                          </label>
+                          <input
+                            name="amount"
+                            type="number"
+                            value={detail.amount}
+                            onChange={(e) => onChangeAmount(e, ind)}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                            required
+                          />
+                        </div>
+                        <div className="w-full lg:w-2/12 lg:px-2 mb-3">
+                          <label
+                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                            htmlFor="projectType"
+                          >
+                            Payment Type
+                          </label>
+                          <select
+                            id="paymentType"
+                            name="paymentType"
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                            value={detail.paymentType}
+                            onChange={(e) => onChangeFormDetail(e, ind)}
+                          >
+                            <option value="">SELECT PAYMENT TYPE</option>
+                            {paymentTypes.map((type, index) => (
+                              <option key={index} value={type}>
+                                {type}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="w-full lg:w-2/12 lg:px-2 mb-3">
+                          <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                            Cheque No
+                          </label>
+                          <input
+                            name="chequeNo"
+                            type="text"
+                            value={detail.chequeNo}
+                            onChange={(e) => onChangeFormDetail(e, ind)}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                            required
+                          />
+                        </div>
+                        <div className="w-full lg:w-2/12 lg:px-2 mb-3">
+                          <label
+                            className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
+                            htmlFor="projectType"
+                          >
+                            Reason
+                          </label>
+                          <select
+                            id="paymentType"
+                            name="customerPaymentReason"
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                            value={detail.customerPaymentReason}
+                            onChange={(e) => onChangeFormDetail(e, ind)}
+                          >
+                            <option value="">SELECT REASON</option>
+                            {paymentReasons.map((type, index) => (
+                              <option key={index} value={type}>
+                                {type}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="w-full lg:w-2/12 lg:px-2 mb-3">
+                          <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                            Cheque Date
+                          </label>
+                          <input
+                            type="datetime-local"
+                            name="chequeDate"
+                            value={detail.chequeDate}
+                            onChange={(e) => onChangeFormDetail(e, ind)}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                          />
+                        </div>
+                        <div className="w-full lg:w-1/12 lg:px-2 mb-3">
+                          <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
+                            Created Date
+                          </label>
+                          <input
+                            type="datetime-local"
+                            name="createdDate"
+                            value={detail.createdDate}
+                            onChange={(e) => onChangeFormDetail(e, ind)}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                          />
+                        </div>
+                        <div className="w-full lg:w-1/12 lg:self-end mb-3">
+                          <div className="flex justify-center lg:justify-start">
+                            <button
+                              type="button"
+                              onClick={() => onRemoveDetailRow(ind)}
+                              className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                             >
-                              Reason
-                            </label>
-                            <select
-                              id="paymentType"
-                              name="customerPaymentReason"
-                              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                              value={detail.customerPaymentReason}
-                              onChange={(e) => onChangeFormDetail(e, ind)}
-                            >
-                              <option value="">SELECT REASON</option>
-                              {paymentReasons.map((type, index) => (
-                                <option key={index} value={type}>
-                                  {type}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="w-full lg:w-1/12">
-                            <div className="relative w-full mb-3">
-                              <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                                Cheque Date
-                              </label>
-                              <input
-                                type="datetime-local"
-                                name="chequeDate"
-                                value={detail.chequeDate}
-                                onChange={(e) => onChangeFormDetail(e, ind)}
-                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                              />
-                            </div>
-                          </div>
-                          <div className="w-full lg:w-2/12 px-2">
-                            <div className="relative w-full mb-3">
-                              <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                                Created Date
-                              </label>
-                              <input
-                                type="datetime-local"
-                                name="createdDate"
-                                value={detail.createdDate}
-                                onChange={(e) => onChangeFormDetail(e, ind)}
-                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                              />
-                            </div>
-                          </div>
-                          <div className="w-full lg:w-1/12">
-                            <div className="flex justify-center lg:justify-start mt-3 lg:mt-7">
-                              <button
-                                type="button"
-                                onClick={() => onRemoveDetailRow(ind)}
-                                className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
-                              >
-                                <MdDeleteForever
-                                  style={{
-                                    fontSize: "25px",
-                                    marginTop: "7px",
-                                  }}
-                                />
-                              </button>
-                            </div>
+                              <MdDeleteForever style={{ fontSize: "25px" }} />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -348,19 +335,14 @@ const PaymentModal = ({
                                 />
                               </div>
                             </div>
-                            <div className="w-full lg:w-1/12 lg:px-4">
-                              <div className="flex justify-center lg:justify-start mt-3 lg:mt-7">
+                            <div className="w-full lg:w-1/12 lg:px-4 lg:self-end">
+                              <div className="flex justify-center lg:justify-start">
                                 <button
                                   type="button"
                                   onClick={() => onRemoveDetailRow(ind)}
                                   className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                                 >
-                                  <MdDeleteForever
-                                    style={{
-                                      fontSize: "25px",
-                                      marginTop: "7px",
-                                    }}
-                                  />
+                                  <MdDeleteForever style={{ fontSize: "25px" }} />
                                 </button>
                               </div>
                             </div>
@@ -436,16 +418,14 @@ const PaymentModal = ({
                             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
                           />
                         </div>
-                        <div className="w-full lg:w-1/12">
-                          <div className="flex justify-center lg:justify-start mt-3 lg:mt-7 lg:ml-5">
+                        <div className="w-full lg:w-1/12 lg:self-end">
+                          <div className="flex justify-center lg:justify-start">
                             <button
                               type="button"
                               onClick={() => onRemoveAccountRow(ind)}
                               className="text-red-500 outline-none focus:outline-none ease-linear transition-all duration-150"
                             >
-                              <MdDeleteForever
-                                style={{ fontSize: "25px", marginTop: "7px" }}
-                              />
+                              <MdDeleteForever style={{ fontSize: "25px" }} />
                             </button>
                           </div>
                         </div>

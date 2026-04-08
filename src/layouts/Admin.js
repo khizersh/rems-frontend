@@ -79,10 +79,9 @@ import {
   VendorInvoiceDetails,
   VendorInvoicePendingSummary
 } from "views/modules/operations/purchasemanagement/vendorinvoice";
-import {
-  VendorPaymentList,
-  CreateVendorPayment
-} from "views/modules/operations/purchasemanagement/vendorpayment";
+import VendorPaymentList from "views/modules/operations/purchasemanagement/vendorpayment/VendorPaymentList";
+
+import CreateVendorPayment from "views/modules/operations/purchasemanagement/vendorpayment/CreateVendorPayment";
 import {
   WarehouseList,
   AddWarehouse,

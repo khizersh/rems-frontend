@@ -19,7 +19,12 @@ export const PAYMENT_PLANS_TYPE = [
   "INSTALLMENT_RANGE",
   "INSTALLMENT_SPECIFIC",
 ];
-export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
+export const paymentTypes = [
+  { id: "CASH", name: "Cash Payment" },
+  { id: "ONLINE", name: "Online Payment" },
+  { id: "PAY_ORDER", name: "Pay Order" },
+  { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
+];
 export const EXPENSE_TYPE = ["MISCELLANEOUS" ,"CONSTRUCTION"];
 export const MONTH_LABELS = [
   "January",

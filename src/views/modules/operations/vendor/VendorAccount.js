@@ -8,7 +8,7 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { v4 as uuidv4 } from "uuid";
-import { FaEye, FaPen, FaTrashAlt, FaDownload } from "react-icons/fa";
+import { FaEye, FaPen, FaTrashAlt, FaDownload, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
@@ -36,8 +36,8 @@ export default function VendorAccount() {
     amountPaid: 0,
     organizationId: 10,
     organizationAccountId: 0,
-    paymentType: "",
-    paymentDocNo: 0,
+    paymentMethodType: "",
+    paymentDocNo: "",
     paymentDocDate: new Date().toISOString().slice(0, 16),
     createdDate: new Date().toISOString().slice(0, 16),
     comments: "",
@@ -245,6 +245,15 @@ export default function VendorAccount() {
   }
 
   const handleSubmit = async () => {
+    if (expenseDetail.paymentMethodType === "CHEQUE") {
+      if (!expenseDetail.paymentDocNo || expenseDetail.paymentDocNo.toString().trim() === "") {
+        return notifyError("Cheque number is required", 4000);
+      }
+      if (!expenseDetail.paymentDocDate) {
+        return notifyError("Cheque date is required", 4000);
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -258,14 +267,28 @@ export default function VendorAccount() {
           Number(expenseDetail.organizationAccountId) || null,
         amountPaid: Number(expenseDetail.amountPaid) || 0,
         idempotencyKey: idempotencyKey,
+        paymentMethodType: expenseDetail.paymentMethodType || "",
+        paymentDocNo: expenseDetail.paymentDocNo || "",
+        paymentDocDate: expenseDetail.paymentDocDate
+          ? new Date(expenseDetail.paymentDocDate).toISOString()
+          : null,
+        comments: expenseDetail.comments || "",
       };
 
-      const data = await httpService.post(
+      const resp = await httpService.post(
         "/vendorAccount/paybackCredit",
         requestBody,
       );
 
-      notifySuccess(data?.responseMessage || "Payback successful", 3000);
+      if (resp?.data?.pdcRecord) {
+        const pdc = resp.data.pdcRecord;
+        notifySuccess(
+          `PDC created successfully! Cheque #${pdc.chequeNumber} will be processed on ${pdc.chequeDate}`,
+          5000,
+        );
+      } else {
+        notifySuccess(resp?.responseMessage || "Payback successful", 3000);
+      }
       setIsPaymentModalOpen(false);
       setBackdrop(!backdrop);
       await fetchVendorList();
@@ -275,8 +298,8 @@ export default function VendorAccount() {
         amountPaid: 0,
         organizationId: organizationLocal?.organizationId || 0,
         organizationAccountId: 0,
-        paymentType: "",
-        paymentDocNo: 0,
+        paymentMethodType: "",
+        paymentDocNo: "",
         paymentDocDate: new Date().toISOString().slice(0, 16),
         createdDate: new Date().toISOString().slice(0, 16),
         comments: "",
@@ -341,45 +364,52 @@ export default function VendorAccount() {
           title="Vendor Account Detail"
         />
         {isPaymentModalOpen ? (
-          <div>
-            <div className="payback-modal inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <div className="bg-white rounded shadow-lg  w-full max-w-xl">
-                <div className="flex justify-between items-center mb-4 p-4">
-                  <h2 className="text-xl font-bold uppercase">Pay Back Form</h2>
-                  <button onClick={togglePaymentModal}>
-                    <RxCross2 className="w-5 h-5 text-red-500" />
-                  </button>
-                </div>
+          <div className="payback-modal-position">
+            <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full overflow-y-auto" style={{ maxHeight: "80vh" }}>
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+                <h2 className="text-base font-bold text-gray-700 uppercase flex items-center">
+                  <FaDownload className="mr-2" style={{ color: "#10b981" }} />
+                  Pay Back
+                </h2>
+                <button
+                  onClick={togglePaymentModal}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <RxCross2 className="w-5 h-5" />
+                </button>
+              </div>
 
-                <div className="grid grid-cols-12 gap-4 payback-form">
-                  <div className="flex flex-wrap bg-white">
-                    <div className="w-full lg:w-3/12 px-2 mb-2">
-                      <div className="relative w-full mb-2">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Amount
-                        </label>
+              {/* Body */}
+              <div className="p-6">
+                <div className="space-y-4 payback-form">
+                  {/* Payment Details Section */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                      <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                      Payment Details
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
                         <input
                           name="amountPaid"
                           type="number"
                           value={expenseDetail.amountPaid}
                           onChange={changeExpenseDetail}
-                          className="border rounded px-3 py-2 w-full"
+                          className="w-full p-2 border rounded-lg text-sm"
                           placeholder="Enter amount"
                         />
                       </div>
-                    </div>
-                    <div className="w-full lg:w-3/12 px-2 mb-2">
-                      <div className="relative w-full mb-2">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Select Account
-                        </label>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Select Account</label>
                         <select
                           name="organizationAccountId"
                           value={expenseDetail.organizationAccountId}
                           onChange={changeExpenseDetail}
-                          className="border rounded px-3 py-2 w-full"
+                          className="w-full p-2 border rounded-lg text-sm"
                         >
-                          <option value="">All Account</option>
+                          <option value="">Select Account</option>
                           {accountList.map((account) => (
                             <option key={account.id} value={account.id}>
                               {account.name}
@@ -387,131 +417,134 @@ export default function VendorAccount() {
                           ))}
                         </select>
                       </div>
-                    </div>
-                    <div className="w-full lg:w-3/12 px-2 mb-2">
-                      <div className="relative w-full mb-2">
-                        <label
-                          className="block uppercase text-blueGray-500 text-xs font-bold mb-2"
-                          htmlFor="projectType"
-                        >
-                          Payment Type
-                        </label>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Payment Type</label>
                         <select
-                          id="paymentType"
-                          name="paymentType"
-                          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                          value={expenseDetail.paymentType}
+                          id="paymentMethodType"
+                          name="paymentMethodType"
+                          value={expenseDetail.paymentMethodType}
                           onChange={changeExpenseDetail}
+                          className="w-full p-2 border rounded-lg text-sm"
                         >
-                          <option value="">SELECT PAYMENT TYPE</option>
-                          {/* minimal static options to match ExpenseList */}
+                          <option value="">Select Payment Type</option>
                           {paymentTypes.map((type, index) => (
-                            <option key={index} value={type}>
-                              {type}
+                            <option key={index} value={type.id}>
+                              {type.name}
                             </option>
                           ))}
                         </select>
                       </div>
                     </div>
-                    {expenseDetail.paymentType == "CHEQUE" ||
-                    expenseDetail.paymentType == "PAY_ORDER" ? (
-                      <>
-                        <div className="w-full lg:w-3/12 px-2 mb-2">
-                          <div className="relative w-full mb-2">
-                            <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              {expenseDetail.paymentType == "CHEQUE"
-                                ? "Cheque"
-                                : "Pay Order"}{" "}
-                              No
-                            </label>
-                            <input
-                              name="paymentDocNo"
-                              type="text"
-                              value={expenseDetail.paymentDocNo}
-                              onChange={changeExpenseDetail}
-                              className="border rounded px-3 py-2 w-full"
-                              placeholder="Enter amount"
-                            />
-                          </div>
-                        </div>
-                        <div className="w-full lg:w-3/12 px-2 mb-2">
-                          <div className="relative w-full mb-2">
-                            <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              {expenseDetail.paymentType == "CHEQUE"
-                                ? "Cheque"
-                                : "Pay Order"}{" "}
-                              Date
-                            </label>
-                            <input
-                              type="datetime-local"
-                              name="paymentDocDate"
-                              value={expenseDetail.paymentDocDate}
-                              onChange={changeExpenseDetail}
-                              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                            />
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      ""
-                    )}
+                  </div>
 
-                    <div className="w-full lg:w-3/12 px-2 mb-2">
-                      <div className="relative w-full mb-2">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Created Date
-                        </label>
+                  {/* Cheque / Pay Order Details Section */}
+                  {(expenseDetail.paymentMethodType === "CHEQUE" ||
+                    expenseDetail.paymentMethodType === "PAY_ORDER") && (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                        <FaCalendarAlt className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                        {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Details
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} No
+                          </label>
+                          <input
+                            name="paymentDocNo"
+                            type="text"
+                            value={expenseDetail.paymentDocNo}
+                            onChange={changeExpenseDetail}
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="Enter number"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Date
+                          </label>
+                          <input
+                            type="datetime-local"
+                            name="paymentDocDate"
+                            value={expenseDetail.paymentDocDate}
+                            onChange={changeExpenseDetail}
+                            className="w-full p-2 border rounded-lg text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Info Section */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
+                      <FaDownload className="mr-2" style={{ fontSize: "14px", color: "#f59e0b" }} />
+                      Additional Info
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Created Date</label>
                         <input
                           type="datetime-local"
                           name="createdDate"
                           value={expenseDetail.createdDate}
                           onChange={changeExpenseDetail}
-                          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                          className="w-full p-2 border rounded-lg text-sm"
                         />
                       </div>
-                    </div>
-
-                    <div className="w-full lg:w-12/12 px-2 mb-2">
-                      <div className="relative w-full mb-2">
-                        <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                          Comments
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          {expenseDetail.paymentMethodType === "CHEQUE" ? "Bank Name (Optional)" : "Comments"}
                         </label>
-                        <textarea
-                          name="comments"
-                          value={expenseDetail.comments}
-                          onChange={changeExpenseDetail}
-                          className="border rounded px-3 py-2 w-full"
-                          placeholder="Enter comments"
-                        />
+                        {expenseDetail.paymentMethodType === "CHEQUE" ? (
+                          <input
+                            type="text"
+                            name="comments"
+                            value={expenseDetail.comments}
+                            onChange={changeExpenseDetail}
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="Enter bank name (optional)"
+                          />
+                        ) : (
+                          <textarea
+                            name="comments"
+                            value={expenseDetail.comments}
+                            onChange={changeExpenseDetail}
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="Enter comments"
+                            rows={2}
+                          />
+                        )}
                       </div>
                     </div>
-
-                    {organizationLocal.paybackByVendor ? (
-                      <div className="w-full lg:w-12/12 px-2 text-left">
-                        <button
-                          type="submit"
-                          onClick={handleSubmit}
-                          className="mt-3 bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
-                        >
-                          <FaDownload
-                            className="w-5 h-5 inline-block "
-                            style={{
-                              paddingBottom: "3px",
-                              paddingRight: "5px",
-                            }}
-                          />
-                          Pay Back
-                        </button>
-                      </div>
-                    ) : null}
                   </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={togglePaymentModal}
+                    className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
+                  >
+                    <RxCross2 className="mr-1" />
+                    Cancel
+                  </button>
+                  {organizationLocal.paybackByVendor ? (
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      className="bg-emerald-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 inline-flex items-center"
+                    >
+                      <FaDownload className="mr-2" style={{ color: "white" }} />
+                      Pay Back
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <></>
-        )}
+        ) : null}
         <DynamicTableComponent
           fetchDataFunction={fetchVendorList}
           setPage={setPage}

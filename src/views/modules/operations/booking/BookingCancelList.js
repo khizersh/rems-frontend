@@ -479,8 +479,8 @@ export default function BookingCancelList() {
                         >
                           <option value="">SELECT PAYMENT TYPE</option>
                           {paymentTypes.map((type, index) => (
-                            <option key={index} value={type}>
-                              {type}
+                            <option key={index} value={type.id}>
+                              {type.name}
                             </option>
                           ))}
                         </select>

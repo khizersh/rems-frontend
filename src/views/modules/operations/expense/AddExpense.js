@@ -6,7 +6,7 @@ import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FaTools, FaReceipt, FaMoneyBillAlt, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { EXPENSE_TYPE_ID } from "utility/Utility";
+import { EXPENSE_TYPE_ID, paymentTypes } from "utility/Utility";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -461,11 +461,7 @@ const AddExpense = () => {
                         name="paymentType"
                         value={formData.paymentType}
                         onChange={handleChange}
-                        options={[
-                          { id: "CASH", name: "Cash Payment" },
-                          { id: "CREDIT", name: "Credit / Payable" },
-                          { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
-                        ]}
+                        options={paymentTypes}
                       />
                     </div>
                     {formData.paymentType === "CHEQUE" ? (

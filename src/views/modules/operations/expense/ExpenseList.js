@@ -24,7 +24,7 @@ import { BiSolidDetail } from "react-icons/bi";
 import {
   paymentTypes,
   EXPENSE_TYPE,
-  EXPENSE_TYPE_ID,
+  INDIRECT_EXPENSE_CATEGORY_ID,
 } from "utility/Utility.js";
 import { PAYMENT_STATUS } from "utility/Utility.js";
 import "../../../../assets/styles/projects/project.css";
@@ -175,7 +175,7 @@ export default function ExpenseList() {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
       const response = await httpService.get(
-        `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+        `/accounting/${org.organizationId}/getAccountGroups?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}`,
       );
       setAccountGroups(response?.data?.data || []);
     } catch (err) {
@@ -192,7 +192,7 @@ export default function ExpenseList() {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
       const response = await httpService.get(
-        `/accounting/${org.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${groupId}`,
+        `/accounting/${org.organizationId}/allChartOfAccounts?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}&accountGroup=${groupId}`,
       );
       setCoaList(response?.data?.data || []);
     } catch (err) {

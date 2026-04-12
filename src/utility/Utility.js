@@ -41,7 +41,7 @@ export const MONTH_LABELS = [
   "December",
 ];
 
-export const EXPENSE_TYPE_ID = 5;
+export const INDIRECT_EXPENSE_CATEGORY_ID = 6;
 
 export const generateYears = (past, future) => {
   const currentYear = new Date().getFullYear();

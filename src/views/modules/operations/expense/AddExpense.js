@@ -6,7 +6,7 @@ import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FaTools, FaReceipt, FaMoneyBillAlt, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { EXPENSE_TYPE_ID, paymentTypes } from "utility/Utility";
+import { INDIRECT_EXPENSE_CATEGORY_ID, paymentTypes } from "utility/Utility";
 
 const AddExpense = () => {
   const { notifySuccess, notifyError, setLoading, loading } =
@@ -164,7 +164,7 @@ const AddExpense = () => {
           `/expense/getAllExpenseTypeByOrgId/${org.organizationId}`,
         ),
         httpService.get(
-          `/accounting/${org.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+          `/accounting/${org.organizationId}/getAccountGroups?accountCategory=${INDIRECT_EXPENSE_CATEGORY_ID}`,
         ),
         httpService.get(`/items/${org.organizationId}/list`),
       ]);
@@ -298,7 +298,7 @@ const AddExpense = () => {
       if (!org) return;
 
       const response = await httpService.get(
-        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseAccountGroupId}`,
+        `/accounting/${org?.organizationId}/allChartOfAccounts?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}&accountGroup=${expenseAccountGroupId}`,
       );
 
       setExpenseAccountDropdown(response?.data?.data || []);

@@ -4,7 +4,7 @@ import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import { useHistory, useParams } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaLayerGroup, FaPen, FaTrashAlt, FaUserPlus } from "react-icons/fa";
-import { EXPENSE_TYPE_ID } from "utility/Utility.js";
+import { INDIRECT_EXPENSE_CATEGORY_ID } from "utility/Utility.js";
 
 export default function ExpenseGroupDetail() {
     const {
@@ -80,7 +80,7 @@ export default function ExpenseGroupDetail() {
             setLoading(true);
 
             const response = await httpService.get(
-                `/accounting/${organization?.organizationId}/allChartOfAccounts?accountType=${EXPENSE_TYPE_ID}&accountGroup=${expenseGroupId}`
+                `/accounting/${organization?.organizationId}/allChartOfAccounts?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}&accountGroup=${expenseGroupId}`
             );
 
             setExpenseGroupDetail(response?.data?.data || []);

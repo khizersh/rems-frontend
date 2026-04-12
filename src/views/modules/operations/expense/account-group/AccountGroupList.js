@@ -4,7 +4,7 @@ import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../../components/table/DynamicTableComponent.js";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { FaEye, FaPen, FaUserPlus , FaChartPie } from "react-icons/fa";
-import { EXPENSE_TYPE_ID } from "utility/Utility.js";
+import { INDIRECT_EXPENSE_CATEGORY_ID } from "utility/Utility.js";
 
 
 export default function AccountGroupList() {
@@ -26,7 +26,7 @@ export default function AccountGroupList() {
   const [update, setUpdate] = useState(false);
   const [expenseGroupId, setExpenseGroupId] = useState(null);
   const [formData, setFormData] = useState({
-    accountTypeId: EXPENSE_TYPE_ID,
+    accountTypeId: INDIRECT_EXPENSE_CATEGORY_ID,
     name: "",
   });
 
@@ -49,7 +49,7 @@ export default function AccountGroupList() {
       setLoading(true);
       setSubmitting(true);
 
-      let url = `/accounting/${organization.organizationId}/accountGroup?accountType=${EXPENSE_TYPE_ID}`;
+      let url = `/accounting/${organization.organizationId}/accountGroup?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}`;
       if (update) {
         url = `/accounting/${organization?.organizationId}/accountGroup?groupId=${expenseGroupId}`;
       }
@@ -80,7 +80,7 @@ export default function AccountGroupList() {
       setLoading(true);
 
       const response = await httpService.get(
-        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${EXPENSE_TYPE_ID}`,
+        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}`,
       );
 
       setAccountGroup(response?.data?.data || []);

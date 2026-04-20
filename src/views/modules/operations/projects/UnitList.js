@@ -282,18 +282,18 @@ export default function UnitList() {
     if (!unit.serialNo) {
       errors.serialNo = "Serial No is required";
     }
-    if (!unit.squareFoot || unit.squareFoot <= 0) {
+    if ((!unit.squareFoot || unit.squareFoot <= 0) ) {
       errors.squareFoot = "Square Foot must be greater than 0";
     }
-    if (!unit.roomCount || unit.roomCount <= 0) {
+    if ((!unit.roomCount || unit.roomCount <= 0) && unit.unitType == "APARTMENT") {
       errors.roomCount = "Room Count must be greater than 0";
     }
-    if (!unit.bathroomCount || unit.bathroomCount <= 0) {
+    if ((!unit.bathroomCount || unit.bathroomCount <= 0) && unit.unitType == "APARTMENT") {
       errors.bathroomCount = "Bathroom Count must be greater than 0";
     }
 
     if (Object.keys(errors).length > 0) {
-      notifyError("Please fix validation errors", errors, 4000);
+      notifyError("Please fix validation errors", Object.values(errors).join(", "), 4000);
       setLoading(false);
       return;
     }

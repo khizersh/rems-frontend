@@ -25,6 +25,8 @@ const PaymentModal = ({
   const [accountList, setAccountList] = useState([]);
 
   useEffect(() => {
+    console.log("selectedPayment :: ",selectedPayment);
+    
     setRemainingAmountState(selectedPayment?.totalBalanceAmount || 0);
   }, [selectedPayment?.totalBalanceAmount]);
 
@@ -193,8 +195,8 @@ const PaymentModal = ({
                       >
                         <option value="">SELECT PAYMENT TYPE</option>
                         {paymentTypes.map((type, index) => (
-                          <option key={index} value={type}>
-                            {type}
+                          <option key={index} value={type.id}>
+                            {type.name}
                           </option>
                         ))}
                       </select>
@@ -295,8 +297,8 @@ const PaymentModal = ({
                       >
                         <option value="">SELECT PAYMENT TYPE</option>
                         {paymentTypes.map((type, index) => (
-                          <option key={index} value={type}>
-                            {type}
+                          <option key={index} value={type.id}>
+                            {type.name}
                           </option>
                         ))}
                       </select>

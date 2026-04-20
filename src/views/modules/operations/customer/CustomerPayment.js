@@ -431,10 +431,12 @@ export default function CustomerPayment() {
         4000
       );
     }
+    
     toggleModal();
   };
 
   const handleDetailModal = (data) => {
+    
     const name = customerAccountList.find(
       (custom) => custom.accountId == selectedCustomerAccount
     );

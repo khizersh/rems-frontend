@@ -394,7 +394,7 @@ export default function UpdateBooking() {
       JSON.parse(localStorage.getItem("organization")) || null;
     const updatedBooking = { ...booking };
     paymentSchedule.totalAmount =
-      paymentSchedule.actualAmount + paymentSchedule.miscellaneousAmount;
+     Number(paymentSchedule.actualAmount)  + Number(paymentSchedule.miscellaneousAmount);
     updatedBooking.customerId = selectedCustomer.customerId;
     updatedBooking.unitId = selectedUnit;
     updatedBooking.projectId = filterProject;
@@ -571,7 +571,8 @@ export default function UpdateBooking() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Select Project</label>
                 <select
                   value={filterProject}
-                  className="w-full p-2 border rounded-lg text-sm"
+                  disabled
+                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">All Projects</option>
                   {projects.map((project) => (
@@ -585,7 +586,8 @@ export default function UpdateBooking() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Select Floor</label>
                 <select
                   value={filterFloor}
-                  className="w-full p-2 border rounded-lg text-sm"
+                  disabled
+                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">All Floors</option>
                   {floorOptions.map((floor) => (
@@ -599,7 +601,8 @@ export default function UpdateBooking() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Select Unit</label>
                 <select
                   value={selectedUnit}
-                  className="w-full p-2 border rounded-lg text-sm"
+                  disabled
+                  className="w-full p-2 border rounded-lg text-sm bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">All Units</option>
                   {unitList.map((unit) => (

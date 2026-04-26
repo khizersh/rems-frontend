@@ -8,7 +8,14 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { v4 as uuidv4 } from "uuid";
-import { FaEye, FaPen, FaTrashAlt, FaDownload, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
+import {
+  FaEye,
+  FaPen,
+  FaTrashAlt,
+  FaDownload,
+  FaCreditCard,
+  FaCalendarAlt,
+} from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
@@ -30,7 +37,9 @@ export default function VendorAccount() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedPaymentItem, setSelectedPaymentItem] = useState(null);
   const [vendorAccountList, setVendorAccountList] = useState([]);
-  const [idempotencyKey] = useState(generateIdempotencyKey());
+  const [idempotencyKey, setIdempotencyKey] = useState(() =>
+    generateIdempotencyKey(),
+  );
   const [expenseDetail, setExpenseDetail] = useState({
     vendorAccountId: 0,
     amountPaid: 0,
@@ -231,22 +240,21 @@ export default function VendorAccount() {
     setExpenseDetail((prev) => ({ ...prev, [name]: value }));
   };
 
-  function generateIdempotencyKey() {
+  function generateIdempotencyKey(forceNew = false) {
     let key = sessionStorage.getItem("vendor_payment_key");
-    console.log("key exist :: ", key);
-
-    if (!key) {
+    if (!key || forceNew) {
       key = `VP-${crypto.randomUUID()}`;
-      console.log("key new :: ", key);
       sessionStorage.setItem("vendor_payment_key", key);
     }
-
     return key;
   }
 
   const handleSubmit = async () => {
     if (expenseDetail.paymentMethodType === "CHEQUE") {
-      if (!expenseDetail.paymentDocNo || expenseDetail.paymentDocNo.toString().trim() === "") {
+      if (
+        !expenseDetail.paymentDocNo ||
+        expenseDetail.paymentDocNo.toString().trim() === ""
+      ) {
         return notifyError("Cheque number is required", 4000);
       }
       if (!expenseDetail.paymentDocDate) {
@@ -306,6 +314,7 @@ export default function VendorAccount() {
       });
       setSelectedPaymentItem(null);
       sessionStorage.removeItem("vendor_payment_key");
+      setIdempotencyKey(generateIdempotencyKey(true));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -365,7 +374,10 @@ export default function VendorAccount() {
         />
         {isPaymentModalOpen ? (
           <div className="payback-modal-position">
-            <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full overflow-y-auto" style={{ maxHeight: "80vh" }}>
+            <div
+              className="bg-white rounded-xl shadow-xl border border-gray-200 w-full overflow-y-auto"
+              style={{ maxHeight: "80vh" }}
+            >
               {/* Header */}
               <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
                 <h2 className="text-base font-bold text-gray-700 uppercase flex items-center">
@@ -386,12 +398,17 @@ export default function VendorAccount() {
                   {/* Payment Details Section */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                      <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                      <FaCreditCard
+                        className="mr-2"
+                        style={{ fontSize: "14px", color: "#10b981" }}
+                      />
                       Payment Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Amount
+                        </label>
                         <input
                           name="amountPaid"
                           type="number"
@@ -402,7 +419,9 @@ export default function VendorAccount() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Select Account</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Select Account
+                        </label>
                         <select
                           name="organizationAccountId"
                           value={expenseDetail.organizationAccountId}
@@ -418,7 +437,9 @@ export default function VendorAccount() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Payment Type</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Payment Type
+                        </label>
                         <select
                           id="paymentMethodType"
                           name="paymentMethodType"
@@ -427,7 +448,12 @@ export default function VendorAccount() {
                           className="w-full p-2 border rounded-lg text-sm"
                         >
                           <option value="">Select Payment Type</option>
-                          {paymentTypes.map((type, index) => (
+                          {[
+                            { id: "CASH", name: "Cash Payment" },
+                            { id: "ONLINE", name: "Online Payment" },
+                            { id: "PAY_ORDER", name: "Pay Order" },
+                            { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" }
+                          ].map((type, index) => (
                             <option key={index} value={type.id}>
                               {type.name}
                             </option>
@@ -442,13 +468,22 @@ export default function VendorAccount() {
                     expenseDetail.paymentMethodType === "PAY_ORDER") && (
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                        <FaCalendarAlt className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
-                        {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Details
+                        <FaCalendarAlt
+                          className="mr-2"
+                          style={{ fontSize: "14px", color: "#6366f1" }}
+                        />
+                        {expenseDetail.paymentMethodType === "CHEQUE"
+                          ? "Cheque"
+                          : "Pay Order"}{" "}
+                        Details
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
-                            {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} No
+                            {expenseDetail.paymentMethodType === "CHEQUE"
+                              ? "Cheque"
+                              : "Pay Order"}{" "}
+                            No
                           </label>
                           <input
                             name="paymentDocNo"
@@ -461,7 +496,10 @@ export default function VendorAccount() {
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
-                            {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Date
+                            {expenseDetail.paymentMethodType === "CHEQUE"
+                              ? "Cheque"
+                              : "Pay Order"}{" "}
+                            Date
                           </label>
                           <input
                             type="datetime-local"
@@ -478,12 +516,17 @@ export default function VendorAccount() {
                   {/* Additional Info Section */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                      <FaDownload className="mr-2" style={{ fontSize: "14px", color: "#f59e0b" }} />
+                      <FaDownload
+                        className="mr-2"
+                        style={{ fontSize: "14px", color: "#f59e0b" }}
+                      />
                       Additional Info
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Created Date</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Created Date
+                        </label>
                         <input
                           type="datetime-local"
                           name="createdDate"
@@ -494,7 +537,9 @@ export default function VendorAccount() {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {expenseDetail.paymentMethodType === "CHEQUE" ? "Bank Name (Optional)" : "Comments"}
+                          {expenseDetail.paymentMethodType === "CHEQUE"
+                            ? "Bank Name (Optional)"
+                            : "Comments"}
                         </label>
                         {expenseDetail.paymentMethodType === "CHEQUE" ? (
                           <input

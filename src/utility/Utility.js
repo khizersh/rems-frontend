@@ -23,8 +23,10 @@ export const paymentTypes = [
   { id: "CASH", name: "Cash Payment" },
   { id: "ONLINE", name: "Online Payment" },
   { id: "PAY_ORDER", name: "Pay Order" },
+  { id: "CREDIT", name: "Credit - Pay Later" },
   { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
 ];
+
 export const EXPENSE_TYPE = ["MISCELLANEOUS" ,"CONSTRUCTION"];
 export const MONTH_LABELS = [
   "January",

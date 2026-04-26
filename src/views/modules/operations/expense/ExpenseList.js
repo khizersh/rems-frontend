@@ -175,7 +175,7 @@ export default function ExpenseList() {
       const org = JSON.parse(localStorage.getItem("organization")) || null;
       if (!org) return;
       const response = await httpService.get(
-        `/accounting/${org.organizationId}/getAccountGroups?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}`,
+        `/accounting/${org.organizationId}/getAccountGroups?accountCategory=${INDIRECT_EXPENSE_CATEGORY_ID}`,
       );
       setAccountGroups(response?.data?.data || []);
     } catch (err) {
@@ -326,10 +326,37 @@ export default function ExpenseList() {
     }
   };
 
+  const getExpenseTypeBadgeClass = (type) => {
+    switch (type) {
+      case "CONSTRUCTION":
+        return "bg-emerald-200 text-emerald-500 border border-blueGray-200";
+      case "MISCELLANEOUS":
+        return "bg-purple-200 text-purple-500 border border-blueGray-200";
+      case "HISTORICAL":
+        return "bg-blueGray-100 text-blueGray-700 border border-blueGray-200";
+      case "ALL":
+        return "bg-lightBlue-200 text-lightBlue-600 border border-blueGray-200";
+      case "VENDOR_PAYBACK":
+        return "bg-emerald-200 text-emerald-500 border border-blueGray-200";
+      default:
+        return "bg-blueGray-100 text-blueGray-700 border border-blueGray-200";
+    }
+  };
+
   const tableColumns = [
     { header: "Title", field: "expenseTitle" },
+    {
+      header: "Type",
+      field: "expenseType",
+      render: (value) => (
+        <span
+          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase ${getExpenseTypeBadgeClass(value)}`}
+        >
+          {value || "-"}
+        </span>
+      ),
+    },
     { header: "Vendor ", field: "vendorName" },
-    { header: "Expense Account", field: "expenseAccountName" },
     { header: "Account", field: "orgAccountTitle" },
   ];
 
@@ -382,6 +409,7 @@ export default function ExpenseList() {
         "Credit Amount": data?.creditAmount,
         "Total Amount": data?.totalAmount,
         "Expense Title": data?.expenseTitle,
+        "Expense Account": data?.expenseAccountName,
         "Project Name": data?.projectName,
         Comments: data?.comments,
       },

@@ -276,7 +276,7 @@ export default function DynamicTableComponent({
                         displayValue == "" ||
                         displayValue == undefined
                       ) {
-                        displayValue = "—";
+                        displayValue = "N/A";
                       }
 
                       return (

@@ -4,7 +4,15 @@ import httpService from "utility/httpService";
 import { TbFileExport } from "react-icons/tb";
 import { EXPENSE_TYPE } from "utility/Utility";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { FaTools, FaReceipt, FaMoneyBillAlt, FaBuilding, FaTruck, FaCreditCard, FaCalendarAlt } from "react-icons/fa";
+import {
+  FaTools,
+  FaReceipt,
+  FaMoneyBillAlt,
+  FaBuilding,
+  FaTruck,
+  FaCreditCard,
+  FaCalendarAlt,
+} from "react-icons/fa";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { INDIRECT_EXPENSE_CATEGORY_ID, paymentTypes } from "utility/Utility";
 
@@ -26,6 +34,7 @@ const AddExpense = () => {
     expenseCOAId: 0,
     chequeDate: new Date().toISOString().slice(0, 16),
     expenseType: "MISCELLANEOUS",
+    expenseTitle: "",
     comments: "",
     createdDate: new Date().toISOString().slice(0, 16),
     bankName: "",
@@ -62,6 +71,7 @@ const AddExpense = () => {
       organizationId: "",
       projectId: 0,
       expenseType: "",
+      expenseTitle: "",
       comments: "",
       expenseCOAId: 0,
       paymentType: "CASH",
@@ -87,13 +97,35 @@ const AddExpense = () => {
       return;
     }
 
+    if (name === "paymentType") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        // force creditAmount to 0 when switching to CHEQUE
+        ...(value === "CHEQUE" ? { creditAmount: 0 } : {}),
+        // for CREDIT we keep amountPaid and mirror it into creditAmount
+        ...(value === "CREDIT" ? { creditAmount: prev.amountPaid } : {}),
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      // force creditAmount to 0 when switching to CHEQUE
-      ...(name === "paymentType" && value === "CHEQUE" ? { creditAmount: 0 } : {}),
     }));
   };
+
+  useEffect(() => {
+    if (
+      formData.paymentType === "CREDIT" &&
+      formData.creditAmount !== formData.amountPaid
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        creditAmount: prev.amountPaid,
+      }));
+    }
+  }, [formData.amountPaid, formData.paymentType, formData.creditAmount]);
 
   const handleTabChange = (type) => {
     setFormData((prev) => {
@@ -124,8 +156,14 @@ const AddExpense = () => {
 
   useEffect(() => {
     if (formData.expenseType === "CONSTRUCTION") {
-      const paid = parseFloat(formData.amountPaid) || 0;
-      const credit = parseFloat(formData.creditAmount) || 0;
+      const paid =
+        formData.paymentType === "CREDIT"
+          ? 0
+          : parseFloat(formData.amountPaid) || 0;
+      const credit =
+        formData.paymentType === "CHEQUE"
+          ? 0
+          : parseFloat(formData.creditAmount) || 0;
       const total = paid + credit;
 
       setFormData((prev) => ({
@@ -138,7 +176,12 @@ const AddExpense = () => {
         totalAmount: prev.totalAmount,
       }));
     }
-  }, [formData.amountPaid, formData.creditAmount, formData.expenseType]);
+  }, [
+    formData.amountPaid,
+    formData.creditAmount,
+    formData.expenseType,
+    formData.paymentType,
+  ]);
 
   const fetchDropdownData = async () => {
     try {
@@ -176,6 +219,11 @@ const AddExpense = () => {
         };
       });
 
+      console.log(
+        "expenseAccountGroups.data.data: ",
+        expenseAccountGroups.data.data,
+      );
+
       setDropdowns({
         projects: projects.data || [],
         vendors: vendors.data || [],
@@ -208,8 +256,14 @@ const AddExpense = () => {
       }
 
       const isCheque = formData.paymentType === "CHEQUE";
-      const paidAmt = parseFloat(formData.amountPaid || 0);
-      const creditAmt = isCheque ? 0 : parseFloat(formData.creditAmount || 0);
+      const isCredit = formData.paymentType === "CREDIT";
+      const amount = parseFloat(formData.amountPaid || 0);
+      const paidAmt = isCredit ? 0 : amount;
+      const creditAmt = isCheque
+        ? 0
+        : isCredit
+          ? amount
+          : parseFloat(formData.creditAmount || 0);
 
       let requestBody = {
         ...formData,
@@ -234,19 +288,31 @@ const AddExpense = () => {
         if (!requestBody.chequeNumber || !requestBody.chequeNumber.trim()) {
           setSubmitting(false);
           setLoading(false);
-          return notifyError("Cheque Number is required", "Please enter a cheque number for PDC payment", 4000);
+          return notifyError(
+            "Cheque Number is required",
+            "Please enter a cheque number for PDC payment",
+            4000,
+          );
         }
         if (!requestBody.chequeDate) {
           setSubmitting(false);
           setLoading(false);
-          return notifyError("Cheque Date is required", "Please select a cheque date for PDC payment", 4000);
+          return notifyError(
+            "Cheque Date is required",
+            "Please select a cheque date for PDC payment",
+            4000,
+          );
         }
         const chequeDay = requestBody.chequeDate.slice(0, 10);
         const today = new Date().toISOString().slice(0, 10);
         if (chequeDay < today) {
           setSubmitting(false);
           setLoading(false);
-          return notifyError("Invalid Cheque Date", "Cheque date must be today or a future date", 4000);
+          return notifyError(
+            "Invalid Cheque Date",
+            "Cheque date must be today or a future date",
+            4000,
+          );
         }
         requestBody.chequeDate = chequeDay;
       } else {
@@ -258,10 +324,9 @@ const AddExpense = () => {
       // paymentMode is removed from backend — delete it from request body
       delete requestBody.paymentMode;
 
-
       if (
         formData.expenseType === "CONSTRUCTION" &&
-        (!formData.vendorAccountId || !formData.projectId )
+        (!formData.vendorAccountId || !formData.projectId)
       ) {
         setSubmitting(false);
         setLoading(false);
@@ -272,7 +337,10 @@ const AddExpense = () => {
         );
       }
 
-      const response = await httpService.post("/expense/addExpense", requestBody);
+      const response = await httpService.post(
+        "/expense/addExpense",
+        requestBody,
+      );
       await notifySuccess(response.responseMessage, 4000);
       resetForm();
     } catch (err) {
@@ -317,9 +385,6 @@ const AddExpense = () => {
     fetchDropdownData();
   }, []);
 
-
-
-
   const selectFields = [
     {
       label: "Select Project",
@@ -336,11 +401,11 @@ const AddExpense = () => {
       name: "organizationAccountId",
       options: dropdowns.accounts,
     },
-    {
-      label: "Expense Type",
-      name: "expenseTypeId",
-      options: dropdowns.expenseTypes,
-    },
+    // {
+    //   label: "Expense Type",
+    //   name: "expenseTypeId",
+    //   options: dropdowns.expenseTypes,
+    // },
   ];
 
   const inputFields = [
@@ -370,7 +435,10 @@ const AddExpense = () => {
       <div className="mb-4 py-4">
         <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
           <button onClick={() => history.goBack()} className="mr-3">
-            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+            <IoArrowBackOutline
+              className="text-xl"
+              style={{ color: "#64748b" }}
+            />
           </button>
           <FaMoneyBillAlt className="mr-2" style={{ color: "#10b981" }} />
           Add Expense
@@ -384,7 +452,10 @@ const AddExpense = () => {
         {/* Expense Type Tabs */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-200">
           <div className="flex justify-center">
-            <div className="bg-gray-100 p-1 rounded-lg inline-flex" style={{ gap: "0.25rem" }}>
+            <div
+              className="bg-gray-100 p-1 rounded-lg inline-flex"
+              style={{ gap: "0.25rem" }}
+            >
               {EXPENSE_TYPE.map((type) => {
                 const Icon = getIconForType(type);
                 const isActive = formData.expenseType === type;
@@ -401,7 +472,10 @@ const AddExpense = () => {
                   >
                     <Icon
                       className="mr-2"
-                      style={{ fontSize: "14px", color: isActive ? "#3b82f6" : "#94a3b8" }}
+                      style={{
+                        fontSize: "14px",
+                        color: isActive ? "#3b82f6" : "#94a3b8",
+                      }}
                     />
                     {type.replace("_", " ")}
                   </button>
@@ -418,7 +492,10 @@ const AddExpense = () => {
               <div className="w-full lg:w-6/12 px-2 mb-4">
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
                   <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                    <FaBuilding className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
+                    <FaBuilding
+                      className="mr-2"
+                      style={{ fontSize: "14px", color: "#6366f1" }}
+                    />
                     Expense Details
                   </h3>
                   <div className="flex flex-wrap -mx-2">
@@ -433,6 +510,16 @@ const AddExpense = () => {
                         />
                       </div>
                     ))}
+                    <div className="w-full lg:w-6/12 px-2 mb-3">
+                      <InputField
+                        label="Expense Title"
+                        name="expenseTitle"
+                        value={formData.expenseTitle}
+                        onChange={handleChange}
+                        type="text"
+                        readOnly={false}
+                      />
+                    </div>
                     <div className="w-full px-2 mt-2">
                       <InputField
                         label="Narrations"
@@ -451,7 +538,10 @@ const AddExpense = () => {
               <div className="w-full lg:w-6/12 px-2 mb-4">
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 h-full">
                   <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                    <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                    <FaCreditCard
+                      className="mr-2"
+                      style={{ fontSize: "14px", color: "#10b981" }}
+                    />
                     Payment Details
                   </h3>
                   <div className="flex flex-wrap -mx-2">
@@ -464,7 +554,8 @@ const AddExpense = () => {
                         options={paymentTypes}
                       />
                     </div>
-                    {formData.paymentType === "CHEQUE" ? (
+                    {formData.paymentType === "CHEQUE" ||
+                    formData.paymentType === "CREDIT" ? (
                       <div className="w-full lg:w-6/12 px-2 mb-3">
                         <InputField
                           label="Amount"
@@ -512,7 +603,8 @@ const AddExpense = () => {
                           />
                           {isFutureDate(formData.chequeDate) && (
                             <p className="text-xs text-amber-600 mt-1 font-semibold">
-                              ⓘ This is a post-dated cheque which does not deduct amount immediately
+                              ⓘ This is a post-dated cheque which does not
+                              deduct amount immediately
                             </p>
                           )}
                         </div>
@@ -545,7 +637,10 @@ const AddExpense = () => {
           ) : formData.expenseType == "MISCELLANEOUS" ? (
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                <FaReceipt className="mr-2" style={{ fontSize: "14px", color: "#8b5cf6" }} />
+                <FaReceipt
+                  className="mr-2"
+                  style={{ fontSize: "14px", color: "#8b5cf6" }}
+                />
                 Miscellaneous Expense
               </h3>
               <div className="flex flex-wrap -mx-2">
@@ -556,6 +651,16 @@ const AddExpense = () => {
                     value={formData.organizationAccountId}
                     onChange={handleChange}
                     options={dropdowns.accounts}
+                  />
+                </div>
+                <div className="w-full lg:w-4/12 px-2 mb-3">
+                  <InputField
+                    label="Expense Title"
+                    name="expenseTitle"
+                    value={formData.expenseTitle}
+                    onChange={handleChange}
+                    type="text"
+                    readOnly={false}
                   />
                 </div>
                 <div className="w-full lg:w-4/12 px-2 mb-3">
@@ -576,8 +681,8 @@ const AddExpense = () => {
                     onChange={handleChange}
                     options={[
                       { id: "CASH", name: "Cash Payment" },
-                      { id: "CREDIT", name: "Credit / Payable" },
-                      { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
+                      { id: "ONLINE", name: "Online Payment" },
+                      { id: "PAY_ORDER", name: "Pay Order" },
                     ]}
                   />
                 </div>
@@ -604,7 +709,8 @@ const AddExpense = () => {
                       />
                       {isFutureDate(formData.chequeDate) && (
                         <p className="text-xs text-amber-600 mt-1 font-semibold">
-                          ⓘ This is a post-dated cheque which does not deduct amount immediately
+                          ⓘ This is a post-dated cheque which does not deduct
+                          amount immediately
                         </p>
                       )}
                     </div>
@@ -669,7 +775,10 @@ const AddExpense = () => {
               onClick={() => history.goBack()}
               className="bg-gray-100 text-gray-700 font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-md hover:bg-gray-200 transition-all mr-3 inline-flex items-center"
             >
-              <IoArrowBackOutline className="mr-1" style={{ color: "#64748b" }} />
+              <IoArrowBackOutline
+                className="mr-1"
+                style={{ color: "#64748b" }}
+              />
               Cancel
             </button>
             <button

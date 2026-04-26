@@ -7,7 +7,16 @@ import {
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min.js";
 import { v4 as uuidv4 } from "uuid";
-import { FaEye, FaPen, FaTrashAlt, FaDownload, FaCreditCard, FaCalendarAlt, FaMoneyBillAlt, FaChartLine } from "react-icons/fa";
+import {
+  FaEye,
+  FaPen,
+  FaTrashAlt,
+  FaDownload,
+  FaCreditCard,
+  FaCalendarAlt,
+  FaMoneyBillAlt,
+  FaChartLine,
+} from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { IoArrowBackOutline } from "react-icons/io5";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
@@ -52,11 +61,13 @@ export default function VendorPaymentHistory() {
   });
   const organizationLocal =
     JSON.parse(localStorage.getItem("organization")) || {};
-  const [idempotencyKey] = useState(generateIdempotencyKey());
+  const [idempotencyKey, setIdempotencyKey] = useState(() =>
+    generateIdempotencyKey(),
+  );
 
-  function generateIdempotencyKey() {
+  function generateIdempotencyKey(forceNew = false) {
     let key = sessionStorage.getItem("vendor_payment_key");
-    if (!key) {
+    if (!key || forceNew) {
       key = `VP-${crypto.randomUUID()}`;
       sessionStorage.setItem("vendor_payment_key", key);
     }
@@ -212,6 +223,13 @@ export default function VendorPaymentHistory() {
               {value}{" "}
             </span>
           );
+        if (value === "PDC_CLEARANCE")
+          return (
+            <span className="text-lightBlue-600 font-semibold">
+              <i className="fas fa-arrow-down  text-lightBlue-600  d-inline mr-1"></i>
+              {value}{" "}
+            </span>
+          );
         else return <span>-</span>;
       },
     },
@@ -261,7 +279,10 @@ export default function VendorPaymentHistory() {
       } else {
         // create new payback
         if (expenseDetail.paymentMethodType === "CHEQUE") {
-          if (!expenseDetail.paymentDocNo || expenseDetail.paymentDocNo.toString().trim() === "") {
+          if (
+            !expenseDetail.paymentDocNo ||
+            expenseDetail.paymentDocNo.toString().trim() === ""
+          ) {
             notifyError("Cheque number is required", 4000);
             setLoading(false);
             return;
@@ -314,6 +335,7 @@ export default function VendorPaymentHistory() {
       setIsPaymentModalOpen(false);
       setBackdrop(!backdrop);
       await fetchAccountList();
+      await fetchAccountDetail();
 
       setExpenseDetail({
         vendorAccountId: 0,
@@ -329,6 +351,7 @@ export default function VendorPaymentHistory() {
       setSelectedPaymentItem(null);
       setIsUpdateMode(false);
       sessionStorage.removeItem("vendor_payment_key");
+      setIdempotencyKey(generateIdempotencyKey(true));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -525,7 +548,10 @@ export default function VendorPaymentHistory() {
       <div className="mb-4 py-4 px-4">
         <h6 className="text-blueGray-700 text-lg font-bold uppercase flex items-center">
           <button onClick={() => history.goBack()} className="mr-3">
-            <IoArrowBackOutline className="text-xl" style={{ color: "#64748b" }} />
+            <IoArrowBackOutline
+              className="text-xl"
+              style={{ color: "#64748b" }}
+            />
           </button>
           <FaChartLine className="mr-2" style={{ color: "#10b981" }} />
           Vendor Payment History
@@ -535,7 +561,10 @@ export default function VendorPaymentHistory() {
       {/* Modal */}
       {isPaymentModalOpen ? (
         <div className="payback-modal-position">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full overflow-y-auto" style={{ maxHeight: "80vh" }}>
+          <div
+            className="bg-white rounded-xl shadow-xl border border-gray-200 w-full overflow-y-auto"
+            style={{ maxHeight: "80vh" }}
+          >
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
               <h2 className="text-base font-bold text-gray-700 uppercase flex items-center">
@@ -556,12 +585,17 @@ export default function VendorPaymentHistory() {
                 {/* Payment Details Section */}
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                    <FaCreditCard className="mr-2" style={{ fontSize: "14px", color: "#10b981" }} />
+                    <FaCreditCard
+                      className="mr-2"
+                      style={{ fontSize: "14px", color: "#10b981" }}
+                    />
                     Payment Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Amount
+                      </label>
                       <input
                         name="amountPaid"
                         type="number"
@@ -572,7 +606,9 @@ export default function VendorPaymentHistory() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Select Account</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Select Account
+                      </label>
                       <select
                         name="organizationAccountId"
                         value={expenseDetail.organizationAccountId}
@@ -588,7 +624,9 @@ export default function VendorPaymentHistory() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Payment Type</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Payment Type
+                      </label>
                       <select
                         id="paymentMethodType"
                         name="paymentMethodType"
@@ -597,7 +635,12 @@ export default function VendorPaymentHistory() {
                         className="w-full p-2 border rounded-lg text-sm"
                       >
                         <option value="">Select Payment Type</option>
-                        {paymentTypes.map((type, index) => (
+                        {[
+                          { id: "CASH", name: "Cash Payment" },
+                          { id: "ONLINE", name: "Online Payment" },
+                          { id: "PAY_ORDER", name: "Pay Order" },
+                          { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
+                        ].map((type, index) => (
                           <option key={index} value={type.id}>
                             {type.name}
                           </option>
@@ -612,13 +655,22 @@ export default function VendorPaymentHistory() {
                   expenseDetail.paymentMethodType === "PAY_ORDER") && (
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                      <FaCalendarAlt className="mr-2" style={{ fontSize: "14px", color: "#6366f1" }} />
-                      {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Details
+                      <FaCalendarAlt
+                        className="mr-2"
+                        style={{ fontSize: "14px", color: "#6366f1" }}
+                      />
+                      {expenseDetail.paymentMethodType === "CHEQUE"
+                        ? "Cheque"
+                        : "Pay Order"}{" "}
+                      Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} No
+                          {expenseDetail.paymentMethodType === "CHEQUE"
+                            ? "Cheque"
+                            : "Pay Order"}{" "}
+                          No
                         </label>
                         <input
                           name="paymentDocNo"
@@ -631,7 +683,10 @@ export default function VendorPaymentHistory() {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {expenseDetail.paymentMethodType === "CHEQUE" ? "Cheque" : "Pay Order"} Date
+                          {expenseDetail.paymentMethodType === "CHEQUE"
+                            ? "Cheque"
+                            : "Pay Order"}{" "}
+                          Date
                         </label>
                         <input
                           type="datetime-local"
@@ -648,12 +703,17 @@ export default function VendorPaymentHistory() {
                 {/* Additional Info Section */}
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center border-b border-gray-200 pb-2">
-                    <FaDownload className="mr-2" style={{ fontSize: "14px", color: "#f59e0b" }} />
+                    <FaDownload
+                      className="mr-2"
+                      style={{ fontSize: "14px", color: "#f59e0b" }}
+                    />
                     Additional Info
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Created Date</label>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Created Date
+                      </label>
                       <input
                         type="datetime-local"
                         name="createdDate"
@@ -664,7 +724,9 @@ export default function VendorPaymentHistory() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                        {expenseDetail.paymentMethodType === "CHEQUE" ? "Bank Name (Optional)" : "Comments"}
+                        {expenseDetail.paymentMethodType === "CHEQUE"
+                          ? "Bank Name (Optional)"
+                          : "Comments"}
                       </label>
                       {expenseDetail.paymentMethodType === "CHEQUE" ? (
                         <input
@@ -722,8 +784,12 @@ export default function VendorPaymentHistory() {
               <FaMoneyBillAlt style={{ color: "#10b981", fontSize: "20px" }} />
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Total Paid</p>
-              <p className="text-xl font-bold text-emerald-600">{parseFloat(totalPaid || 0).toLocaleString()}</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                Total Paid
+              </p>
+              <p className="text-xl font-bold text-emerald-600">
+                {parseFloat(totalPaid || 0).toLocaleString()}
+              </p>
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-5 flex items-center">
@@ -731,8 +797,12 @@ export default function VendorPaymentHistory() {
               <FaCreditCard style={{ color: "#ef4444", fontSize: "20px" }} />
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Total Credit</p>
-              <p className="text-xl font-bold text-red-500">{parseFloat(totalCredit || 0).toLocaleString()}</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                Total Credit
+              </p>
+              <p className="text-xl font-bold text-red-500">
+                {parseFloat(totalCredit || 0).toLocaleString()}
+              </p>
             </div>
           </div>
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-5 flex items-center">
@@ -740,8 +810,12 @@ export default function VendorPaymentHistory() {
               <FaChartLine style={{ color: "#3b82f6", fontSize: "20px" }} />
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Total Amount</p>
-              <p className="text-xl font-bold text-blue-600">{parseFloat(totalAmount || 0).toLocaleString()}</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                Total Amount
+              </p>
+              <p className="text-xl font-bold text-blue-600">
+                {parseFloat(totalAmount || 0).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>

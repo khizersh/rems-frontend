@@ -36,6 +36,11 @@ export default function AddProject() {
     floorList: [],
   });
 
+  const [acquisitionType, setAcquisitionType] = useState("NEW_PROJECT");
+  const [organizationAccounts, setOrganizationAccounts] = useState([]);
+  const [selectedOrganizationAccountId, setSelectedOrganizationAccountId] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+
   const [indexes, setIndexes] = useState([
     {
       floor: 0,
@@ -147,6 +152,52 @@ export default function AddProject() {
     setProject({ ...project, [value.target.name]: value.target.value });
   };
 
+  const handleAcquisitionTypeChange = (type) => {
+    setAcquisitionType(type);
+
+    if (type === "EXISTING_PROJECT") {
+      setSelectedOrganizationAccountId("");
+      setFormErrors((prev) => ({ ...prev, organizationAccountId: undefined }));
+    }
+  };
+
+  const handleOrganizationAccountChange = (e) => {
+    const accountId = e.target.value;
+    setSelectedOrganizationAccountId(accountId);
+    setFormErrors((prev) => ({ ...prev, organizationAccountId: undefined }));
+  };
+
+  const validateProjectInputs = () => {
+    const errors = {};
+    if (!project.name) errors.name = "Project name is required.";
+    if (!project.address) errors.address = "Project address is required.";
+    if (!project.projectType) errors.projectType = "Project type is required.";
+    if (!project.monthDuration || Number(project.monthDuration) <= 0)
+      errors.monthDuration = "Month duration must be greater than zero.";
+
+    const totalCost = Number(project.purchasingAmount || 0) +
+      Number(project.additionalAmount || 0) +
+      Number(project.registrationAmount || 0);
+
+    if (acquisitionType === "NEW_PROJECT") {
+      if (!selectedOrganizationAccountId) {
+        errors.organizationAccountId = "Organization account is required for new projects.";
+      }
+      if (totalCost <= 0) {
+        errors.totalAmount = "Project costs must be greater than zero for new projects.";
+      }
+      const selectedAccount = organizationAccounts.find(
+        (account) => String(account.id) === String(selectedOrganizationAccountId)
+      );
+      if (selectedAccount && Number(selectedAccount.totalAmount) < totalCost) {
+        errors.totalAmount = "Insufficient funds in selected organization account.";
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const changeUnitFields = (floorIndex, unitIndex, e) => {
     const updatedFloors = [...floors];
     updatedFloors[floorIndex].unitList[unitIndex][e.target.name] =
@@ -242,6 +293,29 @@ export default function AddProject() {
 
     setFloors(updatedFloors);
   };
+
+  useEffect(() => {
+    const fetchOrganizationAccounts = async () => {
+      try {
+        const organization =
+          JSON.parse(localStorage.getItem("organization")) || {};
+        if (!organization.organizationId) return;
+
+        setLoading(true);
+        const response = await httpService.get(
+          `/organizationAccount/getAccountByOrgId/${organization.organizationId}`
+        );
+
+        setOrganizationAccounts(response.data || []);
+      } catch (err) {
+        notifyError(err.message, err.data, 4000);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizationAccounts();
+  }, []);
 
   const calculateMonthlyPaymentSum = (schedule) => {
     if (!schedule || !Array.isArray(schedule.monthWisePaymentList)) return 0;
@@ -383,9 +457,20 @@ export default function AddProject() {
 
   const createProject = async (e) => {
     e.preventDefault();
+
+    if (!validateProjectInputs()) {
+      notifyError("Please fix validation errors before submitting.", null, 4000);
+      return;
+    }
+
     const requestBody = { ...project };
     requestBody.floorList = floors;
     requestBody.floors = floors.length;
+    requestBody.acquisitionType = acquisitionType;
+    requestBody.organizationAccountId = selectedOrganizationAccountId
+      ? Number(selectedOrganizationAccountId)
+      : null;
+
     const organization = JSON.parse(localStorage.getItem("organization")) || {};
     requestBody.organizationId = organization.organizationId;
 
@@ -414,6 +499,15 @@ export default function AddProject() {
     Number(project.additionalAmount || 0) +
     Number(project.purchasingAmount || 0) +
     Number(project.registrationAmount || 0);
+
+  const selectedOrganizationAccount = organizationAccounts.find(
+    (account) => String(account.id) === String(selectedOrganizationAccountId)
+  );
+
+  const hasSufficientFunds =
+    acquisitionType === "NEW_PROJECT" &&
+    selectedOrganizationAccount &&
+    Number(selectedOrganizationAccount.totalAmount) >= totalProjectAmount;
 
   return (
     <div className="relative flex flex-col min-w-0 break-words w-full mb-6 border-0">
@@ -524,6 +618,88 @@ export default function AddProject() {
                   Financial Details
                 </h3>
                 <div className="flex flex-wrap -mx-2">
+                  <div className="w-full px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Project Acquisition Type
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      <label className="inline-flex items-center gap-2 text-xs">
+                        <input
+                          type="radio"
+                          name="acquisitionType"
+                          value="NEW_PROJECT"
+                          checked={acquisitionType === "NEW_PROJECT"}
+                          onChange={() => handleAcquisitionTypeChange("NEW_PROJECT")}
+                          className="form-radio text-blue-600"
+                        />
+                        <span>New Project</span>
+                      </label>
+                      <label className="inline-flex items-center gap-2 text-xs">
+                        <input
+                          type="radio"
+                          name="acquisitionType"
+                          value="EXISTING_PROJECT"
+                          checked={acquisitionType === "EXISTING_PROJECT"}
+                          onChange={() => handleAcquisitionTypeChange("EXISTING_PROJECT")}
+                          className="form-radio text-blue-600"
+                        />
+                        <span>Existing Project</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="w-full px-2 mb-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Organization Account {acquisitionType === "NEW_PROJECT" ? "*" : "(Optional)"}
+                    </label>
+                    <select
+                      id="organizationAccountId"
+                      name="organizationAccountId"
+                      value={selectedOrganizationAccountId}
+                      onChange={handleOrganizationAccountChange}
+                      className="w-full p-2 border rounded-lg text-sm"
+                    >
+                      <option value="">SELECT ORGANIZATION ACCOUNT</option>
+                      {organizationAccounts.map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.name || account.title || `Account ${account.id}`} - Available: {account.totalAmount?.toLocaleString()}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.organizationAccountId && (
+                      <p className="mt-1 text-xs text-red-500">
+                        {formErrors.organizationAccountId}
+                      </p>
+                    )}
+                  </div>
+
+                  {acquisitionType === "NEW_PROJECT" && (
+                    <div className="w-full px-2 mb-3">
+                      <div className="rounded-lg p-3 border border-amber-200 bg-amber-50 text-sm text-amber-800">
+                        <div className="font-semibold">Financial impact</div>
+                        <div className="mt-1">
+                          New projects deduct the chosen organization account balance. Ensure available funds are sufficient before saving.
+                        </div>
+                        {selectedOrganizationAccount && (
+                          <div className="mt-2 text-xs text-slate-700">
+                            Available balance: {Number(selectedOrganizationAccount.totalAmount).toLocaleString()} | Required: {totalProjectAmount.toLocaleString()} | {hasSufficientFunds ? "Sufficient funds" : "Insufficient funds"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {acquisitionType === "EXISTING_PROJECT" && (
+                    <div className="w-full px-2 mb-3">
+                      <div className="rounded-lg p-3 border border-emerald-200 bg-emerald-50 text-sm text-emerald-800">
+                        <div className="font-semibold">Historical record</div>
+                        <div className="mt-1">
+                          Existing projects are recorded for reference only. Organization account selection is optional and there is no immediate financial impact.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="w-full lg:w-6/12 px-2 mb-3">
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Purchasing Amount

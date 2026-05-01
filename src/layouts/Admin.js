@@ -97,7 +97,24 @@ export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
 
   function normalize(path) {
-    return path.replace(/\/\d+/g, "").replace(/\/0/g, "").replace(/\/$/, "");
+    if (!path) return "";
+    return path
+      .split(/[?#]/)[0]
+      .replace(/\/:([^/]+)/g, "")
+      .replace(/\/$/, "");
+  }
+
+  function routeMatches(path, candidate) {
+    const normalizedPath = normalize(path);
+    const normalizedCandidate = normalize(candidate);
+
+    if (!normalizedCandidate) return false;
+    if (normalizedPath === normalizedCandidate) return true;
+
+    return (
+      normalizedPath.startsWith(`${normalizedCandidate}/`) &&
+      !normalizedPath.slice(normalizedCandidate.length + 1).includes("/")
+    );
   }
 
   function isRouteAllowed(pathname, sidebar) {
@@ -107,34 +124,34 @@ export default function Admin() {
       const base = normalize(menu.url);
 
       // 1️⃣ Direct match with menu
-      if (current === base) return true;
+      if (routeMatches(current, base)) return true;
 
       // 2️⃣ Match FEATURE_ALIASES
       const aliases = FEATURE_ALIASES[base] || [];
-      if (aliases.some((a) => current === normalize(a))) {
+      if (aliases.some((a) => routeMatches(current, a))) {
         return true;
       }
 
       // 3️⃣ Child menu match
       for (const child of menu.childList || []) {
         const childBase = normalize(child.url);
-        if (current === childBase) return true;
+        if (routeMatches(current, childBase)) return true;
 
         // 4️⃣ Grandchild menu match
         for (const grandChild of child.grandChildList || []) {
           const gcBase = normalize(grandChild.url);
-          if (current === gcBase) return true;
+          if (routeMatches(current, gcBase)) return true;
 
           // 5️⃣ Match FEATURE_ALIASES for grandchild URLs
           const gcAliases = FEATURE_ALIASES[gcBase] || [];
-          if (gcAliases.some((a) => current === normalize(a))) {
+          if (gcAliases.some((a) => routeMatches(current, a))) {
             return true;
           }
         }
 
         // 6️⃣ Match FEATURE_ALIASES for child URLs
         const childAliases = FEATURE_ALIASES[childBase] || [];
-        if (childAliases.some((a) => current === normalize(a))) {
+        if (childAliases.some((a) => routeMatches(current, a))) {
           return true;
         }
       }

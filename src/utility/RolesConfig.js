@@ -25,6 +25,10 @@ export const FEATURE_ALIASES = {
   "/dashboard/organization": [
     "/dashboard/organization-account",
     "/dashboard/add-organization-account",
+    // "/dashboard/organization-account-management",
+  ],
+
+  "/dashboard/organization-account": [
     "/dashboard/organization-account-management",
   ],
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { FaLayerGroup, FaPen } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { paymentTypes } from "utility/Utility";
@@ -24,6 +24,9 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
     fromAccountId: null,
     toAccountId: null,
   });
+  /** One key per user transfer intent; reused on rapid double-clicks and network retries until success. */
+  const transferIdempotencyKeyRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchAllAccounts = async () => {
     try {
@@ -46,6 +49,12 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
   useEffect(() => {
     fetchAllAccounts();
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      transferIdempotencyKeyRef.current = null;
+    }
+  }, [isOpen]);
 
   useEffect(() => {}, [accountList]);
 
@@ -79,12 +88,22 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
         return notifyError("Please select To account", "", 4000);
 
       if (updateRequest.amount == 0)
-        return notifyError("Please enter amount", 4000);
+        return notifyError("Please enter amount", "", 4000);
 
+      if (submitting) return;
+
+      if (!transferIdempotencyKeyRef.current) {
+        transferIdempotencyKeyRef.current = crypto.randomUUID();
+      }
+      const idempotencyKey = transferIdempotencyKeyRef.current;
+
+      setSubmitting(true);
       await httpService.post(
         "/organizationAccount/transferAmount",
-        updateRequest
+        { ...updateRequest, idempotencyKey : "54c14468-bea9-4138-a66f-652808ed40b6" },
+        { "Idempotency-Key": "54c14468-bea9-4138-a66f-652808ed40b6" }
       );
+      transferIdempotencyKeyRef.current = null;
       notifySuccess("Transfer Funds Successfully!", 4000);
       refresh()
       setUpdateRequest({
@@ -96,6 +115,8 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
       setToAccountAmount(null);
     } catch (error) {
       notifyError(error.message, error.data, 4000);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -257,10 +278,12 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
           <div className="margin-dynamic-modal">
             <div className="pl-3">
               <button
+                type="button"
+                disabled={submitting}
                 onClick={handleUpdate}
-                className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none"
               >
-                TRANSFER
+                {submitting ? "TRANSFERRING…" : "TRANSFER"}
               </button>
             </div>
           </div>

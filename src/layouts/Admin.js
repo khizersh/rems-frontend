@@ -58,8 +58,6 @@ import TransactionSummary from "views/transactionsummary/TransactionSummary";
 import UpdateVendorComponent from "views/modules/operations/vendor/UpdateVendorAccount";
 import BookingCancelList from "views/modules/operations/booking/BookingCancelList";
 import BookingCancelDetail from "views/modules/operations/booking/BookingCancelDetail";
-import { ROLE_MODULES } from "utility/RolesConfig";
-import { MODULE_ROUTE_MAP } from "utility/RolesConfig";
 import { FEATURE_ALIASES } from "utility/RolesConfig";
 import AccountGroupList from "views/modules/operations/expense/account-group/AccountGroupList";
 import ExpenseGroupDetail from "views/modules/operations/expense/account-group/ExpenseGroupDetail";
@@ -92,6 +90,13 @@ import {
   MaterialIssue,
 } from "views/modules/warehouse";
 import PdcPayments from "views/modules/operations/expense/PdcPayments";
+import PropertyManagementHub from "views/modules/operations/propertymanagement/PropertyManagementHub";
+import PropertySellerList from "views/modules/operations/propertymanagement/PropertySellerList";
+import AddPropertySeller from "views/modules/operations/propertymanagement/AddPropertySeller";
+import UpdatePropertySeller from "views/modules/operations/propertymanagement/UpdatePropertySeller";
+import PropertyPurchaseList from "views/modules/operations/propertymanagement/PropertyPurchaseList";
+import AddPropertyPurchase from "views/modules/operations/propertymanagement/AddPropertyPurchase";
+import PropertyPurchaseDetail from "views/modules/operations/propertymanagement/PropertyPurchaseDetail";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -303,6 +308,13 @@ export default function Admin() {
               { path: "/dashboard/warehouse/stock-adjustment", component: StockAdjustment },
               { path: "/dashboard/warehouse/stock-ledger", component: StockLedger },
               { path: "/dashboard/warehouse/material-issue", component: MaterialIssue },
+              { path: "/dashboard/property-management", component: PropertyManagementHub },
+              { path: "/dashboard/property-sellers", component: PropertySellerList },
+              { path: "/dashboard/add-property-seller", component: AddPropertySeller },
+              { path: "/dashboard/update-property-seller/:sellerId", component: UpdatePropertySeller },
+              { path: "/dashboard/property-purchases", component: PropertyPurchaseList },
+              { path: "/dashboard/add-property-purchase", component: AddPropertyPurchase },
+              { path: "/dashboard/property-purchase-details/:purchaseId", component: PropertyPurchaseDetail },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

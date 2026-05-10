@@ -6,6 +6,15 @@ export const FEATURE_ALIASES = {
     "/dashboard/unit",
   ],
 
+  "/dashboard/property-purchases": [
+    "/dashboard/property-sellers",
+    "/dashboard/add-property-seller",
+    "/dashboard/update-property-seller",
+    "/dashboard/property-purchases",
+    "/dashboard/add-property-purchase",
+    "/dashboard/property-purchase-details",
+  ],
+
   "/dashboard/customers": [
     "/dashboard/add-customers",
     "/dashboard/update-customer",
@@ -25,7 +34,7 @@ export const FEATURE_ALIASES = {
   "/dashboard/organization": [
     "/dashboard/organization-account",
     "/dashboard/add-organization-account",
-    // "/dashboard/organization-account-management",
+    "/dashboard/organization-account-management",
   ],
 
   "/dashboard/organization-account": [
@@ -73,6 +82,8 @@ export const FEATURE_ALIASES = {
     "/dashboard/warehouse/stock-ledger",
     "/dashboard/warehouse/material-issue",
   ],
+
+
 };
 
 export const ROLE_DASHBOARD_PRIORITY = {

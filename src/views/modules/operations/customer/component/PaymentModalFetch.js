@@ -111,7 +111,6 @@ const PaymentModal = ({
       title: "Edit",
       className: "yellow",
     },
-    ,
   ];
 
   const onChangeUpdateRequest = (e) => {
@@ -139,9 +138,9 @@ const PaymentModal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="p-4 bg-white rounded fixed-left-13p inset-0 z-50 mx-auto  modal-width modal-height"
+        className="p-4 bg-white rounded fixed-left-13p inset-0 z-50 mx-auto modal-width modal-height flex flex-col min-h-0 overflow-hidden"
       >
-        <div className="flex justify-between items-center border-b pb-2 mb-4">
+        <div className="flex shrink-0 justify-between items-center border-b pb-2 mb-4">
           <h2 id="modal-title" className="text-lg font-bold">
             {formTitle}
           </h2>
@@ -153,6 +152,7 @@ const PaymentModal = ({
           </button>
         </div>
 
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
         {paidDetailsList && paidDetailsList.length > 0 ? (
           <div className="container mx-auto p-4">
             <DynamicTableComponent
@@ -173,7 +173,6 @@ const PaymentModal = ({
           <></>
         )}
 
-        <>
           {isEdit ? (
             <>
               <>
@@ -374,29 +373,27 @@ const PaymentModal = ({
           ) : (
             <></>
           )}
+        </div>
 
-          <div className="margin-dynamic-modal">
-            {isEdit ? (
-              <div className="pl-3">
-                <button
-                  onClick={handleUpdate}
-                  className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-                >
-                  UPDATE
-                </button>
+        {isEdit ? (
+          <div className="shrink-0 border-t border-blueGray-200 pt-3 pb-1 mt-2 -mx-4 px-4 bg-white">
+            <div className="pl-3 flex flex-wrap gap-3">
+              <button
+                onClick={handleUpdate}
+                className="bg-lightBlue-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+              >
+                UPDATE
+              </button>
 
-                <button
-                  onClick={() => handleEdit(false)}
-                  className="bg-red-500 ml-4 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-                >
-                  CANCEL
-                </button>
-              </div>
-            ) : (
-              <></>
-            )}
+              <button
+                onClick={() => handleEdit(false)}
+                className="bg-red-500 items-center text-white active:bg-lightBlue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+              >
+                CANCEL
+              </button>
+            </div>
           </div>
-        </>
+        ) : null}
       </div>
     </>
   );

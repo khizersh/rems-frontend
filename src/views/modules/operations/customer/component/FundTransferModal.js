@@ -100,8 +100,8 @@ const PaymentModalFundTransfer = ({ isOpen, onClose, formTitle = "Form" , refres
       setSubmitting(true);
       await httpService.post(
         "/organizationAccount/transferAmount",
-        { ...updateRequest, idempotencyKey : "54c14468-bea9-4138-a66f-652808ed40b6" },
-        { "Idempotency-Key": "54c14468-bea9-4138-a66f-652808ed40b6" }
+        { ...updateRequest, idempotencyKey  },
+        { "Idempotency-Key": idempotencyKey }
       );
       transferIdempotencyKeyRef.current = null;
       notifySuccess("Transfer Funds Successfully!", 4000);

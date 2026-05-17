@@ -1,7 +1,13 @@
 export const projectTypes = ["APARTMENT", "SHOP", "PLOT"];
 export const CANCEL_BOOKING_FEES_TYPE = ["FIXED", "PERCENTILE"];
 export const PAYMENT_STATUS = ["PENDING", "PAID", "UNPAID"];
-export const ACCOUNT_BALANCE_TRANSACTION_CATEGORY = ["WITHDRAWL", "ADJUSTMENT", "SCRAP_SALE", "REFUND",  "OTHER"];
+export const ACCOUNT_BALANCE_TRANSACTION_CATEGORY = [
+  "WITHDRAWL",
+  "ADJUSTMENT",
+  "SCRAP_SALE",
+  "REFUND",
+  "OTHER",
+];
 export const unitTypes = ["APARTMENT", "SHOP"];
 export const TRANSACTION_TYPES = ["CREDIT", "DEBIT", "DEBIT_CREDIT"];
 export const paymentReasons = [
@@ -20,7 +26,7 @@ export const PAYMENT_PLANS_TYPE = [
   "INSTALLMENT_SPECIFIC",
 ];
 export const paymentTypes = ["CASH", "ONLINE", "PAY_ORDER", "CHEQUE", "CUSTOM"];
-export const EXPENSE_TYPE = ["CONSTRUCTION", "MISCELLANEOUS"];
+export const EXPENSE_TYPE = ["MISCELLANEOUS", "CONSTRUCTION"];
 export const MONTH_LABELS = [
   "January",
   "February",
@@ -190,38 +196,45 @@ export function generateBookingHtml(data) {
           </div>
         </div>
         <div class="right">
-          <div class="photo-box">${data.profileImageUrl
-      ? `<img src="${data.profileImageUrl}" alt="Applicant Photo" />`
-      : `Photo`
-    }</div>
+          <div class="photo-box">${
+            data.profileImageUrl
+              ? `<img src="${data.profileImageUrl}" alt="Applicant Photo" />`
+              : `Photo`
+          }</div>
         </div>
       </div>
 
       <table class="info">
         <tbody>
           <tr><td><b>Name:</b></td><td>${data.name}</td></tr>
-          <tr><td><b>Father’s/Husband’s Name:</b></td><td>${data.guardianName
-    }</td></tr>
+          <tr><td><b>Father’s/Husband’s Name:</b></td><td>${
+            data.guardianName
+          }</td></tr>
           <tr><td><b>Postal Address:</b></td><td>${data.postalAddress}</td></tr>
-          <tr><td><b>Residential Address:</b></td><td>${data.residentialAddress
-    }</td></tr>
+          <tr><td><b>Residential Address:</b></td><td>${
+            data.residentialAddress
+          }</td></tr>
           <tr><td><b>Phone (Office):</b></td><td>${data.phone}</td></tr>
           <tr><td><b>Email Address:</b></td><td>${data.email}</td></tr>
           <tr><td><b>Age:</b></td><td>${data.age}</td></tr>
           <tr><td><b>Nationality:</b></td><td>${data.nationality}</td></tr>
           <tr><td><b>CNIC:</b></td><td>${data.cnic}</td></tr>
-          <tr><td><b>Nominee:</b></td><td>${data.nominee} (${data.nomineeRelation
-    })</td></tr>
+          <tr><td><b>Nominee:</b></td><td>${data.nominee} (${
+            data.nomineeRelation
+          })</td></tr>
         </tbody>
       </table>
 
       <div class="declaration">
         <p>1. I hereby declare that I have read and understand the terms and conditions of the allotment of the apartment and accept the same.</p>
         <p>2. I further agree to pay regularly installments and dues and abide by all rules and regulations prescribed by Vision Builders & Marketing from time to time.</p>
-        <p>3. I enclose herewith a sum of Rs. ${data.amount
-    }/- by Bank Draft / Pay Order No. ${data.payOrderNo || "________"
-    } drawn on ${data.bank || "________"
-    } on account of booking of the above unit.</p>
+        <p>3. I enclose herewith a sum of Rs. ${
+          data.amount
+        }/- by Bank Draft / Pay Order No. ${
+          data.payOrderNo || "________"
+        } drawn on ${
+          data.bank || "________"
+        } on account of booking of the above unit.</p>
       </div>
 
       <div class="footer">
@@ -236,7 +249,6 @@ export function generateBookingHtml(data) {
   </html>
   `;
 }
-
 
 export function formatPaymentSchedule(scheduleData) {
   if (!scheduleData?.monthWisePaymentList?.length) return [];

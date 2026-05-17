@@ -14,7 +14,6 @@
   background-color: #eee;
 }
 
-
 .text-green-600 {
   color: #16a34a; /* Tailwind's green-600 */
   font-weight: 600;
@@ -24,6 +23,18 @@
 .text-blue-600 {
   color: #2563eb; /* Tailwind's blue-600 */
   font-weight: 600;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.hover\:text-gray-500:hover {
+  color: #6b7280;
+}
+
+.hover\:bg-gray-50:hover {
+  background-color: #f9fafb;
 }
 
 .text-red-600 {
@@ -41,6 +52,7 @@
 }
 
 .btn-hover-shadow:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind's shadow-lg */
 }

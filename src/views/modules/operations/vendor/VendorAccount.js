@@ -13,7 +13,7 @@ import { RxCross2 } from "react-icons/rx";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { RiFolderReceivedFill } from "react-icons/ri";
 import { GoSearch } from "react-icons/go";
-import { paymentTypes } from "utility/Utility.js";
+import { paymentMethodTypes } from "utility/Utility.js";
 
 export default function VendorAccount() {
   const {
@@ -30,13 +30,15 @@ export default function VendorAccount() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedPaymentItem, setSelectedPaymentItem] = useState(null);
   const [vendorAccountList, setVendorAccountList] = useState([]);
-  const [idempotencyKey] = useState(generateIdempotencyKey());
+  const [idempotencyKey, setIdempotencyKey] = useState(() =>
+    generateIdempotencyKey(),
+  );
   const [expenseDetail, setExpenseDetail] = useState({
     vendorAccountId: 0,
     amountPaid: 0,
     organizationId: 10,
     organizationAccountId: 0,
-    paymentType: "",
+    paymentMethodType: "",
     paymentDocNo: 0,
     paymentDocDate: new Date().toISOString().slice(0, 16),
     createdDate: new Date().toISOString().slice(0, 16),
@@ -231,20 +233,83 @@ export default function VendorAccount() {
     setExpenseDetail((prev) => ({ ...prev, [name]: value }));
   };
 
-  function generateIdempotencyKey() {
+  function generateIdempotencyKey(forceNew = false) {
     let key = sessionStorage.getItem("vendor_payment_key");
-    console.log("key exist :: ", key);
-
-    if (!key) {
+    if (!key || forceNew) {
       key = `VP-${crypto.randomUUID()}`;
-      console.log("key new :: ", key);
       sessionStorage.setItem("vendor_payment_key", key);
     }
-
     return key;
   }
 
+  // const handleSubmit = async () => {
+  //   setLoading(true);
+
+  //   try {
+  //     const requestBody = {
+  //       ...expenseDetail,
+  //       organizationId:
+  //         organizationLocal?.organizationId || expenseDetail.organizationId,
+  //       vendorAccountId:
+  //         selectedPaymentItem?.id || expenseDetail.vendorAccountId,
+  //       organizationAccountId:
+  //         Number(expenseDetail.organizationAccountId) || null,
+  //       amountPaid: Number(expenseDetail.amountPaid) || 0,
+  //       idempotencyKey: idempotencyKey,
+  //     };
+
+  //     const resp = await httpService.post(
+  //       "/vendorAccount/paybackCredit",
+  //       requestBody,
+  //     );
+
+  //      if (resp?.data?.pdcRecord) {
+  //       const pdc = resp.data.pdcRecord;
+  //       notifySuccess(
+  //         `PDC created successfully! Cheque #${pdc.chequeNumber} will be processed on ${pdc.chequeDate}`,
+  //         5000,
+  //       );
+  //     } else {
+  //       notifySuccess(resp?.responseMessage || "Payback successful", 3000);
+  //     }
+
+  //     setIsPaymentModalOpen(false);
+  //     setBackdrop(!backdrop);
+  //     await fetchVendorList();
+
+  //     setExpenseDetail({
+  //       vendorAccountId: 0,
+  //       amountPaid: 0,
+  //       organizationId: organizationLocal?.organizationId || 0,
+  //       organizationAccountId: 0,
+  //       paymentMethodType: "",
+  //       paymentDocNo: 0,
+  //       paymentDocDate: new Date().toISOString().slice(0, 16),
+  //       createdDate: new Date().toISOString().slice(0, 16),
+  //       comments: "",
+  //     });
+  //     setSelectedPaymentItem(null);
+  //     sessionStorage.removeItem("vendor_payment_key");
+  //   } catch (err) {
+  //     notifyError(err.message, err.data, 4000);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async () => {
+    if (expenseDetail.paymentMethodType === "CHEQUE") {
+      if (
+        !expenseDetail.paymentDocNo ||
+        expenseDetail.paymentDocNo.toString().trim() === ""
+      ) {
+        return notifyError("Cheque number is required", 4000);
+      }
+      if (!expenseDetail.paymentDocDate) {
+        return notifyError("Cheque date is required", 4000);
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -258,14 +323,28 @@ export default function VendorAccount() {
           Number(expenseDetail.organizationAccountId) || null,
         amountPaid: Number(expenseDetail.amountPaid) || 0,
         idempotencyKey: idempotencyKey,
+        paymentMethodType: expenseDetail.paymentMethodType || "",
+        paymentDocNo: expenseDetail.paymentDocNo || "",
+        paymentDocDate: expenseDetail.paymentDocDate
+          ? new Date(expenseDetail.paymentDocDate).toISOString()
+          : null,
+        comments: expenseDetail.comments || "",
       };
 
-      const data = await httpService.post(
+      const resp = await httpService.post(
         "/vendorAccount/paybackCredit",
         requestBody,
       );
 
-      notifySuccess(data?.responseMessage || "Payback successful", 3000);
+      if (resp?.data?.pdcRecord) {
+        const pdc = resp.data.pdcRecord;
+        notifySuccess(
+          `PDC created successfully! Cheque #${pdc.chequeNumber} will be processed on ${pdc.chequeDate}`,
+          5000,
+        );
+      } else {
+        notifySuccess(resp?.responseMessage || "Payback successful", 3000);
+      }
       setIsPaymentModalOpen(false);
       setBackdrop(!backdrop);
       await fetchVendorList();
@@ -275,14 +354,15 @@ export default function VendorAccount() {
         amountPaid: 0,
         organizationId: organizationLocal?.organizationId || 0,
         organizationAccountId: 0,
-        paymentType: "",
-        paymentDocNo: 0,
+        paymentMethodType: "",
+        paymentDocNo: "",
         paymentDocDate: new Date().toISOString().slice(0, 16),
         createdDate: new Date().toISOString().slice(0, 16),
         comments: "",
       });
       setSelectedPaymentItem(null);
       sessionStorage.removeItem("vendor_payment_key");
+      setIdempotencyKey(generateIdempotencyKey(true));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -397,29 +477,33 @@ export default function VendorAccount() {
                           Payment Type
                         </label>
                         <select
-                          id="paymentType"
-                          name="paymentType"
+                          id="paymentMethodType"
+                          name="paymentMethodType"
                           className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                          value={expenseDetail.paymentType}
+                          value={expenseDetail.paymentMethodType}
                           onChange={changeExpenseDetail}
                         >
-                          <option value="">SELECT PAYMENT TYPE</option>
-                          {/* minimal static options to match ExpenseList */}
-                          {paymentTypes.map((type, index) => (
-                            <option key={index} value={type}>
-                              {type}
+                          <option value="">Select Payment Type</option>
+                          {[
+                            { id: "CASH", name: "Cash Payment" },
+                            { id: "ONLINE", name: "Online Payment" },
+                            { id: "PAY_ORDER", name: "Pay Order" },
+                            { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
+                          ].map((type, index) => (
+                            <option key={index} value={type.id}>
+                              {type.name}
                             </option>
                           ))}
                         </select>
                       </div>
                     </div>
-                    {expenseDetail.paymentType == "CHEQUE" ||
-                    expenseDetail.paymentType == "PAY_ORDER" ? (
+                    {expenseDetail.paymentMethodType == "CHEQUE" ||
+                    expenseDetail.paymentMethodType == "PAY_ORDER" ? (
                       <>
                         <div className="w-full lg:w-3/12 px-2 mb-2">
                           <div className="relative w-full mb-2">
                             <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              {expenseDetail.paymentType == "CHEQUE"
+                              {expenseDetail.paymentMethodType == "CHEQUE"
                                 ? "Cheque"
                                 : "Pay Order"}{" "}
                               No
@@ -437,7 +521,7 @@ export default function VendorAccount() {
                         <div className="w-full lg:w-3/12 px-2 mb-2">
                           <div className="relative w-full mb-2">
                             <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
-                              {expenseDetail.paymentType == "CHEQUE"
+                              {expenseDetail.paymentMethodType == "CHEQUE"
                                 ? "Cheque"
                                 : "Pay Order"}{" "}
                               Date

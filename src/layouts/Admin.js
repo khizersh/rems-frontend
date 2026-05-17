@@ -20,6 +20,7 @@ import Tables from "views/admin/Tables.js";
 import { MainProvider } from "context/MainContext";
 import NotificationContainer from "components/Notification/NotificationContainer";
 import FloorList from "views/modules/operations/projects/FloorList";
+import PdcPayments from "views/modules/operations/expense/PdcPayments";
 import UnitList from "views/modules/operations/projects/UnitList";
 import CustomerList from "views/modules/operations/customer/CustomerList";
 import CustomerAccount from "views/modules/operations/customer/CustomerAccount";
@@ -109,12 +110,36 @@ export default function Admin() {
 
           <Switch>
             {[
-              { path: "/dashboard/admin-dashboard", exact: true, component: AdminDashboard },
-              { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
-              { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
-              { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },
-              { path: "/dashboard/user-dashboard/payments", exact: true, component: CustomerPayments },
-              { path: "/dashboard/user-dashboard/ledger", exact: true, component: CustomerLedgerPage },
+              {
+                path: "/dashboard/admin-dashboard",
+                exact: true,
+                component: AdminDashboard,
+              },
+              {
+                path: "/dashboard/user-dashboard",
+                exact: true,
+                component: UserDashboard,
+              },
+              {
+                path: "/dashboard/user-dashboard/accounts",
+                exact: true,
+                component: CustomerAccounts,
+              },
+              {
+                path: "/dashboard/user-dashboard/accounts/:id",
+                exact: true,
+                component: AccountDetails,
+              },
+              {
+                path: "/dashboard/user-dashboard/payments",
+                exact: true,
+                component: CustomerPayments,
+              },
+              {
+                path: "/dashboard/user-dashboard/ledger",
+                exact: true,
+                component: CustomerLedgerPage,
+              },
               {
                 path: "/dashboard/project-analysis/:projectId",
                 component: ProjectAnalytics,
@@ -156,8 +181,14 @@ export default function Admin() {
               },
               { path: "/dashboard/expense-list", component: ExpenseList },
               { path: "/dashboard/add-expense", component: AddExpense },
-              { path: "/dashboard/expense-account-group", component: AccountGroupList },
-              { path: "/dashboard/expense-group-detail/:expenseGroupId", component: ExpenseGroupDetail },
+              {
+                path: "/dashboard/expense-account-group",
+                component: AccountGroupList,
+              },
+              {
+                path: "/dashboard/expense-group-detail/:expenseGroupId",
+                component: ExpenseGroupDetail,
+              },
               {
                 path: "/dashboard/expense-update/:expenseId",
                 component: UpdateExpense,
@@ -189,6 +220,7 @@ export default function Admin() {
                 component: CustomerAccount,
               },
               { path: "/dashboard/customer-ledger", component: CustomerLedger },
+              { path: "/dashboard/pdc-payments", component: PdcPayments },
               {
                 path: "/dashboard/customer-schedule/:unitID",
                 component: CustomerSchedule,

@@ -545,12 +545,10 @@ const AddExpense = () => {
                           { id: "ONLINE", name: "Online Payment" },
                           { id: "PAY_ORDER", name: "Pay Order" },
                           { id: "CHEQUE", name: "Post Dated Cheque" },
-                          { id: "CREDIT", name: "Credit Payment" },
                         ]}
                       />
                     </div>
-                    {formData.paymentType === "CHEQUE" ||
-                    formData.paymentType === "CREDIT" ? (
+                    {formData.paymentType === "CHEQUE" ? (
                       <div className="w-full lg:w-6/12 px-2 mb-3">
                         <InputField
                           label="Amount"

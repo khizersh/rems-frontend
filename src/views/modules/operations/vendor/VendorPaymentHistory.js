@@ -11,7 +11,6 @@ import { FaEye, FaPen, FaTrashAlt, FaDownload } from "react-icons/fa";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
 import { BsFillSave2Fill } from "react-icons/bs";
 import { MdPrint } from "react-icons/md";
-import { paymentTypes } from "utility/Utility.js";
 
 export default function VendorPaymentHistory() {
   const {
@@ -50,11 +49,13 @@ export default function VendorPaymentHistory() {
   });
   const organizationLocal =
     JSON.parse(localStorage.getItem("organization")) || {};
-  const [idempotencyKey] = useState(generateIdempotencyKey());
+  const [idempotencyKey, setIdempotencyKey] = useState(
+    generateIdempotencyKey(),
+  );
 
-  function generateIdempotencyKey() {
+  function generateIdempotencyKey(forceNew = false) {
     let key = sessionStorage.getItem("vendor_payment_key");
-    if (!key) {
+    if (!key || forceNew) {
       key = `VP-${crypto.randomUUID()}`;
       sessionStorage.setItem("vendor_payment_key", key);
     }
@@ -225,6 +226,40 @@ export default function VendorPaymentHistory() {
     setExpenseDetail((prev) => ({ ...prev, [name]: value }));
   };
 
+  const formatPaymentDocDate = (dateValue) =>
+    dateValue ? new Date(dateValue).toISOString() : null;
+
+  const validatePaymentDetails = () => {
+    if (expenseDetail.paymentMethodType === "CHEQUE") {
+      if (
+        !expenseDetail.paymentDocNo ||
+        expenseDetail.paymentDocNo.toString().trim() === ""
+      ) {
+        notifyError("Cheque number is required", 4000);
+        return false;
+      }
+      if (!expenseDetail.paymentDocDate) {
+        notifyError("Cheque date is required", 4000);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const notifyPaybackSuccess = (resp, fallbackMessage) => {
+    if (resp?.data?.pdcRecord) {
+      const pdc = resp.data.pdcRecord;
+      notifySuccess(
+        `PDC created successfully! Cheque #${pdc.chequeNumber} will be processed on ${pdc.chequeDate}`,
+        5000,
+      );
+      return;
+    }
+
+    notifySuccess && notifySuccess(resp?.responseMessage || fallbackMessage, 3000);
+  };
+
   const togglePaymentModal = () => {
     const newState = !isPaymentModalOpen;
     setBackdrop(!backdrop);
@@ -233,6 +268,8 @@ export default function VendorPaymentHistory() {
   };
 
   const handleSubmitPayback = async () => {
+    if (!validatePaymentDetails()) return;
+
     setLoading(true);
     try {
       if (isUpdateMode && selectedPaymentItem && selectedPaymentItem.id) {
@@ -246,7 +283,7 @@ export default function VendorPaymentHistory() {
           comments: expenseDetail.comments || "",
           paymentMethodType: expenseDetail.paymentMethodType || "",
           paymentDocNo: expenseDetail.paymentDocNo || "",
-          paymentDocDate: expenseDetail.paymentDocDate || null,
+          paymentDocDate: formatPaymentDocDate(expenseDetail.paymentDocDate),
         };
 
         const resp = await httpService.put(
@@ -254,8 +291,7 @@ export default function VendorPaymentHistory() {
           requestBody,
         );
 
-        notifySuccess &&
-          notifySuccess(resp?.responseMessage || "Update successful", 3000);
+        notifyPaybackSuccess(resp, "Update successful");
       } else {
         // create new payback
         const requestBody = {
@@ -271,7 +307,7 @@ export default function VendorPaymentHistory() {
           idempotencyKey: idempotencyKey,
           paymentMethodType: expenseDetail.paymentMethodType || "",
           paymentDocNo: expenseDetail.paymentDocNo || "",
-          paymentDocDate: expenseDetail.paymentDocDate || null,
+          paymentDocDate: formatPaymentDocDate(expenseDetail.paymentDocDate),
           comments: expenseDetail.comments || "",
         };
 
@@ -280,8 +316,7 @@ export default function VendorPaymentHistory() {
           requestBody,
         );
 
-        notifySuccess &&
-          notifySuccess(resp?.responseMessage || "Payback successful", 3000);
+        notifyPaybackSuccess(resp, "Payback successful");
       }
 
       // common cleanup
@@ -294,8 +329,8 @@ export default function VendorPaymentHistory() {
         amountPaid: 0,
         organizationId: organizationLocal?.organizationId || 0,
         organizationAccountId: 0,
-        paymentType: "",
-        paymentDocNo: 0,
+        paymentMethodType: "",
+        paymentDocNo: "",
         paymentDocDate: new Date().toISOString().slice(0, 16),
         createdDate: new Date().toISOString().slice(0, 16),
         comments: "",
@@ -303,6 +338,7 @@ export default function VendorPaymentHistory() {
       setSelectedPaymentItem(null);
       setIsUpdateMode(false);
       sessionStorage.removeItem("vendor_payment_key");
+      setIdempotencyKey(generateIdempotencyKey(true));
     } catch (err) {
       notifyError(err.message, err.data, 4000);
     } finally {
@@ -333,6 +369,7 @@ export default function VendorPaymentHistory() {
     setSelectedPaymentItem(row);
     setExpenseDetail((prev) => {
       let createdDateVal = prev.createdDate;
+      let paymentDocDateVal = prev.paymentDocDate;
       try {
         if (row.createdDate) {
           // normalize to datetime-local `YYYY-MM-DDTHH:mm`
@@ -345,6 +382,16 @@ export default function VendorPaymentHistory() {
           )
             createdDateVal = row.createdDate.slice(0, 16);
         }
+        if (row.paymentDocDate) {
+          const d = new Date(row.paymentDocDate);
+          if (!isNaN(d.getTime()))
+            paymentDocDateVal = d.toISOString().slice(0, 16);
+          else if (
+            typeof row.paymentDocDate === "string" &&
+            row.paymentDocDate.includes("T")
+          )
+            paymentDocDateVal = row.paymentDocDate.slice(0, 16);
+        }
       } catch (e) {
         // fallback to previous value
       }
@@ -356,6 +403,8 @@ export default function VendorPaymentHistory() {
           row.organizationAccountId || prev.organizationAccountId,
         comments: row.comments || prev.comments,
         paymentMethodType: row.paymentMethodType || prev.paymentMethodType,
+        paymentDocNo: row.paymentDocNo || prev.paymentDocNo,
+        paymentDocDate: paymentDocDateVal,
         createdDate: createdDateVal,
       };
     });
@@ -491,12 +540,21 @@ export default function VendorPaymentHistory() {
   `;
   };
 
+  const paymentFieldClass = "w-full md:w-6/12 lg:w-4/12 px-2 mb-2";
+  const paymentDocTypes = ["CHEQUE", "PAY_ORDER"];
+  const paymentMethodOptions = [
+    { id: "CASH", name: "Cash Payment" },
+    { id: "ONLINE", name: "Online Payment" },
+    { id: "PAY_ORDER", name: "Pay Order" },
+    { id: "CHEQUE", name: "Post-Dated Cheque (PDC)" },
+  ];
+
   return (
     <div className="container mx-auto p-4">
       {isPaymentModalOpen ? (
         <div>
           <div className="payback-modal inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded shadow-lg  w-full max-w-xl">
+            <div className="bg-white rounded shadow-lg  w-full max-w-3xl">
               <div className="flex justify-between items-center mb-4 p-4">
                 <h2 className="text-xl font-bold uppercase">Pay Back Form</h2>
                 <button onClick={togglePaymentModal}>
@@ -506,7 +564,7 @@ export default function VendorPaymentHistory() {
 
               <div className="grid grid-cols-12 gap-4 payback-form p-4">
                 <div className="flex flex-wrap bg-white">
-                  <div className="w-full lg:w-3/12 px-2 mb-2">
+                  <div className={paymentFieldClass}>
                     <div className="relative w-full mb-2">
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Amount
@@ -521,7 +579,7 @@ export default function VendorPaymentHistory() {
                       />
                     </div>
                   </div>
-                  <div className="w-full lg:w-3/12 px-2 mb-2">
+                  <div className={paymentFieldClass}>
                     <div className="relative w-full mb-2">
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Select Account
@@ -542,7 +600,7 @@ export default function VendorPaymentHistory() {
                     </div>
                   </div>
 
-                  <div className="w-full lg:w-3/12 px-2 mb-2">
+                  <div className={paymentFieldClass}>
                     <div className="relative w-full mb-2">
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Payment Type
@@ -554,20 +612,19 @@ export default function VendorPaymentHistory() {
                         value={expenseDetail.paymentMethodType}
                         onChange={changeExpenseDetail}
                       >
-                        <option value="">SELECT PAYMENT TYPE</option>
-                        {paymentTypes.map((type, index) => (
-                          <option key={index} value={type}>
-                            {type}
+                        <option value="">Select Payment Type</option>
+                        {paymentMethodOptions.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
 
-                  {expenseDetail.paymentMethodType == "CHEQUE" ||
-                  expenseDetail.paymentMethodType == "PAY_ORDER" ? (
+                  {paymentDocTypes.includes(expenseDetail.paymentMethodType) ? (
                     <>
-                      <div className="w-full lg:w-3/12 px-2 mb-2">
+                      <div className={paymentFieldClass}>
                         <div className="relative w-full mb-2">
                           <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                             {expenseDetail.paymentMethodType == "CHEQUE"
@@ -581,10 +638,15 @@ export default function VendorPaymentHistory() {
                             value={expenseDetail.paymentDocNo}
                             onChange={changeExpenseDetail}
                             className="border rounded px-3 py-2 w-full"
+                            placeholder={`Enter ${
+                              expenseDetail.paymentMethodType == "CHEQUE"
+                                ? "cheque"
+                                : "pay order"
+                            } no`}
                           />
                         </div>
                       </div>
-                      <div className="w-full lg:w-3/12 px-2 mb-2">
+                      <div className={paymentFieldClass}>
                         <div className="relative w-full mb-2">
                           <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                             {expenseDetail.paymentMethodType == "CHEQUE"
@@ -604,7 +666,7 @@ export default function VendorPaymentHistory() {
                     </>
                   ) : null}
 
-                  <div className="w-full lg:w-3/12 px-2 mb-2">
+                  <div className={paymentFieldClass}>
                     <div className="relative w-full mb-2">
                       <label className="block uppercase text-blueGray-500 text-xs font-bold mb-2">
                         Created Date

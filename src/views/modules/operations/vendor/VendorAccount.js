@@ -242,60 +242,6 @@ export default function VendorAccount() {
     return key;
   }
 
-  // const handleSubmit = async () => {
-  //   setLoading(true);
-
-  //   try {
-  //     const requestBody = {
-  //       ...expenseDetail,
-  //       organizationId:
-  //         organizationLocal?.organizationId || expenseDetail.organizationId,
-  //       vendorAccountId:
-  //         selectedPaymentItem?.id || expenseDetail.vendorAccountId,
-  //       organizationAccountId:
-  //         Number(expenseDetail.organizationAccountId) || null,
-  //       amountPaid: Number(expenseDetail.amountPaid) || 0,
-  //       idempotencyKey: idempotencyKey,
-  //     };
-
-  //     const resp = await httpService.post(
-  //       "/vendorAccount/paybackCredit",
-  //       requestBody,
-  //     );
-
-  //      if (resp?.data?.pdcRecord) {
-  //       const pdc = resp.data.pdcRecord;
-  //       notifySuccess(
-  //         `PDC created successfully! Cheque #${pdc.chequeNumber} will be processed on ${pdc.chequeDate}`,
-  //         5000,
-  //       );
-  //     } else {
-  //       notifySuccess(resp?.responseMessage || "Payback successful", 3000);
-  //     }
-
-  //     setIsPaymentModalOpen(false);
-  //     setBackdrop(!backdrop);
-  //     await fetchVendorList();
-
-  //     setExpenseDetail({
-  //       vendorAccountId: 0,
-  //       amountPaid: 0,
-  //       organizationId: organizationLocal?.organizationId || 0,
-  //       organizationAccountId: 0,
-  //       paymentMethodType: "",
-  //       paymentDocNo: 0,
-  //       paymentDocDate: new Date().toISOString().slice(0, 16),
-  //       createdDate: new Date().toISOString().slice(0, 16),
-  //       comments: "",
-  //     });
-  //     setSelectedPaymentItem(null);
-  //     sessionStorage.removeItem("vendor_payment_key");
-  //   } catch (err) {
-  //     notifyError(err.message, err.data, 4000);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     if (expenseDetail.paymentMethodType === "CHEQUE") {

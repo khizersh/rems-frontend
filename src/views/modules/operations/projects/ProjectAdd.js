@@ -168,13 +168,27 @@ export default function AddProject() {
 
     if (type === "EXISTING_PROJECT") {
       setSelectedPropertyPurchaseId("");
+      setProject((prev) => ({ ...prev, purchasingAmount: 0 }));
       setFormErrors((prev) => ({ ...prev, propertyPurchaseId: undefined }));
+      return;
     }
+
+    setSelectedPropertyPurchaseId("");
+    setProject((prev) => ({ ...prev, purchasingAmount: 0 }));
+    setFormErrors((prev) => ({ ...prev, propertyPurchaseId: undefined }));
   };
 
   const handlePropertyPurchaseChange = (e) => {
     const purchaseId = e.target.value;
+    const selectedPurchase = propertyPurchases.find(
+      (purchase) => String(purchase.id) === String(purchaseId),
+    );
+    const autoAmount = selectedPurchase
+      ? Number(selectedPurchase.totalAmount ?? selectedPurchase.totalAmount ?? 0)
+      : 0;
+
     setSelectedPropertyPurchaseId(purchaseId);
+    setProject((prev) => ({ ...prev, purchasingAmount: autoAmount }));
     setFormErrors((prev) => ({ ...prev, propertyPurchaseId: undefined }));
   };
 
@@ -678,7 +692,7 @@ export default function AddProject() {
                         <option value="">SELECT PROPERTY PURCHASE</option>
                         {propertyPurchases.map((purchase) => (
                           <option key={purchase.id} value={purchase.id}>
-                            {purchase.propertyName} - {purchase.location} ($
+                            {purchase.referenceNo} - ($
                             {purchase.totalAmount?.toLocaleString()})
                           </option>
                         ))}
@@ -723,8 +737,17 @@ export default function AddProject() {
                       type="number"
                       name="purchasingAmount"
                       onChange={(e) => changeProjectFields(e)}
-                      className="w-full p-2 border rounded-lg text-sm"
+                      className={`w-full p-2 border rounded-lg text-sm ${
+                        acquisitionType === "NEW_PROJECT" &&
+                        selectedPropertyPurchaseId
+                          ? "bg-gray-100 text-gray-600"
+                          : ""
+                      }`}
                       value={project.purchasingAmount}
+                      disabled={
+                        acquisitionType === "NEW_PROJECT" &&
+                        Boolean(selectedPropertyPurchaseId)
+                      }
                     />
                   </div>
                   <div className="w-full lg:w-6/12 px-2 mb-3">

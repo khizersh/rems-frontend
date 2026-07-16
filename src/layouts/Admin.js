@@ -12,6 +12,10 @@ import FooterAdmin from "components/Footers/FooterAdmin.js";
 
 import AdminDashboard from "views/modules/homepages/AdminHomepage";
 import UserDashboard from "views/modules/homepages/UserHomepage";
+import ReportingHub from "views/modules/admin/reporting/ReportingHub";
+import ReportPage from "views/modules/admin/reporting/ReportPage";
+import DownloadReportsHub from "views/modules/admin/reporting/DownloadReportsHub";
+import DownloadReportPage from "views/modules/admin/reporting/DownloadReportPage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -179,6 +183,10 @@ export default function Admin() {
           <Switch>
             {[
               { path: "/dashboard/admin-dashboard", exact: true, component: AdminDashboard },
+              { path: "/dashboard/reporting", exact: true, component: ReportingHub },
+              { path: "/dashboard/reporting/downloads", exact: true, component: DownloadReportsHub },
+              { path: "/dashboard/reporting/downloads/:reportKey", exact: true, component: DownloadReportPage },
+              { path: "/dashboard/reporting/:reportKey", exact: true, component: ReportPage },
               { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
               { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
               { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },

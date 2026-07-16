@@ -96,6 +96,46 @@ const httpService = {
     });
     return handleResponse(response);
   },
+
+  /**
+   * Downloads a file (e.g. CSV export). Triggers a browser save dialog.
+   */
+  download: async (url, fallbackFilename = "report.csv") => {
+    const response = await fetch(`${BASE_URL}${url}`, {
+      method: "GET",
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+
+    if (!response.ok) {
+      let message = "Download failed";
+      try {
+        const err = await response.json();
+        message = err.responseMessage || message;
+      } catch {
+        // non-JSON error body
+      }
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get("Content-Disposition") || "";
+    let filename = fallbackFilename;
+    const match = disposition.match(/filename="?([^";\n]+)"?/i);
+    if (match && match[1]) {
+      filename = match[1].trim();
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+  },
 };
 
 export default httpService;

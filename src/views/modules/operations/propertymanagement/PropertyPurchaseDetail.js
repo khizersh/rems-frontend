@@ -1,6 +1,10 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { MainContext } from "context/MainContext";
-import { useHistory, useParams } from "react-router-dom/cjs/react-router-dom.min";
+import {
+  useHistory,
+  useParams,
+} from "react-router-dom/cjs/react-router-dom.min";
+import { MdOutlinePayments } from "react-icons/md";
 import { IoArrowBackOutline } from "react-icons/io5";
 import {
   FaLandmark,
@@ -69,14 +73,18 @@ export default function PropertyPurchaseDetail() {
 
       if (p?.propertySellerId) {
         try {
-          const sRes = await PropertyApi.getPropertySellerById(p.propertySellerId);
+          const sRes = await PropertyApi.getPropertySellerById(
+            p.propertySellerId,
+          );
           if (sRes.data?.name) setSellerName(sRes.data.name);
         } catch {
           setSellerName(`#${p.propertySellerId}`);
         }
       }
 
-      const accRes = await httpService.get(`/organizationAccount/getAccountByOrgId/${organization.organizationId}`);
+      const accRes = await httpService.get(
+        `/organizationAccount/getAccountByOrgId/${organization.organizationId}`,
+      );
       setAccounts(Array.isArray(accRes.data) ? accRes.data : []);
     } catch (e) {
       notifyError(e.message, e.data, 4000);
@@ -149,8 +157,9 @@ export default function PropertyPurchaseDetail() {
         header: "Account",
         field: "organizationAccountId",
         render: (_, item) =>
-          accounts.find((a) => Number(a.id) === Number(item.organizationAccountId))?.name ||
-          `#${item.organizationAccountId}`,
+          accounts.find(
+            (a) => Number(a.id) === Number(item.organizationAccountId),
+          )?.name || `#${item.organizationAccountId}`,
       },
       {
         header: "Payment type",
@@ -189,7 +198,11 @@ export default function PropertyPurchaseDetail() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
             <h6 className="text-blueGray-800 text-lg font-bold uppercase flex items-center flex-wrap gap-2">
-              <button type="button" onClick={() => history.goBack()} className="mr-1">
+              <button
+                type="button"
+                onClick={() => history.goBack()}
+                className="mr-1"
+              >
                 <IoArrowBackOutline className="text-xl text-blueGray-500 hover:text-blueGray-700" />
               </button>
               <FaLandmark className="text-emerald-600" />
@@ -198,7 +211,10 @@ export default function PropertyPurchaseDetail() {
             <p className="text-sm text-blueGray-600 mt-2 ml-0 sm:ml-8 flex items-center gap-2">
               <FaUser className="text-blueGray-400 shrink-0" />
               <span>
-                Seller: <span className="font-semibold text-blueGray-800">{sellerName || `#${purchase.propertySellerId}`}</span>
+                Seller:{" "}
+                <span className="font-semibold text-blueGray-800">
+                  {sellerName || `#${purchase.propertySellerId}`}
+                </span>
               </span>
             </p>
             {(purchase.referenceNo || purchase.remarks) && (
@@ -222,15 +238,21 @@ export default function PropertyPurchaseDetail() {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between gap-2">
               <span className="text-gray-600">Total</span>
-              <span className="font-bold text-gray-800 tabular-nums">{total.toLocaleString()}</span>
+              <span className="font-bold text-gray-800 tabular-nums">
+                {total.toLocaleString()}
+              </span>
             </div>
             <div className="flex justify-between gap-2">
               <span className="text-gray-600">Paid</span>
-              <span className="font-semibold text-emerald-700 tabular-nums">{paid.toLocaleString()}</span>
+              <span className="font-semibold text-emerald-700 tabular-nums">
+                {paid.toLocaleString()}
+              </span>
             </div>
             <div className="flex justify-between border-t border-gray-100 pt-3 gap-2">
               <span className="text-gray-600">Remaining</span>
-              <span className="font-bold text-amber-700 tabular-nums">{Number(purchase.remainingAmount).toLocaleString()}</span>
+              <span className="font-bold text-amber-700 tabular-nums">
+                {Number(purchase.remainingAmount).toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -242,19 +264,27 @@ export default function PropertyPurchaseDetail() {
           <dl className="space-y-2 text-sm text-blueGray-700">
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Reference</dt>
-              <dd className="font-medium text-right">{purchase.referenceNo || "—"}</dd>
+              <dd className="font-medium text-right">
+                {purchase.referenceNo || "—"}
+              </dd>
             </div>
             <div className="flex justify-between gap-2 items-start">
               <dt className="text-gray-500 shrink-0">Remarks</dt>
-              <dd className="text-right text-gray-800 max-w-[65%]">{purchase.remarks || "—"}</dd>
+              <dd className="text-right text-gray-800 max-w-[65%]">
+                {purchase.remarks || "—"}
+              </dd>
             </div>
             <div className="flex justify-between gap-2 border-t border-gray-100 pt-2">
               <dt className="text-gray-500">Created</dt>
-              <dd className="tabular-nums text-right">{formatIsoDate(purchase.createdDate)}</dd>
+              <dd className="tabular-nums text-right">
+                {formatIsoDate(purchase.createdDate)}
+              </dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-gray-500">Last updated</dt>
-              <dd className="tabular-nums text-right">{formatIsoDate(purchase.updatedDate)}</dd>
+              <dd className="tabular-nums text-right">
+                {formatIsoDate(purchase.updatedDate)}
+              </dd>
             </div>
           </dl>
         </div>
@@ -274,99 +304,150 @@ export default function PropertyPurchaseDetail() {
             />
           </div>
           <p className="text-xs text-gray-500">
-            Outstanding balance drives the maximum amount you can post in the form below.
+            Outstanding balance drives the maximum amount you can post in the
+            form below.
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-5 mb-6">
-        <div className="text-xs font-bold text-gray-500 uppercase mb-4 flex items-center gap-2">
-          <FaCreditCard className="text-violet-500" /> Record payment to seller
+      <div className="bg-gradient-to-br from-white via-violet-50/50 to-emerald-50/40 rounded-2xl shadow-lg border border-violet-100 p-5 md:p-6 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2">
+            <div className="rounded-xl bg-violet-100 p-2.5">
+              <FaCreditCard className="text-violet-600" />
+            </div>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">
+                Payment entry
+              </div>
+              <h3 className="text-base font-semibold text-blueGray-800">
+                Record payment to seller
+              </h3>
+            </div>
+          </div>
+          <div className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-700">
+            Remaining balance:{" "}
+            {Number(purchase.remainingAmount).toLocaleString()}
+          </div>
         </div>
-        <form onSubmit={submitPayment} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
-          <div className="sm:col-span-2 xl:col-span-4">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Bank / Cash account *</label>
-            <select
-              name="organizationAccountId"
-              value={payForm.organizationAccountId}
-              onChange={handlePayChange}
-              required
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-violet-200 focus:border-violet-400 outline-none"
-            >
-              <option value="">Select account</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
+
+        <form
+          onSubmit={submitPayment}
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-end"
+        >
+          <div className="md:col-span-2 xl:col-span-4">
+            <div className="rounded-xl border border-violet-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Bank / Cash account *
+              </label>
+              <select
+                name="organizationAccountId"
+                value={payForm.organizationAccountId}
+                onChange={handlePayChange}
+                required
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-violet-200 focus:border-violet-400 outline-none"
+              >
+                <option value="">Select account</option>
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="xl:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Amount *</label>
-            <input
-              name="amount"
-              type="number"
-              min="0.01"
-              step="0.01"
-              max={purchase.remainingAmount}
-              value={payForm.amount}
-              onChange={handlePayChange}
-              required
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-200 focus:border-violet-400 outline-none"
-            />
+            <div className="rounded-xl border border-emerald-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Amount *
+              </label>
+              <input
+                name="amount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                max={purchase.remainingAmount}
+                value={payForm.amount}
+                onChange={handlePayChange}
+                required
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 outline-none"
+              />
+            </div>
           </div>
           <div className="xl:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Payment type *</label>
-            <select
-              name="paymentType"
-              value={payForm.paymentType}
-              onChange={handlePayChange}
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-violet-200 focus:border-violet-400 outline-none"
-            >
-              {PAY_TYPES.map((pt) => (
-                <option key={pt.id} value={pt.id}>
-                  {pt.name}
-                </option>
-              ))}
-            </select>
+            <div className="rounded-xl border border-sky-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Payment type *
+              </label>
+              <select
+                name="paymentType"
+                value={payForm.paymentType}
+                onChange={handlePayChange}
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-sky-200 focus:border-sky-400 outline-none"
+              >
+                {PAY_TYPES.map((pt) => (
+                  <option key={pt.id} value={pt.id}>
+                    {pt.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="xl:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-              <FaReceipt className="text-gray-400" /> Doc no
-            </label>
-            <input
-              name="paymentDocNo"
-              value={payForm.paymentDocNo}
-              onChange={handlePayChange}
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-200 outline-none"
-            />
+            <div className="rounded-xl border border-emerald-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Doc No
+              </label>
+              <input
+                type="text"
+                name="paymentDocNo"
+                value={payForm.paymentDocNo}
+                onChange={handlePayChange}
+                placeholder="Enter document no"
+                required
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 outline-none"
+              />
+            </div>
           </div>
           <div className="xl:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-              <FaCalendarAlt className="text-gray-400" /> Doc date
-            </label>
-            <input
-              name="paymentDocDate"
-              type="date"
-              value={payForm.paymentDocDate}
-              onChange={handlePayChange}
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-200 outline-none"
-            />
+            <div className="rounded-xl border border-blue-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+                <FaCalendarAlt className="text-blue-500" /> Doc date
+              </label>
+              <input
+                name="paymentDocDate"
+                type="date"
+                value={payForm.paymentDocDate}
+                onChange={handlePayChange}
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none"
+              />
+            </div>
           </div>
-          <div className="sm:col-span-2 xl:col-span-8">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Comments</label>
-            <input
-              name="comments"
-              value={payForm.comments}
-              onChange={handlePayChange}
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-200 outline-none"
-            />
+          <div className="xl:col-span-2">
+            <div className="rounded-xl border border-emerald-100 bg-white/90 p-3 shadow-sm h-full">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                Doc No
+              </label>
+              <input
+                type="text"
+                name="comments"
+                value={payForm.comments}
+                onChange={handlePayChange}
+                placeholder="Enter comments"
+                required
+                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 outline-none"
+              />
+            </div>
           </div>
-          <div className="sm:col-span-2 xl:col-span-4 xl:flex xl:justify-end pb-0.5">
+          <div className="md:col-span-2 xl:col-span-4 xl:flex xl:justify-end">
             <button
               type="submit"
-              className="w-full xl:w-auto px-5 py-2.5 text-xs font-bold text-white bg-violet-500 hover:bg-violet-600 rounded-lg shadow-sm transition-colors"
+              className="px-4 mt-4 bg-lightBlue-500 text-white font-bold uppercase text-xs px-5 py-2 rounded shadow-sm hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
             >
+              <MdOutlinePayments
+                className="w-5 h-5 inline-block "
+                style={{ paddingBottom: "3px", paddingRight: "5px" }}
+              />
               Post payment
             </button>
           </div>

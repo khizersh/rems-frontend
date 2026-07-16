@@ -1,4 +1,20 @@
 export const FEATURE_ALIASES = {
+  // Admin reporting module. Anchored to the admin dashboard menu (registered under
+  // both possible sidebar bases so it resolves regardless of how the dashboard menu
+  // url is stored). The alias value "/dashboard/reporting" also covers every
+  // single-segment sub-report, e.g. "/dashboard/reporting/financial-overview".
+  "/dashboard/admin-dashboard": [
+    "/dashboard/reporting",
+    "/dashboard/reporting/downloads",
+  ],
+  "/dashboard": [
+    "/dashboard/reporting",
+    "/dashboard/reporting/downloads",
+  ],
+  "/dashboard/reporting": [
+    "/dashboard/reporting/downloads",
+  ],
+
   "/dashboard/projects": [
     "/dashboard/add-project",
     "/dashboard/update-project",

@@ -116,7 +116,7 @@ export default function AddPropertyPurchase() {
                 />
               </div>
               <div className="w-full lg:w-6/12 px-2 mb-3">
-                <label className="block text-xs font-medium text-slate-700 mb-1">Reference No</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Property Name</label>
                 <input
                   name="referenceNo"
                   value={form.referenceNo}
@@ -125,7 +125,7 @@ export default function AddPropertyPurchase() {
                 />
               </div>
               <div className="w-full px-2 mb-3">
-                <label className="block text-xs font-medium text-slate-700 mb-1">Remarks</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Remarks/Address</label>
                 <textarea
                   name="remarks"
                   value={form.remarks}

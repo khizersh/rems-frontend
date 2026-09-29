@@ -16,6 +16,11 @@ import ReportingHub from "views/modules/admin/reporting/ReportingHub";
 import ReportPage from "views/modules/admin/reporting/ReportPage";
 import DownloadReportsHub from "views/modules/admin/reporting/DownloadReportsHub";
 import DownloadReportPage from "views/modules/admin/reporting/DownloadReportPage";
+import AccountantDashboard from "views/modules/accountant/reporting/AccountantDashboard";
+import AccountantReportingHub from "views/modules/accountant/reporting/AccountantReportingHub";
+import AccountantReportPage from "views/modules/accountant/reporting/AccountantReportPage";
+import AccountantDownloadHub from "views/modules/accountant/reporting/AccountantDownloadHub";
+import AccountantDownloadReportPage from "views/modules/accountant/reporting/AccountantDownloadReportPage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -187,6 +192,11 @@ export default function Admin() {
               { path: "/dashboard/reporting/downloads", exact: true, component: DownloadReportsHub },
               { path: "/dashboard/reporting/downloads/:reportKey", exact: true, component: DownloadReportPage },
               { path: "/dashboard/reporting/:reportKey", exact: true, component: ReportPage },
+              { path: "/dashboard/accountant-dashboard", exact: true, component: AccountantDashboard },
+              { path: "/dashboard/accountant/reporting", exact: true, component: AccountantReportingHub },
+              { path: "/dashboard/accountant/reporting/downloads", exact: true, component: AccountantDownloadHub },
+              { path: "/dashboard/accountant/reporting/downloads/:reportKey", exact: true, component: AccountantDownloadReportPage },
+              { path: "/dashboard/accountant/reporting/:reportKey", exact: true, component: AccountantReportPage },
               { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
               { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
               { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },

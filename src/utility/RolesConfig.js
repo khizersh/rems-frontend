@@ -15,6 +15,19 @@ export const FEATURE_ALIASES = {
     "/dashboard/reporting/downloads",
   ],
 
+  // Accountant reporting module. Anchored to the accountant dashboard menu
+  // ("/dashboard/accountant-dashboard"). Single-segment sub-reports (e.g.
+  // "/dashboard/accountant/reporting/financial-overview") are covered by route matching
+  // against "/dashboard/accountant/reporting"; downloads sub-reports are covered by the
+  // "/dashboard/accountant/reporting/downloads" alias.
+  "/dashboard/accountant-dashboard": [
+    "/dashboard/accountant/reporting",
+    "/dashboard/accountant/reporting/downloads",
+  ],
+  "/dashboard/accountant/reporting": [
+    "/dashboard/accountant/reporting/downloads",
+  ],
+
   "/dashboard/projects": [
     "/dashboard/add-project",
     "/dashboard/update-project",
@@ -117,7 +130,7 @@ export const ROLE_DASHBOARD_PRIORITY = {
   },
   ACCOUNTANT_ROLE: {
     priority: 4,
-    path: "/dashboard/accounts",
+    path: "/dashboard/accountant-dashboard",
   },
   HR_PAYROLL_ROLE: {
     priority: 5,

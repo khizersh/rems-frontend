@@ -21,7 +21,7 @@ import AccountantReportingHub from "views/modules/accountant/reporting/Accountan
 import AccountantReportPage from "views/modules/accountant/reporting/AccountantReportPage";
 import AccountantDownloadHub from "views/modules/accountant/reporting/AccountantDownloadHub";
 import AccountantDownloadReportPage from "views/modules/accountant/reporting/AccountantDownloadReportPage";
-import HRHomepage from "views/modules/homepages/HRHomepage";
+import HRHomepage from "views/modules/homepages/HrHomepage";
 import HRReportingHub from "views/modules/accountant/reporting/HRReportingHub";
 import HRReportPage from "views/modules/accountant/reporting/HRReportPage";
 import Maps from "views/admin/Maps.js";
@@ -109,6 +109,18 @@ import UpdatePropertySeller from "views/modules/operations/propertymanagement/Up
 import PropertyPurchaseList from "views/modules/operations/propertymanagement/PropertyPurchaseList";
 import AddPropertyPurchase from "views/modules/operations/propertymanagement/AddPropertyPurchase";
 import PropertyPurchaseDetail from "views/modules/operations/propertymanagement/PropertyPurchaseDetail";
+import {
+  HrDashboard,
+  DepartmentList,
+  EmployeeList,
+  AddEmployee,
+  UpdateEmployee,
+  ViewEmployee,
+  AttendancePage,
+  LeaveList,
+  SalaryAmendments,
+  PayrollPage,
+} from "views/modules/payroll";
 
 export default function Admin() {
   const sidebar = JSON.parse(localStorage.getItem("sidebar") || "[]");
@@ -339,6 +351,17 @@ export default function Admin() {
               { path: "/dashboard/property-purchases", component: PropertyPurchaseList },
               { path: "/dashboard/add-property-purchase", component: AddPropertyPurchase },
               { path: "/dashboard/property-purchase-details/:purchaseId", component: PropertyPurchaseDetail },
+              // HR & Payroll
+              { path: "/dashboard/hr/dashboard", exact: true, component: HrDashboard },
+              { path: "/dashboard/hr/departments", component: DepartmentList },
+              { path: "/dashboard/hr/employees", component: EmployeeList },
+              { path: "/dashboard/hr/add-employee", component: AddEmployee },
+              { path: "/dashboard/hr/edit-employee/:id", component: UpdateEmployee },
+              { path: "/dashboard/hr/employee/:id", component: ViewEmployee },
+              { path: "/dashboard/hr/attendance", component: AttendancePage },
+              { path: "/dashboard/hr/leaves", component: LeaveList },
+              { path: "/dashboard/hr/amendments", component: SalaryAmendments },
+              { path: "/dashboard/hr/payroll", component: PayrollPage },
             ].map(({ path, exact = true, component: Component }) => (
               <Route
                 key={path}

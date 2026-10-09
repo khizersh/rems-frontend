@@ -115,7 +115,24 @@ export const FEATURE_ALIASES = {
     "/dashboard/warehouse/material-issue",
   ],
 
+  "/dashboard/hr": [
+    "/dashboard/hr/departments",
+    "/dashboard/hr/employees",
+    "/dashboard/hr/add-employee",
+    "/dashboard/hr/edit-employee",
+    "/dashboard/hr/employee",
+    "/dashboard/hr/attendance",
+    "/dashboard/hr/leaves",
+    "/dashboard/hr/amendments",
+    "/dashboard/hr/payroll",
+    "/dashboard/hr/payroll-history",
+  ],
 
+  "/dashboard/hr/employees": [
+    "/dashboard/hr/add-employee",
+    "/dashboard/hr/edit-employee",
+    "/dashboard/hr/employee",
+  ],
 };
 
 export const ROLE_DASHBOARD_PRIORITY = {

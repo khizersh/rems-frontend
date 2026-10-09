@@ -2,6 +2,21 @@
 import React from "react";
 import { hint, hintIcon, formatValue } from "../reportConfig";
 
+const BACKEND_ICON_CLASSES = {
+  FaUsers: "fas fa-users",
+  FaUserClock: "fas fa-user-clock",
+  FaUserCheck: "fas fa-user-check",
+  FaUserPlus: "fas fa-user-plus",
+  FaUserMinus: "fas fa-user-minus",
+  FaBuilding: "fas fa-building",
+  FaMoneyCheckDollar: "fas fa-money-bill-wave",
+  FaMoneyBillWave: "fas fa-money-bill-wave",
+  FaCoins: "fas fa-coins",
+  FaCalendarCheck: "fas fa-calendar-check",
+  FaClock: "fas fa-clock",
+  FaBriefcase: "fas fa-briefcase",
+};
+
 /**
  * A single KPI tile. Mirrors the backend KpiCard DTO:
  * { key, label, value, formattedValue, changePercent, trend, colorHint, icon, type }
@@ -49,7 +64,13 @@ export default function ReportKpiCard({ card }) {
                 theme.solid
               }
             >
-              <i className={card.iconClass || hintIcon(card.colorHint)}></i>
+              <i
+                className={
+                  card.iconClass ||
+                  BACKEND_ICON_CLASSES[card.icon] ||
+                  hintIcon(card.colorHint)
+                }
+              ></i>
             </div>
           </div>
         </div>

@@ -28,6 +28,9 @@ export const FEATURE_ALIASES = {
     "/dashboard/accountant/reporting/downloads",
   ],
 
+  "/dashboard/hr-dashboard": ["/dashboard/hr/reporting"],
+  "/dashboard/hr": ["/dashboard/hr-dashboard", "/dashboard/hr/reporting"],
+
   "/dashboard/projects": [
     "/dashboard/add-project",
     "/dashboard/update-project",
@@ -134,7 +137,15 @@ export const ROLE_DASHBOARD_PRIORITY = {
   },
   HR_PAYROLL_ROLE: {
     priority: 5,
-    path: "/dashboard/hr",
+    path: "/dashboard/hr-dashboard",
+  },
+  HR_ROLE: {
+    priority: 5,
+    path: "/dashboard/hr-dashboard",
+  },
+  HR_MANAGER_ROLE: {
+    priority: 5,
+    path: "/dashboard/hr-dashboard",
   },
   USER_ROLE: {
     priority: 6,

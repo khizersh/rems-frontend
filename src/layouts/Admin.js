@@ -21,6 +21,9 @@ import AccountantReportingHub from "views/modules/accountant/reporting/Accountan
 import AccountantReportPage from "views/modules/accountant/reporting/AccountantReportPage";
 import AccountantDownloadHub from "views/modules/accountant/reporting/AccountantDownloadHub";
 import AccountantDownloadReportPage from "views/modules/accountant/reporting/AccountantDownloadReportPage";
+import HRHomepage from "views/modules/homepages/HRHomepage";
+import HRReportingHub from "views/modules/accountant/reporting/HRReportingHub";
+import HRReportPage from "views/modules/accountant/reporting/HRReportPage";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import ProjectAdd from "views/modules/operations/projects/ProjectAdd";
@@ -197,6 +200,9 @@ export default function Admin() {
               { path: "/dashboard/accountant/reporting/downloads", exact: true, component: AccountantDownloadHub },
               { path: "/dashboard/accountant/reporting/downloads/:reportKey", exact: true, component: AccountantDownloadReportPage },
               { path: "/dashboard/accountant/reporting/:reportKey", exact: true, component: AccountantReportPage },
+              { path: "/dashboard/hr-dashboard", exact: true, component: HRHomepage },
+              { path: "/dashboard/hr/reporting", exact: true, component: HRReportingHub },
+              { path: "/dashboard/hr/reporting/:reportKey", exact: true, component: HRReportPage },
               { path: "/dashboard/user-dashboard", exact: true, component: UserDashboard },
               { path: "/dashboard/user-dashboard/accounts", exact: true, component: CustomerAccounts },
               { path: "/dashboard/user-dashboard/accounts/:id", exact: true, component: AccountDetails },
@@ -348,6 +354,7 @@ export default function Admin() {
               />
             ))}
 
+            <Redirect exact from="/dashboard/hr" to="/dashboard/hr-dashboard" />
             <Redirect from="/admin" to="/dashboard" />
           </Switch>
 

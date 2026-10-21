@@ -408,7 +408,7 @@ export default function VendorAccount() {
                           <option value="">All Account</option>
                           {accountList.map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.name}
+                              {account.name} - {account.bankName}
                             </option>
                           ))}
                         </select>

@@ -234,7 +234,7 @@ export default function PdcPayments() {
     {
       header: "Amount",
       field: "amount",
-      render: (value) => `Rs. ${Number(value || 0).toLocaleString()}`,
+      render: (_value, row) => `Rs. ${Number(row.amount || 0).toLocaleString()}`,
     },
     {
       header: "Status",

@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import desktopLogo from "../../assets/img/logo/desktop-logo.png";
-import mobileLogo from "../../assets/img/logo/mobile-logo.png";
+import mobileLogo from "../../assets/img/logo/mobile-logo.svg";
 import { MainContext } from "context/MainContext";
 import "../../assets/styles/custom/sidebar.css";
 

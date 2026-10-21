@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" viewBox="0 0 55 55" role="img" aria-labelledby="title desc">
+<title id="title">CloudREMS mobile logo</title><desc id="desc">Centered CloudREMS icon inside a circular border</desc>
+<defs>
+  <linearGradient id="blueTeal" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0756D9"/><stop offset="0.52" stop-color="#00A7E8"/><stop offset="1" stop-color="#00C99A"/>
+  </linearGradient>
+</defs>
+<circle cx="27.5" cy="27.5" r="26" fill="#fff" stroke="url(#blueTeal)" stroke-width="2"/>
+<g transform="translate(6.75 12) scale(.34)">
+  <path d="M23 70c-11 0-20-9-20-20s9-20 20-20c2 0 4 .3 6 1C31 17 43 7 58 7c17 0 31 13 32 30 2-.7 5-1 7-1 12 0 22 10 22 22S109 80 97 80H23z" fill="url(#blueTeal)"/>
+  <path d="M31 72V46l16-11v34z" fill="#0B4D8D"/>
+  <path d="M50 68V27l19-13v52z" fill="#07528F"/>
+  <path d="M74 69V40l17 12v23z" fill="#0877C8"/>
+  <rect x="78" y="52" width="5" height="5" fill="#fff"/><rect x="85" y="55" width="5" height="5" fill="#fff"/>
+  <rect x="78" y="61" width="5" height="5" fill="#fff"/><rect x="85" y="64" width="5" height="5" fill="#fff"/>
+  <path d="M14 84 C38 67 70 66 105 84 C75 74 43 74 14 84Z" fill="#00B98D"/>
+</g>
+</svg>

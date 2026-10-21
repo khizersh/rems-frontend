@@ -5,7 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import NotificationDropdown from "components/Dropdowns/NotificationDropdown.js";
 import UserDropdown from "components/Dropdowns/UserDropdown.js";
 import desktopLogo from "../../assets/img/logo/desktop-logo.png";
-import mobileLogo from "../../assets/img/logo/mobile-logo.png";
+import mobileLogo from "../../assets/img/logo/mobile-logo.svg";
 import "../../assets/styles/custom/sidebar.css";
 
 export default function MobileSidebar() {

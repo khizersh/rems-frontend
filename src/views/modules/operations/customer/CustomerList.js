@@ -4,7 +4,7 @@ import { MainContext } from "context/MainContext.js";
 import DynamicTableComponent from "../../../../components/table/DynamicTableComponent.js";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min.js";
 import DynamicDetailsModal from "components/CustomerComponents/DynamicModal.js";
-import { FaEye, FaFilter, FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEye, FaFilter, FaPen, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min.js";
 import { IoShareSocial } from "react-icons/io5";
@@ -506,6 +506,13 @@ export default function CustomerList() {
           loading={loading}
           title="Customer List"
           actions={actions}
+          firstButton={{
+            onClick: () => history.push("/dashboard/add-customers"),
+            className: "bg-emerald-500",
+            style: {},
+            icon: FaPlus,
+            title: "Add Customer",
+          }}
         />
       </div>
     </>

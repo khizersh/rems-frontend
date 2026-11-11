@@ -80,7 +80,7 @@ export default function AccountGroupList() {
       setLoading(true);
 
       const response = await httpService.get(
-        `/accounting/${organization.organizationId}/getAccountGroups?accountType=${INDIRECT_EXPENSE_CATEGORY_ID}`,
+        `/accounting/${organization.organizationId}/getAccountGroups?accountCategory=${INDIRECT_EXPENSE_CATEGORY_ID}`,
       );
 
       setAccountGroup(response?.data?.data || []);

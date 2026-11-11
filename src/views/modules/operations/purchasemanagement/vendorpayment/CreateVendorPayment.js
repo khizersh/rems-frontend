@@ -126,7 +126,7 @@ const CreateVendorPayment = () => {
 
       const accounts = (response?.data || []).map((acc) => ({
         ...acc,
-        displayName: `${acc.name} - ${acc.bankName} (₹${acc.balance?.toLocaleString() || 0})`,
+        displayName: `${acc.name} - ${acc.bankName} (₹${acc.totalAmount?.toLocaleString() || 0})`,
       }));
 
       setOrgAccounts(accounts);

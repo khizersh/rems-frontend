@@ -8,6 +8,7 @@ import {
   FaCheckCircle,
   FaEye,
   FaPen,
+  FaPlus,
   FaTimesCircle,
   FaTrashAlt,
 } from "react-icons/fa";
@@ -348,6 +349,12 @@ export default function PurchaseOrderList() {
           totalElements={totalElements}
           loading={loading}
           title="Purchase Order List"
+          firstButton={{
+            title: "Create Purchase Order",
+            onClick: () => history.push("/dashboard/add-purchase-order"),
+            icon: FaPlus,
+            className: "bg-emerald-500",
+          }}
           actions={actions}
         />
       </div>
